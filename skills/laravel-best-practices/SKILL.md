@@ -23,6 +23,8 @@ This guide establishes the production-grade architectural patterns for building 
 > 🔌 **Model Context Protocol (MCP) Architecture**: For first-party MCP Servers (`laravel/mcp`), Tools, Resources, Prompts, Web SSE (`routes/ai.php`), and stdio transports, see **[docs/architecture/mcp-and-ai-protocols.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/mcp-and-ai-protocols.md)**.
 > 💻 **Console Commands & Scheduling**: For CLI signature syntax, concurrency isolation (`Isolatable`), Laravel Prompts, memory safety, and `routes/console.php`, see **[docs/architecture/console-commands-and-scheduling.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/console-commands-and-scheduling.md)**.
 > 💳 **Database Transactions & Concurrency**: For ACID boundaries, deadlock retry (`attempts: 3`), pessimistic row locking (`lockForUpdate`), and `afterCommit` hooks, see **[docs/architecture/database-transactions-and-concurrency.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/database-transactions-and-concurrency.md)**.
+> 🎨 **Blade & Livewire (v3 & v4)**: For Blade components, slots, Alpine.js, Livewire reactive state, wire:stream AI token streaming, and Pest 3 tests, see **[docs/architecture/blade-and-livewire.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/blade-and-livewire.md)**.
+> ⚡ **Inertia.js v2 Multi-Frontend SPAs**: For Vue 3 (TS), React 19/18 (TS), Svelte 5 (Runes), Deferred Props, Vite SSR, and Pest 3 tests, see **[docs/architecture/inertia-and-frontend-stacks.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/inertia-and-frontend-stacks.md)**.
 
 ---
 

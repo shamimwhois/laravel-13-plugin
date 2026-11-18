@@ -401,3 +401,31 @@ All multi-record state mutations and high-contention business actions must adher
 - **Post-Commit Event & Queue Safety**:
   - NEVER dispatch events or queue jobs directly inside transactions that rely on the committed database state.
   - ALWAYS use `DB::afterCommit(fn () => ...)` or implement `Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit` on queued listeners to prevent race conditions where workers query uncommitted rows.
+
+---
+
+## 18. Modern Frontend Architecture (Blade, Livewire, Inertia.js, Vue, React, Svelte & Vite)
+
+All frontend templates, components, and client-side single-page applications must adhere strictly to these enterprise standards:
+
+- **Blade Component Architecture**:
+  - Author atomic, reusable UI primitives in `resources/views/components/` with explicit `@props` parameter contracts.
+  - Always merge caller attributes with internal defaults using `$attributes->class([...])`.
+  - NEVER interpolate raw unescaped input into templates; use `{{ ... }}` for automatic HTML escaping and restrict `{!! ... !!}` strictly to sanitized markdown or trusted inline SVG icons.
+- **Livewire (v3 & v4) Reactive Security & Performance**:
+  - ALWAYS protect sensitive database IDs, tenant keys, and internal state using the `#[Locked]` attribute to prevent client-side tampering via DOM manipulation or network requests.
+  - Encapsulate multi-field forms in dedicated `Livewire\Form` classes (`app/Livewire/Forms/`) implementing explicit `#[Validate]` attributes.
+  - Cache heavy queries using `#[Computed(persist: true)]`, and defer slow dashboard widgets using `#[Lazy]` with a dedicated `placeholder()` skeleton view.
+  - Stream LLM tokens incrementally to the DOM using Livewire's `$this->stream()` targeting elements marked with `wire:stream` when integrating with `laravel/ai`.
+  - Reserve Livewire for server-dependent state; use **Alpine.js** (`x-data`, `x-show`, `x-transition`) for purely client-side micro-interactions (dropdowns, dialogs, tabs).
+- **Inertia.js v2 Single-Page Applications (Vue 3, React, Svelte 5)**:
+  - NEVER return raw Eloquent models or unmapped collections from Inertia controllers. ALWAYS transform data using `JsonResource` or dedicated DTOs to prevent sensitive model attributes from leaking into client page props.
+  - Wrap queries taking longer than 100ms in **Deferred Props** (`Inertia::defer(fn () => ...)`) and hydrate on the client using `<Deferred data="...">` with fallback loading skeletons.
+  - Author Vue 3 components with `<script setup lang="ts">` and React 19/18 with TypeScript JSX, enforcing explicit typed interface declarations for all page props.
+  - Author Svelte 5 components using modern Runes (`let { prop }: Props = $props();`, `$state()`, `$derived()`) instead of legacy `export let` statements.
+  - Manage form interactions using Inertia's native `useForm()` hook for client-side dirty state tracking, automatic validation error mapping, and file uploads.
+- **Vite & Frontend Testing Standards**:
+  - Configure `vite.config.ts` using `laravel-vite-plugin` with SSR entries (`resources/js/ssr.ts`) and path aliases (`@ -> /resources/js`).
+  - Test Livewire components with Pest 3 using `Livewire::test()` verifying computed properties, action execution, validation errors, and locked property security exceptions.
+  - Test Inertia endpoints with Pest 3 using `assertInertia(fn (AssertableInertia $page) => ...)` asserting component names, typed prop structures, and deferred groups.
+

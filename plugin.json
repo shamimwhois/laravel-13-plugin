@@ -1,8 +1,8 @@
 {
   "name": "laravel",
   "displayName": "Laravel 13 & Modern PHP 8.5+",
-  "version": "2.6.0",
-  "description": "Modern PHP 8.5+ and Laravel 13 toolkit: Model Context Protocol (laravel/mcp: Servers, Tools, Resources, Prompts, SSE & stdio transports), Official AI SDK (laravel/ai: Prompts, Context, Tools, Provider Tools, Structured Output, Streaming, Async, Attachments), Console Commands & Scheduling (make:command, Isolatable, Laravel Prompts, memory safety), Database Transactions & Concurrency (ACID, deadlock retry attempts: 3, lockForUpdate), Single-action invokable controllers, fluent middleware in bootstrap/app.php, terminable middleware, Enterprise security & anti-hacking (OWASP, SSRF), Code speed & cache compression (igbinary, zstd, Cache::flexible), memory safety (Octane, cursor streaming), Senior refactoring, RESTful API design (RFC 7807), Pest 3 testing suite, Architectural Decision Matrix (Top 10 Patterns), Artisan generators (`make:*`), fullstack scaffolding, routing, Form Requests, eager loading, and PHPStan Level 8+.",
+  "version": "2.7.0",
+  "description": "Modern PHP 8.5+ and Laravel 13 toolkit: Fullstack Frontend Architecture (Blade components, slots, Alpine.js, Livewire v3/v4 reactive components, wire:stream AI token streaming), Inertia.js v2 Single-Page Applications (Vue 3 TypeScript, React 19/18 TypeScript, Svelte 5 Runes, Deferred Props, Vite SSR), Model Context Protocol (laravel/mcp: Servers, Tools, Resources, Prompts, SSE & stdio transports), Official AI SDK (laravel/ai: Prompts, Context, Tools, Provider Tools, Structured Output, Streaming, Async, Attachments), Console Commands & Scheduling (make:command, Isolatable, Laravel Prompts, memory safety), Database Transactions & Concurrency (ACID, deadlock retry attempts: 3, lockForUpdate), Single-action invokable controllers, fluent middleware in bootstrap/app.php, terminable middleware, Enterprise security & anti-hacking (OWASP, SSRF), Code speed & cache compression (igbinary, zstd, Cache::flexible), memory safety (Octane, cursor streaming), Senior refactoring, RESTful API design (RFC 7807), Pest 3 testing suite, Architectural Decision Matrix (Top 10 Patterns), Artisan generators (`make:*`), fullstack scaffolding, routing, Form Requests, eager loading, and PHPStan Level 8+.",
   "author": {
     "name": "Shamim",
     "url": "https://github.com/shamimwhois"
@@ -13,10 +13,11 @@
   },
   "homepage": "https://github.com/shamimwhois/laravel-13-plugin#readme",
   "suggestedPrompts": [
+    "Build a reactive Livewire v3/v4 component with wire:stream AI token streaming, form objects, and #[Locked] security",
+    "Build an Inertia.js v2 SPA page with Vue 3 / React / Svelte 5, Deferred Props, and TypeScript interfaces",
     "Build an MCP server with laravel/mcp exposing Tools, Resources, and Prompts via SSE or stdio",
     "Build an AI agent with laravel/ai using Prompts, Context, Tools, Structured Output, and Streaming",
     "Author a memory-safe, Isolatable console command with Laravel Prompts and routes/console.php scheduling",
-    "Refactor bloated controllers into single-action invokables and configure fluent middleware in bootstrap/app.php",
     "Audit my application for OWASP Top 10 vulnerabilities, SSRF risks, IDOR, and timing attacks"
   ]
 }
