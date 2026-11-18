@@ -505,38 +505,357 @@ final readonly class BinancePayDriver implements PaymentGatewayInterface
 
 ---
 
-## 4. Idempotency & Webhook Protection Rules
+## 4. Stripe, Razorpay & PayPal Driver Blueprints
 
-1. **Mandatory Double-Check via Webhook & Query API**: Never mark an order as `Paid` based solely on a frontend redirect. The frontend redirect must only display a "Processing Payment" state while the backend validates the transaction out-of-band via webhook or API query.
-2. **Timing-Safe Signature Comparison**: Always use `hash_equals($expected, $actual)` to defend against timing side-channel attacks on webhook secrets.
-3. **Idempotency Key Tracking**: Store `idempotency_key` and gateway `transaction_id` with unique database constraints to guarantee zero duplicate billings during network timeouts or retry storms.
+### Stripe Driver (`app/Services/Payments/Drivers/StripeDriver.php`)
 
 ```php
-// In a dedicated Webhook Handler:
-DB::transaction(attempts: 3, callback: function () use ($event, $gatewayResponse): void {
-    $processed = ProcessedWebhook::where('event_id', $event->id)
-        ->lockForUpdate()
-        ->first();
+<?php
 
-    if ($processed !== null) {
-        return; // Already processed idempotently
+declare(strict_types=1);
+
+namespace App\Services\Payments\Drivers;
+
+use App\Contracts\Payments\PaymentGatewayInterface;
+use App\Data\Payments\ChargePayloadData;
+use App\Data\Payments\PaymentResponseData;
+use App\Data\Payments\RefundPayloadData;
+use App\Data\Payments\RefundResponseData;
+use App\Enums\PaymentStatus;
+use Illuminate\Http\Request;
+use Stripe\Exception\SignatureVerificationException;
+use Stripe\PaymentIntent;
+use Stripe\Refund;
+use Stripe\Stripe;
+use Stripe\Webhook;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+
+final readonly class StripeDriver implements PaymentGatewayInterface
+{
+    public function __construct(
+        private string $secretKey,
+        private string $webhookSecret,
+    ) {
+        Stripe::setApiKey($this->secretKey);
     }
 
-    ProcessedWebhook::create([
-        'event_id' => $event->id,
-        'gateway' => 'binance',
-        'payload' => $gatewayResponse->raw,
-    ]);
+    #[\Override]
+    public function charge(ChargePayloadData $payload): PaymentResponseData
+    {
+        $intent = PaymentIntent::create([
+            'amount' => $payload->amountCents,
+            'currency' => strtolower($payload->currency ?? 'usd'),
+            'metadata' => [
+                'order_id' => $payload->orderId,
+            ],
+            'automatic_payment_methods' => ['enabled' => true],
+        ]);
 
-    // Transition Order
-    $order = Order::where('id', $gatewayResponse->transactionId)->lockForUpdate()->firstOrFail();
-    $order->update(['status' => OrderStatus::Paid]);
+        return new PaymentResponseData(
+            transactionId: $intent->id,
+            status: PaymentStatus::Pending,
+            redirectUrl: null, // Client secret used by Stripe Elements
+            raw: $intent->toArray(),
+        );
+    }
+
+    #[\Override]
+    public function handleWebhook(Request $request): PaymentResponseData
+    {
+        $signature = $request->header('Stripe-Signature', '');
+        $payload = $request->getContent();
+
+        try {
+            $event = Webhook::constructEvent($payload, $signature, $this->webhookSecret);
+        } catch (SignatureVerificationException $e) {
+            throw new BadRequestHttpException('Invalid Stripe webhook signature.', $e);
+        }
+
+        $status = match ($event->type) {
+            'payment_intent.succeeded' => PaymentStatus::Paid,
+            'payment_intent.payment_failed' => PaymentStatus::Failed,
+            default => PaymentStatus::Pending,
+        };
+
+        /** @var PaymentIntent $intent */
+        $intent = $event->data->object;
+
+        return new PaymentResponseData(
+            transactionId: $intent->id,
+            status: $status,
+            redirectUrl: null,
+            raw: $event->toArray(),
+        );
+    }
+
+    #[\Override]
+    public function query(string $transactionId): PaymentResponseData
+    {
+        $intent = PaymentIntent::retrieve($transactionId);
+
+        $status = match ($intent->status) {
+            'succeeded' => PaymentStatus::Paid,
+            'requires_payment_method', 'canceled' => PaymentStatus::Failed,
+            default => PaymentStatus::Pending,
+        };
+
+        return new PaymentResponseData(
+            transactionId: $intent->id,
+            status: $status,
+            redirectUrl: null,
+            raw: $intent->toArray(),
+        );
+    }
+
+    #[\Override]
+    public function refund(RefundPayloadData $payload): RefundResponseData
+    {
+        $refund = Refund::create([
+            'payment_intent' => $payload->transactionId,
+            'amount' => $payload->amountCents,
+            'reason' => 'requested_by_customer',
+        ]);
+
+        return new RefundResponseData(
+            refundId: $refund->id,
+            status: $refund->status === 'succeeded',
+            raw: $refund->toArray(),
+        );
+    }
+}
+```
+
+---
+
+## 5. Advanced Fintech Security Architecture & Attack Mitigation
+
+Financial processing requires dedicated security guardrails to protect against fraud, side-channels, and race conditions.
+
+```mermaid
+graph TD
+    Incoming["Incoming Webhook / Charge Request"] --> ReplayCheck{"Timestamp Delta ≤ 300s & Nonce Unique?"}
+    ReplayCheck -- No --> Reject401["HTTP 401 Replay Attack Detected"]
+    ReplayCheck -- Yes --> TimingSafe{"hash_equals(Signature, Expected)?"}
+    TimingSafe -- No --> Reject400["HTTP 400 Invalid Cryptographic Signature"]
+    TimingSafe -- Yes --> RateLimit{"Velocity Check: Below Tiered Limit?"}
+    RateLimit -- No --> Reject429["HTTP 429 Carding Defense Triggered"]
+    RateLimit -- Yes --> AsyncQueue["Dispatch ProcessPaymentWebhookJob (DLQ Enabled)"]
+    AsyncQueue --> FSM["Payment FSM (Strict Transition Check)"]
+    FSM --> DBTransaction["DB::transaction(attempts: 3)"]
+    DBTransaction --> Ledger["Double-Entry Ledger (Debit = Credit)"]
+```
+
+### 1. Replay Attack Mitigation (Timestamp Sliding Window & Nonces)
+
+Every webhook or signed API request must enforce a strict **$\pm 300\text{s}$ (5-minute) sliding time window** and store nonces in Redis to prevent attackers from replaying captured transmissions:
+
+```php
+final readonly class WebhookReplayGuard
+{
+    private const int MAX_TOLERANCE_SECONDS = 300;
+
+    public static function verify(string $timestamp, string $nonce): void
+    {
+        $time = (int) $timestamp;
+        $currentTime = time();
+
+        // 1. Sliding window validation
+        if (abs($currentTime - $time) > self::MAX_TOLERANCE_SECONDS) {
+            throw new BadRequestHttpException('Webhook timestamp outside acceptable tolerance window.');
+        }
+
+        // 2. Atomic Nonce verification via Redis
+        $nonceKey = "fintech:nonce:{$nonce}";
+        $acquired = Cache::add($nonceKey, true, now()->addMinutes(10));
+
+        if (! $acquired) {
+            throw new BadRequestHttpException('Replay attack detected: Nonce has already been utilized.');
+        }
+    }
+}
+```
+
+### 2. Log Redaction & Monolog Sensitive Data Sanitizer
+
+PCI-DSS SAQ A mandates that credit cards, bank account numbers, CVVs, and fintech API tokens NEVER enter server logs:
+
+```php
+namespace App\Logging;
+
+use Monolog\LogRecord;
+use Monolog\Processor\ProcessorInterface;
+
+final class MaskSensitivePaymentData implements ProcessorInterface
+{
+    private const array PATTERNS = [
+        '/\b\d{4}[ -]?\d{4}[ -]?\d{4}[ -]?\d{4}\b/' => '[MASKED_CARD_PAN]',
+        '/\b\d{3,4}\b(?=.*(?:cvv|cvc|security_code))/i' => '[MASKED_CVV]',
+        '/(Bearer\s+)[A-Za-z0-9\-_.]+/i' => '$1[MASKED_TOKEN]',
+    ];
+
+    #[\Override]
+    public function __invoke(LogRecord $record): LogRecord
+    {
+        $message = $record->message;
+
+        foreach (self::PATTERNS as $pattern => $replacement) {
+            $message = preg_replace($pattern, $replacement, $message) ?? $message;
+        }
+
+        return $record->with(message: $message);
+    }
+}
+```
+
+### 3. Multi-Currency Decimal Safety (Zero Float Rule)
+
+**NEVER use PHP `float` or `double` for currency math** due to binary floating-point rounding errors (e.g., `0.1 + 0.2 !== 0.3`).
+
+- **Rule**: All currency values must be handled as **integer cents** (e.g. `$10.50` = `1050`) or computed using arbitrary-precision arithmetic (`bcadd`, `bcsub`, `bcmul`, `bcdiv` with scale 4).
+
+```php
+// Integer Cents representation
+$amountCents = 1050; // $10.50 USD
+
+// BCMath representation for micro-settlements or Crypto
+$cryptoAmount = bcmul('0.00452391', '1.05', 8); // 8-decimal Bitcoin precision
+```
+
+### 4. Rate Limiting & Velocity Defense against Carding Attacks
+
+Card testing attacks occur when fraudsters use bots to test stolen credit cards with micro-charges. Defend payment endpoints with tiered rate limiters in `app/Providers/AppServiceProvider.php`:
+
+```php
+RateLimiter::for('payment.checkout', function (Request $request) {
+    return [
+        // 5 payment attempts per minute per IP address
+        Limit::perMinute(5)->by($request->ip())->response(function () {
+            return response()->json(['message' => 'Too many checkout attempts. Please try again later.'], 429);
+        }),
+        // 10 payment attempts per hour per authenticated user
+        Limit::perHour(10)->by($request->user()?->id ?: $request->ip()),
+    ];
 });
 ```
 
 ---
 
-## 5. Pest 3 Fintech & Payment Testing Suite
+## 6. Payment Finite State Machine (FSM)
+
+Enforce strict, unidirectional state transitions to prevent illegal state changes (such as transitioning an already refunded order back to paid):
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> Pending: Initiate Charge
+    Pending --> Authorized: Pre-authorization
+    Pending --> Paid: Direct Settlement
+    Authorized --> Paid: Capture Funds
+    Authorized --> Voided: Cancel Authorization
+    Pending --> Failed: Declined / Timeout
+    Paid --> PartiallyRefunded: Partial Refund
+    PartiallyRefunded --> Refunded: Full Refund
+    Paid --> Refunded: Full Refund
+    Paid --> Disputed: Chargeback Initiated
+    Disputed --> ChargebackLost: Merchant Lost
+    Disputed --> Paid: Merchant Won
+    Failed --> [*]
+    Refunded --> [*]
+    Voided --> [*]
+```
+
+### Transition Guard Implementation
+
+```php
+namespace App\Enums;
+
+enum PaymentStatus: string
+{
+    case Draft = 'draft';
+    case Pending = 'pending';
+    case Authorized = 'authorized';
+    case Paid = 'paid';
+    case PartiallyRefunded = 'partially_refunded';
+    case Refunded = 'refunded';
+    case Failed = 'failed';
+    case Voided = 'voided';
+    case Disputed = 'disputed';
+
+    public function canTransitionTo(self $next): bool
+    {
+        return match ($this) {
+            self::Draft => in_array($next, [self::Pending, self::Failed], true),
+            self::Pending => in_array($next, [self::Authorized, self::Paid, self::Failed], true),
+            self::Authorized => in_array($next, [self::Paid, self::Voided], true),
+            self::Paid => in_array($next, [self::PartiallyRefunded, self::Refunded, self::Disputed], true),
+            self::PartiallyRefunded => in_array($next, [self::PartiallyRefunded, self::Refunded, self::Disputed], true),
+            self::Disputed => in_array($next, [self::Paid, self::Refunded], true),
+            self::Failed, self::Refunded, self::Voided => false, // Terminal states
+        };
+    }
+}
+```
+
+---
+
+## 7. Double-Entry Bookkeeping Ledger Architecture
+
+For high-volume fintech and multi-currency applications, never rely solely on a single mutable `balance` column. Maintain an immutable, double-entry financial ledger where every credit has an equal and opposite debit:
+
+```mermaid
+erDiagram
+    ACCOUNTS ||--o{ LEDGER_ENTRIES : contains
+    JOURNAL_ENTRIES ||--|{ LEDGER_ENTRIES : groups
+    
+    ACCOUNTS {
+        ulid id PK
+        string name
+        enum type "Asset, Liability, Equity, Revenue, Expense"
+        string currency
+    }
+    JOURNAL_ENTRIES {
+        ulid id PK
+        string reference_type "Order, Refund, Payout"
+        string reference_id
+        datetime posted_at
+    }
+    LEDGER_ENTRIES {
+        ulid id PK
+        ulid journal_entry_id FK
+        ulid account_id FK
+        bigint amount_cents "Positive integer"
+        enum direction "DEBIT, CREDIT"
+    }
+```
+
+```php
+// Creating a balanced journal entry in DB transaction:
+DB::transaction(attempts: 3, callback: function () use ($order): void {
+    $journal = JournalEntry::create([
+        'reference_type' => Order::class,
+        'reference_id' => $order->id,
+        'posted_at' => now(),
+    ]);
+
+    // Debit: Customer Accounts Receivable / Cash in Transit (Asset increases)
+    $journal->entries()->create([
+        'account_id' => Account::cashInTransitId(),
+        'amount_cents' => $order->total_cents,
+        'direction' => 'DEBIT',
+    ]);
+
+    // Credit: Sales Revenue (Revenue increases)
+    $journal->entries()->create([
+        'account_id' => Account::salesRevenueId(),
+        'amount_cents' => $order->total_cents,
+        'direction' => 'CREDIT',
+    ]);
+});
+```
+
+---
+
+## 8. Pest 3 Fintech & Payment Testing Suite
 
 ```php
 declare(strict_types=1);
@@ -576,4 +895,17 @@ test('binance driver verifies webhook signature with constant time comparison', 
 
     expect(hash_equals($signature, strtoupper(hash_hmac('sha512', $payloadToSign, $secret))))->toBeTrue();
 });
+
+test('payment state machine forbids illegal status transitions', function () {
+    expect(PaymentStatus::Draft->canTransitionTo(PaymentStatus::Pending))->toBeTrue()
+        ->and(PaymentStatus::Pending->canTransitionTo(PaymentStatus::Paid))->toBeTrue()
+        ->and(PaymentStatus::Paid->canTransitionTo(PaymentStatus::Refunded))->toBeTrue()
+        ->and(PaymentStatus::Refunded->canTransitionTo(PaymentStatus::Paid))->toBeFalse(); // Illegal
+});
+
+test('webhook replay guard rejects expired timestamps', function () {
+    expect(fn() => \App\Logging\WebhookReplayGuard::verify((string) (time() - 400), 'nonce_123'))
+        ->toThrow(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
+});
 ```
+

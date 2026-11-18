@@ -558,6 +558,19 @@ All payment processing code written or audited under this plugin must strictly a
 - **Binance Pay Cryptographic Standards**:
   - Sign every request using HMAC-SHA512 with millisecond UTC timestamp and cryptographically secure 32-character random nonce.
   - Verify incoming Binance Pay webhook payloads using the identical SHA512 string-to-sign protocol.
+- **Zero Floating-Point Arithmetic for Currency**:
+  - NEVER use PHP `float` or `double` types for monetary calculations.
+  - Store all monetary values as integer cents (e.g. `amount_cents: int`) or use BCMath strings (`bcadd`, `bcmul`) with explicit scale for crypto or fractional units.
+- **Replay Attack Defense & Nonce Tracking**:
+  - Enforce a strict sliding window ($\pm 300\text{s}$) on all signed webhook and payment payloads.
+  - Record unique nonces in Redis (`Cache::add("fintech:nonce:{$nonce}", true, 600)`) and reject duplicate nonces with `401 Unauthorized`.
+- **Payment Log Sanitization (Monolog Processor)**:
+  - Configure a dedicated Monolog processor (`MaskSensitivePaymentData`) in `config/logging.php` to redact PANs, CVVs, and Bearer tokens before writing to disk.
+- **Payment Finite State Machine (FSM) Guards**:
+  - Implement strict transition guards on `PaymentStatus` preventing illegal transitions (e.g., transitioning from `Refunded` or `Voided` back to `Paid`).
+- **Checkout Velocity Defense (Anti-Carding)**:
+  - Enforce tiered rate limiting (`payment.checkout`) via `RateLimiter::for()` on all payment initiation endpoints to mitigate card testing and MFS bot abuse.
+
 
 
 

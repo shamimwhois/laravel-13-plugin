@@ -164,15 +164,92 @@ $$\text{Signature} = \text{strtoupper}(\text{hash\_hmac}('sha512', \text{payload
 
 ---
 
-## 5. PCI-DSS Compliance & Security Rules
+## 5. PCI-DSS Compliance & Advanced Fintech Security
 
-1. **Zero Raw Card Data Storage**:
-   - NEVER store Card Numbers (PAN), CVV/CVC, or Expiration Dates in MySQL, PostgreSQL, or Redis.
-   - Use Client-Side Elements / SDKs (Stripe Elements, bKash iFrame, Binance QR) to tokenize credentials directly at the gateway.
-2. **Timing Attack Immunity**:
-   - Webhook signatures MUST ALWAYS be compared using `hash_equals()`. NEVER use `===`.
-3. **Atomic Concurrency & Webhook Idempotency**:
-   - Gateway webhooks can be retried dozens of times. Always track processed event IDs in an `idempotency_keys` or `processed_webhooks` table locked via `lockForUpdate()`.
-4. **Zero Secrets in Git**:
-   - API keys, secrets, and private keys belong strictly in `.env`.
-   - Redact payment secrets in logs using Laravel's `Http::withHeaders()->withoutLogging()`.
+Fintech architectures require defense-in-depth across the entire request-response lifecycle:
+
+```mermaid
+flowchart TD
+    Client["Client / User"] --> CDN["Cloudflare / WAF"]
+    CDN --> RateLimit["Tiered Rate Limiter (Velocity Defense)"]
+    RateLimit --> SSL["TLS 1.3 Strict Transport"]
+    SSL --> MonologFilter["Monolog MaskSensitivePaymentData Processor"]
+    MonologFilter --> ReplayGuard["Replay Attack Guard (Nonce + Timestamp Delta ≤ 300s)"]
+    ReplayGuard --> GatewayVerify["Constant-Time HMAC (hash_equals)"]
+    GatewayVerify --> FSM["Payment State Machine (Strict Transitions)"]
+    FSM --> DB["ACID DB Transaction (Deadlock Retries: 3)"]
+    DB --> Ledger["Double-Entry Balanced Ledger (Debit = Credit)"]
+```
+
+### 1. Zero Raw Card Data Storage (PCI-DSS SAQ A)
+- **Tokenization**: Never accept raw 16-digit Primary Account Numbers (PAN), CVVs, or card expiration dates onto your application server. Use gateway hosted tokens (Stripe Elements, bKash Hosted Checkout, Binance Pay QR, PayPal Buttons).
+- **Log Redaction**: Register a Monolog processor (`App\Logging\MaskSensitivePaymentData`) in `config/logging.php` to scrub potential PANs, CVVs, and Authorization Bearer headers before they hit disk or centralized log collectors (Datadog, CloudWatch).
+
+### 2. Replay Attack Defense Protocol
+- **Timestamp Window**: Calculate $|\text{now}() - \text{timestamp}| \le 300\text{s}$. If older than 5 minutes or in the future, abort with `401 Unauthorized`.
+- **Atomic Nonce Cache**: Cache each unique nonce with a 10-minute TTL (`Cache::add("nonce:{$nonce}", true, 600)`). If key already exists, reject as a replay attack.
+
+### 3. Monetary Decimal Safety: The Zero-Float Rule
+- **Prohibition**: Never store or calculate money using floating-point types (`float`, `double`).
+- **Standard**: Always store monetary values as **integer cents** (e.g., `1050` = $10.50 USD) or use BCMath strings (`bcmul`, `bcadd`) with explicit scales for cryptocurrency or fractional shares.
+
+---
+
+## 6. Payment Finite State Machine (FSM)
+
+Enforce strict, unidirectional state transitions to eliminate race conditions and double-settlement bugs:
+
+| Current Status | Allowed Target Statuses | Disallowed (Illegal) Transitions |
+| :--- | :--- | :--- |
+| `Draft` | `Pending`, `Failed` | `Paid`, `Refunded`, `Authorized` |
+| `Pending` | `Authorized`, `Paid`, `Failed` | `Refunded`, `PartiallyRefunded` |
+| `Authorized` | `Paid` (Capture), `Voided` (Cancel) | `Refunded`, `Pending` |
+| `Paid` | `PartiallyRefunded`, `Refunded`, `Disputed` | `Pending`, `Draft`, `Authorized` |
+| `PartiallyRefunded` | `PartiallyRefunded`, `Refunded`, `Disputed` | `Paid`, `Pending`, `Draft` |
+| `Disputed` | `Paid` (Won), `Refunded` / `Lost` (Chargeback) | `Draft`, `Pending` |
+| `Failed` *(Terminal)* | *None* | Any transition |
+| `Refunded` *(Terminal)* | *None* | Any transition |
+| `Voided` *(Terminal)* | *None* | Any transition |
+
+---
+
+## 7. Double-Entry Bookkeeping Ledger Architecture
+
+Financial auditability requires an immutable double-entry ledger where every credit corresponds to an equal debit:
+
+```mermaid
+erDiagram
+    ACCOUNTS ||--o{ LEDGER_ENTRIES : holds
+    JOURNAL_ENTRIES ||--|{ LEDGER_ENTRIES : balances
+
+    ACCOUNTS {
+        ulid id PK
+        string code
+        string name
+        enum type "Asset, Liability, Equity, Revenue, Expense"
+        string currency
+    }
+    JOURNAL_ENTRIES {
+        ulid id PK
+        string reference_type
+        string reference_id
+        timestamp posted_at
+    }
+    LEDGER_ENTRIES {
+        ulid id PK
+        ulid journal_entry_id FK
+        ulid account_id FK
+        bigint amount_cents
+        enum direction "DEBIT, CREDIT"
+    }
+```
+
+---
+
+## 8. Asynchronous Webhook Queue Pipeline & Dead-Letter Queue (DLQ)
+
+To handle massive webhook spikes without timing out external gateways:
+1. **Synchronous Controller**: Validates HMAC signature with `hash_equals()`, stores raw payload in `webhook_events`, and returns `HTTP 200 OK` in $< 50\text{ms}$.
+2. **Queued Worker (`ProcessPaymentWebhookJob`)**: Dispatches asynchronous processing on Redis queue `fintech-webhooks` with exponential backoff (`backoff: [10, 30, 90, 300]`).
+3. **Dead-Letter Queue (DLQ)**: Failed events after 5 attempts are routed to `failed_jobs` and trigger an automated PagerDuty / Slack alert for manual reconciliation.
+
