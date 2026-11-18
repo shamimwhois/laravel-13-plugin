@@ -1,15 +1,146 @@
 ---
 name: php-modern-syntax
-description: Modern PHP 8.4 and PHP 8.5+ syntax reference, typing rules, and idiom guide. Use when writing, upgrading, or refactoring PHP code to leverage modern language features such as the pipe operator, clone-with, property hooks, asymmetric visibility, and enums.
+description: Modern PHP 8.4, PHP 8.5, and PHP 8.6+ syntax reference, typing rules, and idiom guide. Use when writing, upgrading, or refactoring PHP code to leverage modern language features such as Partial Function Application (PFA) with ?, clamp(), #[Override] on constants, Readonly property defaults, Time\Duration, pipe operator, clone-with, property hooks, and asymmetric visibility.
 ---
 
-# Modern PHP Syntax & Idioms Guide (PHP 8.4 – PHP 8.5+)
+# Modern PHP Syntax & Idioms Guide (PHP 8.4 – PHP 8.6+)
 
-This skill covers the modern syntax features of **PHP 8.4** and **PHP 8.5+**, detailing how to build type-safe, expressive, and zero-boilerplate applications.
+This skill covers the modern syntax features of **PHP 8.4**, **PHP 8.5**, and **PHP 8.6+**, detailing how to build type-safe, expressive, and zero-boilerplate applications.
 
 ---
 
-## 1. PHP 8.5+ Features & New Syntax
+## 1. PHP 8.6+ Features & New Syntax
+
+### Partial Function Application (PFA) with `?` Placeholder
+Pre-fill specific arguments of any function or method using a question mark `?` placeholder, returning a lightweight closure for the remaining arguments. This pairs exceptionally well with first-class callables (`...`) and the pipe operator (`|>`):
+
+```php
+declare(strict_types=1);
+
+// 1. Standalone partial application
+$formatPrice = number_format(?, 2, '.', ',');
+echo $formatPrice(1499.5); // "1,499.50"
+
+// 2. Synergizing with the pipe operator (|>) without verbose closures
+$rawTitle = '   Building Enterprise AI with Laravel 13 & PHP 8.6   ';
+
+$slug = $rawTitle 
+    |> trim(...) 
+    |> str_replace(' ', '-', ?) 
+    |> strtolower(...);
+
+echo $slug; // "building-enterprise-ai-with-laravel-13-&-php-8.6"
+```
+
+### Native `clamp()` Function
+Bound numbers within a declared minimum and maximum threshold without verbose `min(max(...))` or nested ternary expressions:
+
+```php
+// Standard clamping syntax: clamp(number, min, max)
+$score = clamp(145, 0, 100); // 100
+$discount = clamp(-5, 0, 50); // 0
+
+// Production controller pagination bounds:
+$perPage = clamp($request->integer('per_page', 15), min: 5, max: 100);
+```
+
+### Readonly Property Defaults
+Readonly class properties are now permitted to have default initializers directly on property definitions, eliminating constructor boilerplate for optional immutable fields:
+
+```php
+final readonly class PaginationCriteria
+{
+    public int $page = 1;
+    public int $perPage = 25;
+    public string $sortBy = 'created_at';
+    public string $sortOrder = 'desc';
+
+    public function __construct(
+        public string $search = '',
+    ) {}
+}
+
+$criteria = new PaginationCriteria('billing');
+echo $criteria->page; // 1
+echo $criteria->sortBy; // "created_at"
+```
+
+### `#[Override]` Attribute on Class Constants
+Extend compile-time interface and inheritance verification to class constants using the `#[Override]` attribute, ensuring base contracts are not broken:
+
+```php
+interface PaymentGatewayContract
+{
+    public const int DEFAULT_TIMEOUT_SECONDS = 30;
+}
+
+final class StripePaymentGateway implements PaymentGatewayContract
+{
+    #[\Override]
+    public const int DEFAULT_TIMEOUT_SECONDS = 45;
+}
+```
+
+### High-Performance Native Polling API (`Io\Poll`)
+Modern replacement for legacy `stream_select()`. Leverages OS-native event multiplexing (`epoll` on Linux, `kqueue` on macOS/BSD, and `WSAPoll` on Windows) for $O(1)$ socket throughput in asynchronous workers, Octane servers, and daemon listeners:
+
+```php
+use Io\Poll;
+
+$poll = new Poll();
+$poll->add($socketResource, Poll::READ);
+
+// Event loop waiting without O(n) select() degradation
+$events = $poll->wait(timeoutMs: 1000);
+```
+
+### The `Time\Duration` Standard Class
+Native standard library representation for precise elapsed time, ISO 8601 interval parsing, and nanosecond calculations:
+
+```php
+use Time\Duration;
+
+$duration = Duration::ofSeconds(90);
+echo $duration->toIsoString(); // "PT1M30S"
+
+$total = $duration->add(Duration::ofMinutes(5));
+echo $total->toSeconds(); // 390
+```
+
+### Enums `__debugInfo()` Support
+Enums can now customize their debug output to mask sensitive backing data or inject telemetry when inspected via `var_dump()` or application loggers:
+
+```php
+enum ApiCredentialType: string
+{
+    case ProductionKey = 'prod_secret_998124';
+    case SandboxKey = 'test_key_00129';
+
+    public function __debugInfo(): array
+    {
+        return [
+            'name' => $this->name,
+            'masked_value' => substr($this->value, 0, 4) . '****',
+        ];
+    }
+}
+```
+
+### Precise JSON Offset Error Tracking
+`json_decode()` and `JsonException` now include the exact character location where a syntax failure occurred, speeding up API payload debugging:
+
+```php
+try {
+    json_decode('{"name": "Laravel", invalid}', flags: JSON_THROW_ON_ERROR);
+} catch (JsonException $e) {
+    // Exact byte/character offset reported by the engine:
+    echo $e->getOffset(); // 19
+}
+```
+
+---
+
+## 2. PHP 8.5+ Features & New Syntax
 
 ### The Native Pipe Operator (`|>`)
 Chain sequential function calls from left to right cleanly without nested parentheses or temporary variables:
@@ -108,7 +239,7 @@ class UserInput {}
 
 ---
 
-## 2. PHP 8.4 Features
+## 3. PHP 8.4 Features
 
 ### Property Hooks
 Declare computed or validated properties directly on class fields, eliminating verbose getter and setter methods:
@@ -175,7 +306,7 @@ $result = new RequestPipeline()->pipe($step1)->pipe($step2)->execute();
 
 ---
 
-## 3. Strong Typing, Enums & Pattern Matching
+## 4. Strong Typing, Enums & Pattern Matching
 
 ### Backed Enums
 ```php

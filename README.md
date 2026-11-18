@@ -1,15 +1,15 @@
-# Laravel 13 & Modern PHP 8.5+ Antigravity Plugin
+# Laravel 13 & Modern PHP 8.6+ Antigravity Plugin
 
 [![GitHub Repository](https://img.shields.io/badge/GitHub-shamimwhois%2Flaravel--13--plugin-181717?style=flat&logo=github)](https://github.com/shamimwhois/laravel-13-plugin)
-[![Version](https://img.shields.io/badge/version-2.9.0-red.svg)](https://github.com/shamimwhois/laravel-13-plugin/releases)
+[![Version](https://img.shields.io/badge/version-2.10.0-red.svg)](https://github.com/shamimwhois/laravel-13-plugin/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?logo=laravel)](https://laravel.com)
-[![PHP](https://img.shields.io/badge/PHP-8.5%2B-777BB4?logo=php)](https://php.net)
+[![PHP](https://img.shields.io/badge/PHP-8.6%2B-777BB4?logo=php)](https://php.net)
 [![Pest](https://img.shields.io/badge/Tested%20with-Pest%203-9333EA)](https://pestphp.com)
 [![PHPStan](https://img.shields.io/badge/PHPStan-Level%208%20%2F%20Max-brightgreen)](https://phpstan.org)
 [![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-blue)](https://modelcontextprotocol.io)
 
-An enterprise-grade, comprehensive toolkit, architectural framework, and autonomous agent skill pack for developing, refactoring, and architecting modern PHP (**PHP 8.4 & PHP 8.5+**) and **Laravel 13** applications with the Antigravity AI assistant.
+An enterprise-grade, comprehensive toolkit, architectural framework, and autonomous agent skill pack for developing, refactoring, and architecting modern PHP (**PHP 8.4, PHP 8.5 & PHP 8.6+**) and **Laravel 13** applications with the Antigravity AI assistant.
 
 ---
 
@@ -35,9 +35,9 @@ An enterprise-grade, comprehensive toolkit, architectural framework, and autonom
 
 ## 🌟 Executive Overview
 
-This plugin transforms the Antigravity AI assistant into an expert **Principal Laravel 13 & PHP 8.5+ Software Architect**. It provides:
+This plugin transforms the Antigravity AI assistant into an expert **Principal Laravel 13 & PHP 8.6+ Software Architect**. It provides:
 
-- **Strict Modern PHP 8.5+ Syntax**: Enforces `declare(strict_types=1);`, native property hooks, asymmetric visibility, pipe operators (`|>`), `clone $obj with (...)`, and `#[\NoDiscard]`.
+- **Strict Modern PHP 8.6+ Syntax**: Enforces `declare(strict_types=1);`, Partial Function Application (`?`), native `clamp()`, `#[Override]` on class constants, Readonly property defaults, `Time\Duration`, pipe operators (`|>`), `clone $obj with (...)`, and `#[\NoDiscard]`.
 - **4-Tier Frontend Directory Organization**: Strict separation of Layouts (`app`, `admin`, `customer`, `auth`), Domain Chrome (`components/app/*`), UI Primitives (`components/ui/*`, `icon/*`), and Pages (`pages/*`) across Blade, Livewire, Vue 3, React 19, and Svelte 5.
 - **JSON Schema Validation (`JsonSchema::rules()`)**: Bridges `laravel/ai` and `laravel/mcp` tool parameter schemas directly into native Laravel validation rules without duplicating constraints.
 - **Declarative Queue Attributes (`#[RetryFor]`)**: Declares job and listener retry windows cleanly via PHP attributes (`#[RetryFor(hours: 4)]`), eliminating legacy `retryUntil()` boilerplate.
@@ -99,7 +99,7 @@ Every skill adheres to progressive disclosure—loaded into context only when ne
 | **16** | **`laravel-scaffolding`** | [`skills/laravel-scaffolding/SKILL.md`](skills/laravel-scaffolding/SKILL.md) | End-to-end blueprint for scaffolding all 6 layers of a feature (Migration $\rightarrow$ Route). |
 | **17** | **`laravel-security-and-hardening`** | [`skills/laravel-security-and-hardening/SKILL.md`](skills/laravel-security-and-hardening/SKILL.md) | OWASP Top 10 defense, SSRF private IP filters, `hash_equals()`, safe uploads, IDOR. |
 | **18** | **`pest-testing`** | [`skills/pest-testing/SKILL.md`](skills/pest-testing/SKILL.md) | Pest 3 test suite: feature tests, architectural boundary tests (`arch()`), fakes. |
-| **19** | **`php-modern-syntax`** | [`skills/php-modern-syntax/SKILL.md`](skills/php-modern-syntax/SKILL.md) | PHP 8.4 property hooks, asymmetric visibility, PHP 8.5 pipe operator (`\|>`), `#[\NoDiscard]`. |
+| **19** | **`php-modern-syntax`** | [`skills/php-modern-syntax/SKILL.md`](skills/php-modern-syntax/SKILL.md) | PHP 8.6 Partial Function Application (`?`), `clamp()`, `#[Override]` on constants, Readonly defaults, `Time\Duration`, PHP 8.5 pipe operator (`\|>`), `#[NoDiscard]`. |
 | **20** | **`phpstan-larastan`** | [`skills/phpstan-larastan/SKILL.md`](skills/phpstan-larastan/SKILL.md) | PHPStan Level 8 / max configuration, generic Eloquent typing, CI workflows. |
 
 ---
@@ -108,7 +108,7 @@ Every skill adheres to progressive disclosure—loaded into context only when ne
 
 All agent interactions automatically enforce the strict standards codified in [`rules/AGENTS.md`](rules/AGENTS.md):
 
-1. **Strict Typing & Modern Syntax**: `declare(strict_types=1);` mandatory. Explicit top-level imports; zero inline leading backslashes (`\App\...`). Mark classes `final` by default. Promoted constructor properties.
+1. **Strict Typing & Modern Syntax**: `declare(strict_types=1);` mandatory. Explicit top-level imports; zero inline leading backslashes (`\App\...`). Mark classes `final` by default. Promoted constructor properties. PHP 8.6 Partial Function Application (`?`), native `clamp()`, Readonly property defaults, and `#[Override]` on class constants.
 2. **Thin Controllers**: No business logic or queries in controllers. Mandatory Form Requests (`app/Http/Requests`). Use `JsonSchema::rules()` to dynamically derive validation rules from schemas without duplicated constraints. API Resources (`JsonResource`) mandatory for all responses.
 3. **Canonical Routing**: Kebab-case URLs (`/user-profiles`), dot notation names (`admin.users.index`), plural resources, singular parameters (`{user}`).
 4. **RESTful Semantics**: `POST` $\rightarrow$ 201 Created; `PUT`/`PATCH` $\rightarrow$ 200 OK; `DELETE` $\rightarrow$ 204 No Content; Validation failure $\rightarrow$ 422 with RFC 7807 problem details.

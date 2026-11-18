@@ -1,10 +1,10 @@
-# Laravel 13 & Modern PHP 8.5+ Engineering Guidelines
+# Laravel 13 & Modern PHP 8.6+ Engineering Guidelines
 
 These rules govern all PHP and Laravel code written, reviewed, or refactored when this plugin is active. Adhere to these standards strictly without exception.
 
 ---
 
-## 1. Strict Typing & Modern PHP 8.5+ Syntax Standards
+## 1. Strict Typing & Modern PHP 8.6+ Syntax Standards
 
 - **Strict Types**: Always place `declare(strict_types=1);` at the very top of every PHP file without exception.
 - **Namespaces & Imports**:
@@ -16,14 +16,35 @@ These rules govern all PHP and Laravel code written, reviewed, or refactored whe
   - Mark classes `final` by default (except abstract bases and Eloquent models requiring inheritance).
   - Use `final readonly class` for immutable DTOs and Value Objects.
   - Follow canonical member ordering: (1) Traits, (2) Constants, (3) Properties (static, public/asymmetric, protected, private), (4) Constructor with promoted properties, (5) Framework hooks, (6) Magic methods, (7) Public API methods, (8) Private implementation methods.
-- **PHP 8.4 Property Hooks**: Use property hooks (`get => ...; set => ...;`) for computed, formatted, or validated properties instead of boilerplate getter and setter methods.
-- **PHP 8.4 Asymmetric Visibility**: Utilize `public private(set)` or `protected private(set)` for properties that need public read access but restricted write access, eliminating boilerplate getters.
-- **PHP 8.5 Pipe Operator (`|>`)**: Use the native pipe operator for sequential data transformations and pipelines:
+- **PHP 8.6 Partial Function Application (PFA)**: Use `?` placeholders with first-class callables and the pipe operator (`|>`) for clean, closure-free data transformations:
   ```php
   $slug = $title |> trim(...) 
-                |> (fn(string $s): string => str_replace(' ', '-', $s)) 
+                |> str_replace(' ', '-', ?) 
                 |> strtolower(...);
   ```
+- **PHP 8.6 Native `clamp()` Function**: Use native `clamp($value, $min, $max)` for bounding numbers, metrics, and pagination limits instead of legacy `min(max(...))` boilerplate:
+  ```php
+  $perPage = clamp($request->integer('per_page', 15), min: 5, max: 100);
+  ```
+- **PHP 8.6 Readonly Property Defaults**: Leverage default value initializers directly on readonly class properties to eliminate redundant constructor parameter boilerplate:
+  ```php
+  final readonly class QueryFilter
+  {
+      public string $sort = 'created_at';
+      public string $direction = 'desc';
+
+      public function __construct(public string $query = '') {}
+  }
+  ```
+- **PHP 8.6 `#[Override]` on Constants**: Enforce compile-time contract integrity on overridden class and interface constants using the `#[Override]` attribute:
+  ```php
+  #[\Override]
+  public const int TIMEOUT_SECONDS = 60;
+  ```
+- **PHP 8.6 `Time\Duration` Class**: Prefer the native `Time\Duration` class for precise elapsed time representation, nanosecond arithmetic, and ISO 8601 formatting.
+- **PHP 8.4 Property Hooks**: Use property hooks (`get => ...; set => ...;`) for computed, formatted, or validated properties instead of boilerplate getter and setter methods.
+- **PHP 8.4 Asymmetric Visibility**: Utilize `public private(set)` or `protected private(set)` for properties that need public read access but restricted write access, eliminating boilerplate getters.
+- **PHP 8.5 Pipe Operator (`|>`)**: Use the native pipe operator for sequential data transformations and pipelines.
 - **PHP 8.5 Clone-With Syntax**: Use `clone $obj with (...)` for immutable DTOs and value objects when modifying state:
   ```php
   $updatedUser = clone $user with (status: UserStatus::Active);
@@ -38,7 +59,7 @@ These rules govern all PHP and Laravel code written, reviewed, or refactored whe
       private readonly LoggerInterface $logger,
   ) {}
   ```
-- **Enums**: Replace magic strings and constants with backed enums (e.g., `enum OrderStatus: string { case Pending = 'pending'; }`).
+- **Enums**: Replace magic strings and constants with backed enums (e.g., `enum OrderStatus: string { case Pending = 'pending'; }`). Use `__debugInfo()` to sanitize sensitive enum secrets.
 - **Match Expressions**: Always prefer `match` expressions over `switch` statements for cleaner, type-safe condition handling.
 - **Trailing Commas & Callables**: Always use trailing commas in multi-line parameter lists, arrays, and arguments. Use first-class callable syntax: `array_map(strtoupper(...), $items)`.
 

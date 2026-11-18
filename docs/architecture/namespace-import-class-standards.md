@@ -1,7 +1,7 @@
-# Modern PHP 8.5+ & Laravel 13 Namespace, Import & Class Standards
+# Modern PHP 8.6+ & Laravel 13 Namespace, Import & Class Standards
 
 > **Document**: `docs/architecture/namespace-import-class-standards.md`  
-> **Framework**: Laravel 13 & PHP 8.5+  
+> **Framework**: Laravel 13 & PHP 8.6+  
 > **Standards Compliance**: PSR-4, PSR-12, PER Coding Style 2.0, PHPStan Level 8 / max, Laravel Pint.
 
 ---
@@ -11,7 +11,7 @@
 Writing clean, maintainable, and type-safe PHP requires strict adherence to uniform structural standards. This document outlines the official conventions for:
 1. **File Prologue & Namespaces**: Strict typing and PSR-4 directory mapping.
 2. **Import Statements (`use`)**: Canonical ordering, alphabetical sorting, explicit root imports, and aliasing rules.
-3. **Class Anatomy & Organization**: `final` by default, `readonly` DTOs, canonical member ordering, and modern PHP 8.5+ property hooks.
+3. **Class Anatomy & Organization**: `final` by default, `readonly` DTOs with default properties, canonical member ordering, `#[Override]` on class constants, and modern PHP 8.6+ property hooks.
 
 ---
 
