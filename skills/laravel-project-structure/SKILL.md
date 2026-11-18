@@ -14,6 +14,7 @@ This skill provides production-grade directory tree patterns and codebase organi
 | Architecture Pattern | Root Codebase Namespace | Primary Business Logic Location | Data Transfer Layer | Infrastructure & Persistence |
 | :--- | :--- | :--- | :--- | :--- |
 | **Action-Driven Monolith** *(Default)* | `App\` under `app/` | `app/Actions/<Domain>/` | `app/Data/<Domain>/` | `app/Models/` + `app/Builders/` |
+| **Service-Class Oriented Monolith** | `App\` under `app/` | `app/Services/<Domain>/` | `app/Data/<Domain>/` | `app/Models/` + `app/Repositories/` (or Builders) |
 | **Modular Monolith** | `Modules\<Domain>\` under `modules/` | `modules/<Domain>/src/Actions/` | `modules/<Domain>/src/Data/` | `modules/<Domain>/src/Models/` |
 | **Domain-Driven Design (DDD)** | `Domain\` & `Application\` under `src/` | `src/Domain/<Domain>/` & `src/Application/<Domain>/` | `src/Application/<Domain>/Data/` | `src/Infrastructure/<Domain>/` |
 | **Hexagonal (Ports & Adapters)** | `Core\` & `Adapters\` under `src/` | `src/Core/Domain/` & `src/Core/UseCases/` | `src/Core/DTO/` | `src/Adapters/Secondary/` |
@@ -401,13 +402,180 @@ src/
 
 ---
 
-## 5. Architectural Directory Placement Rules
+## 5. Pattern E: Service-Class Oriented Monolith Directory Architecture
+
+The **Service-Class Oriented Monolith** organizes business logic into cohesive, domain-scoped Service classes implementing explicit interfaces. It is ideal for applications where operations span multiple models, external services, and coordinated database transactions.
+
+### Canonical Directory Blueprint
+
+```text
+my-service-monolith/
+├── app/
+│   ├── Contracts/
+│   │   └── Services/                   # Public Interface Contracts for IoC Container
+│   │       ├── Billing/
+│   │       │   ├── PaymentGatewayServiceInterface.php
+│   │       │   └── SubscriptionServiceInterface.php
+│   │       └── Orders/
+│   │           ├── OrderCreationServiceInterface.php
+│   │           ├── OrderFulfillmentServiceInterface.php
+│   │           └── OrderPricingServiceInterface.php
+│   ├── Services/                       # Concrete Domain Service Implementations
+│   │   ├── Billing/
+│   │   │   ├── StripePaymentService.php
+│   │   │   └── SubscriptionService.php
+│   │   └── Orders/
+│   │       ├── OrderCreationService.php
+│   │       ├── OrderFulfillmentService.php
+│   │       └── OrderPricingService.php
+│   ├── Data/                           # Strongly-typed immutable DTOs passed into Services
+│   │   ├── Billing/
+│   │   │   └── ChargeCustomerData.php
+│   │   └── Orders/
+│   │       ├── CreateOrderData.php
+│   │       ├── FulfillmentData.php
+│   │       └── OrderPricingData.php
+│   ├── Repositories/                   # Optional: Data Access Layer (or custom Query Builders)
+│   │   ├── Contracts/
+│   │   │   └── OrderRepositoryInterface.php
+│   │   └── Eloquent/
+│   │       └── EloquentOrderRepository.php
+│   ├── Builders/                       # Eloquent Custom Query Builders
+│   │   └── OrderQueryBuilder.php
+│   ├── Models/                         # Thin Eloquent Models
+│   │   ├── Order.php
+│   │   └── OrderItem.php
+│   ├── Http/
+│   │   ├── Controllers/                # Thin Invokable Controllers injecting Service Interfaces
+│   │   │   └── Api/
+│   │   │       └── V1/
+│   │   │           └── Orders/
+│   │   │               ├── StoreOrderController.php
+│   │   │               └── FulfillOrderController.php
+│   │   ├── Requests/                   # Form Requests transforming into DTOs
+│   │   │   └── Orders/
+│   │   │       ├── StoreOrderRequest.php
+│   │   │       └── FulfillOrderRequest.php
+│   │   └── Resources/                  # JsonResource serialization
+│   │       └── Orders/
+│   │           └── OrderResource.php
+│   └── Providers/
+│       └── AppServiceProvider.php       # Binds Service Interfaces to Implementations
+```
+
+### Modern PHP 8.6+ Service Implementation Pattern
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\Orders;
+
+use App\Contracts\Services\Orders\OrderCreationServiceInterface;
+use App\Data\Orders\CreateOrderData;
+use App\Enums\OrderStatus;
+use App\Events\Orders\OrderCreated;
+use App\Exceptions\Orders\InsufficientInventoryException;
+use App\Models\Order;
+use App\Models\OrderItem;
+use Illuminate\Support\Facades\DB;
+use Throwable;
+
+final readonly class OrderCreationService implements OrderCreationServiceInterface
+{
+    public function __construct(
+        private \App\Contracts\Services\Billing\PaymentGatewayServiceInterface $paymentGateway,
+        private \Illuminate\Contracts\Events\Dispatcher $events,
+    ) {}
+
+    #[\Override]
+    public function create(CreateOrderData $data): Order
+    {
+        return DB::transaction(attempts: 3, callback: function () use ($data): Order {
+            // 1. Verify business invariants
+            $order = Order::create([
+                'user_id' => $data->userId,
+                'status' => OrderStatus::Pending,
+                'total_amount' => $data->totalAmount,
+            ]);
+
+            foreach ($data->items as $item) {
+                $order->items()->create([
+                    'product_id' => $item->productId,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->unitPrice,
+                ]);
+            }
+
+            // 2. Execute payment via injected service
+            $this->paymentGateway->charge($order, $data->payment);
+
+            // 3. Dispatch domain event post-commit
+            DB::afterCommit(fn() => $this->events->dispatch(new OrderCreated($order)));
+
+            return $order;
+        });
+    }
+}
+```
+
+### Dependency Injection in Thin Single-Action Controllers
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api\V1\Orders;
+
+use App\Contracts\Services\Orders\OrderCreationServiceInterface;
+use App\Http\Requests\Orders\StoreOrderRequest;
+use App\Http\Resources\Orders\OrderResource;
+use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+
+final readonly class StoreOrderController
+{
+    public function __construct(
+        private OrderCreationServiceInterface $orderService,
+    ) {}
+
+    public function __invoke(StoreOrderRequest $request): JsonResponse
+    {
+        $order = $this->orderService->create($request->toDto());
+
+        return (new OrderResource($order))
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
+    }
+}
+```
+
+### IoC Service Binding (`bootstrap/providers.php` or `AppServiceProvider.php`)
+
+```php
+// In app/Providers/AppServiceProvider.php:
+public function register(): void
+{
+    $this->app->bind(
+        \App\Contracts\Services\Orders\OrderCreationServiceInterface::class,
+        \App\Services\Orders\OrderCreationService::class,
+    );
+}
+```
+
+---
+
+## 6. Architectural Directory Placement Rules
 
 Follow this strict decision matrix to determine where any newly created file belongs:
 
 | File Type / Responsibility | Target Directory | Strict Naming Convention |
 | :--- | :--- | :--- |
 | Single business action / use case | `app/Actions/<Domain>/` | `<Verb><Noun>Action.php` |
+| Cohesive multi-step domain service | `app/Services/<Domain>/` | `<Domain><Capability>Service.php` |
+| Service interface contract | `app/Contracts/Services/<Domain>/` | `<Capability>ServiceInterface.php` |
 | Strongly typed immutable payload | `app/Data/<Domain>/` | `<Noun>Data.php` |
 | Custom Eloquent query builder | `app/Builders/` | `<Model>QueryBuilder.php` |
 | Single-action HTTP controller | `app/Http/Controllers/<Namespace>/` | `<Verb><Noun>Controller.php` |
@@ -427,7 +595,7 @@ Follow this strict decision matrix to determine where any newly created file bel
 
 ---
 
-## 6. Pest 3 Architectural Boundary Tests
+## 7. Pest 3 Architectural Boundary Tests
 
 Ensure codebase integrity by placing automated tests in `tests/Arch/ArchitectureTest.php`:
 
@@ -447,19 +615,26 @@ arch('actions are final and invokable')
     ->toBeFinal()
     ->toBeInvokable();
 
-// 3. DTOs in Data/ must be final readonly
+// 3. Services must implement an interface and reside in Services/
+arch('services implement their contract interface')
+    ->expect('App\Services')
+    ->toHaveSuffix('Service')
+    ->toBeFinal()
+    ->toImplement('App\Contracts\Services');
+
+// 4. DTOs in Data/ must be final readonly
 arch('data transfer objects are immutable')
     ->expect('App\Data')
     ->toHaveSuffix('Data')
     ->toBeFinal()
     ->toBeReadonly();
 
-// 4. Models must not be injected directly into Controllers
+// 5. Models must not be injected directly into Controllers
 arch('controllers do not access models directly')
     ->expect('App\Http\Controllers')
     ->not->toUse('Illuminate\Database\Eloquent\Builder');
 
-// 5. Zero procedural helpers
+// 6. Zero procedural helpers
 arch('no procedural helper files exist')
     ->expect('App\Helpers')
     ->not->toBeClasses();
@@ -467,9 +642,9 @@ arch('no procedural helper files exist')
 
 ---
 
-## 7. Anti-Patterns & Prohibitions
+## 8. Anti-Patterns & Prohibitions
 
-1. **NO Miscellaneous Dumping Grounds**: Prohibit `app/Services/MiscService.php`, `app/Utils/Helper.php`, or `app/Helpers/functions.php`.
-2. **NO Controller Business Logic**: Controllers must only deserialize requests, invoke an Action/DTO, and return a Resource.
-3. **NO Model Bloat**: Do not put business orchestration, payment execution, or heavy queries into Eloquent models. Use Actions and Query Builders.
+1. **NO "God" Services**: Never build `app/Services/OrderService.php` with 30 unrelated methods. Split by cohesive capability: `OrderCreationService`, `OrderFulfillmentService`, `OrderPricingService`.
+2. **NO Controllers with Business Logic**: Controllers must only deserialize requests, invoke an Action/Service via its Interface, and return a Resource.
+3. **NO Untyped Array Passing**: Services must strictly receive and return typed DTOs (`final readonly class`) or Eloquent Models, never raw `$request->all()`.
 4. **NO View Root Sprawl**: All views must reside inside the 4-tier hierarchy (`layouts/`, `components/app/<domain>`, `components/ui`, `pages/<domain>/<feature>`). Never dump files directly in `resources/views/`.

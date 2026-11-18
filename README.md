@@ -1,7 +1,7 @@
 # Laravel 13 & Modern PHP 8.6+ Antigravity Plugin
 
 [![GitHub Repository](https://img.shields.io/badge/GitHub-shamimwhois%2Flaravel--13--plugin-181717?style=flat&logo=github)](https://github.com/shamimwhois/laravel-13-plugin)
-[![Version](https://img.shields.io/badge/version-2.12.0-red.svg)](https://github.com/shamimwhois/laravel-13-plugin/releases)
+[![Version](https://img.shields.io/badge/version-2.13.0-red.svg)](https://github.com/shamimwhois/laravel-13-plugin/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?logo=laravel)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.6%2B-777BB4?logo=php)](https://php.net)
@@ -37,7 +37,7 @@ An enterprise-grade, comprehensive toolkit, architectural framework, and autonom
 
 This plugin transforms the Antigravity AI assistant into an expert **Principal Laravel 13 & PHP 8.6+ Software Architect**. It provides:
 
-- **Architectural Base Directory Blueprints**: Production-grade folder hierarchy standards for Action-Driven Monoliths, Modular Monoliths, Domain-Driven Design (DDD), Hexagonal (Ports & Adapters), and CQRS architectures with Pest 3 boundary tests.
+- **Architectural Base Directory Blueprints**: Production-grade folder hierarchy standards for Action-Driven Monoliths, Service-Class Oriented Monoliths, Modular Monoliths, Domain-Driven Design (DDD), Hexagonal (Ports & Adapters), and CQRS architectures with Pest 3 boundary tests.
 - **Strict Modern PHP 8.6+ Syntax**: Enforces `declare(strict_types=1);`, Partial Function Application (`?`), native `clamp()`, `#[Override]` on class constants, Readonly property defaults, `Time\Duration`, pipe operators (`|>`), `clone $obj with (...)`, and `#[\NoDiscard]`.
 - **4-Tier Frontend Directory Organization**: Strict separation of Layouts (`app`, `admin`, `customer`, `auth`), Domain Chrome (`components/app/*`), UI Primitives (`components/ui/*`, `icon/*`), and Pages (`pages/*`) across Blade, Livewire, Vue 3, React 19, and Svelte 5.
 - **JSON Schema Validation (`JsonSchema::rules()`)**: Bridges `laravel/ai` and `laravel/mcp` tool parameter schemas directly into native Laravel validation rules without duplicating constraints.
@@ -98,7 +98,7 @@ Every skill adheres to progressive disclosure—loaded into context only when ne
 | **13** | **`laravel-mcp`** | [`skills/laravel-mcp/SKILL.md`](skills/laravel-mcp/SKILL.md) | Official `laravel/mcp`: Tools, Resources, Prompts, Web SSE, and stdio transports. |
 | **14** | **`laravel-memory-safety`** | [`skills/laravel-memory-safety/SKILL.md`](skills/laravel-memory-safety/SKILL.md) | Octane concurrency safety, $O(1)$ cursor streaming, WeakMap caching, worker recycling. |
 | **15** | **`laravel-performance-and-caching`** | [`skills/laravel-performance-and-caching/SKILL.md`](skills/laravel-performance-and-caching/SKILL.md) | Redis compression (`igbinary`, `zstd`), `Cache::flexible()` stampede defense, locks. |
-| **16** | **`laravel-project-structure`** | [`skills/laravel-project-structure/SKILL.md`](skills/laravel-project-structure/SKILL.md) | Architectural base directory tree patterns (Action-Driven, Modular, DDD, Hexagonal, CQRS) & Pest 3 Arch tests. |
+| **16** | **`laravel-project-structure`** | [`skills/laravel-project-structure/SKILL.md`](skills/laravel-project-structure/SKILL.md) | Architectural base directory tree patterns (Action-Driven, Service-Class Monolith, Modular, DDD, Hexagonal, CQRS) & Pest 3 Arch tests. |
 | **17** | **`laravel-routing`** | [`skills/laravel-routing/SKILL.md`](skills/laravel-routing/SKILL.md) | 5 routing styles: Invokable mapping, grouping, scoped bindings, `whereUlid`, rate limiting. |
 | **18** | **`laravel-scaffolding`** | [`skills/laravel-scaffolding/SKILL.md`](skills/laravel-scaffolding/SKILL.md) | End-to-end blueprint for scaffolding all 6 layers of a feature (Migration $\rightarrow$ Route). |
 | **19** | **`laravel-security-and-hardening`** | [`skills/laravel-security-and-hardening/SKILL.md`](skills/laravel-security-and-hardening/SKILL.md) | OWASP Top 10 defense, SSRF private IP filters, `hash_equals()`, safe uploads, IDOR. |
@@ -132,7 +132,7 @@ All agent interactions automatically enforce the strict standards codified in [`
 18. **Modern Frontend Architecture**: Blade components with `@props`, Livewire `#[Locked]` state tampering defense, Form Objects, `wire:stream` AI token streaming, Alpine.js micro-interactions, Inertia v2 Deferred Props (`Inertia::defer`), Vue 3 / React TypeScript interfaces, Svelte 5 Runes, and Pest 3 component assertions.
 19. **Canonical Frontend Directory Organization**: Strict 4-tier directory scoping across Blade, Livewire, and Inertia.js (`layouts/`, `components/app/<domain>/`, `components/ui/`, `components/icon/`, `pages/<domain>/<feature>/index`), total prohibition of view root sprawl, and controller dot-notation resolution (`view('pages.admin.dashboard.index')` / `Inertia::render('admin/dashboard/Index')`).
 20. **Dead Code Elimination, Zombie Logic Hunting & Codebase Hygiene**: Zero tolerance for commented-out code, unused `use` imports (`laravel/pint`), and unused Composer dependencies (`composer-unused`). Immediate deletion of legacy Laravel skeleton files (`app/Http/Kernel.php`, `app/Console/Kernel.php`, `app/Exceptions/Handler.php`, `app/Providers/RouteServiceProvider.php`). Automated dead code purging with Rector `SetList::DEAD_CODE` and Pest 3 boundary tests forbidding legacy class revival.
-21. **Architectural Base Project Directory Tree Patterns & Placement Guidelines**: Mandatory adherence to standardized architectural directory patterns (Action-Driven Monolith by default, Modular Monolith for multi-team platforms, DDD for core banking/fintech, Hexagonal for framework-agnostic engines). Strict canonical folder placement: actions in `app/Actions/<Domain>/`, immutable DTOs in `app/Data/<Domain>/`, query builders in `app/Builders/`, single-action invokables in `app/Http/Controllers/`, pure static helpers in `app/Support/`, first-party AI/MCP in `app/Ai/` and `app/Mcp/`, and 4-tier frontend scoping (`layouts/`, `components/app/<domain>/`, `components/ui/`, `components/icon/`, `pages/<domain>/<feature>/`). Mandatory Pest 3 architectural boundary tests in `tests/Arch/`.
+21. **Architectural Base Project Directory Tree Patterns & Placement Guidelines**: Mandatory adherence to standardized architectural directory patterns (Action-Driven Monolith or Service-Class Oriented Monolith by default, Modular Monolith for multi-team platforms, DDD for core banking/fintech, Hexagonal for framework-agnostic engines). Strict canonical folder placement: actions in `app/Actions/<Domain>/`, domain services in `app/Services/<Domain>/` with interface contracts in `app/Contracts/Services/<Domain>/`, immutable DTOs in `app/Data/<Domain>/`, query builders in `app/Builders/`, single-action invokables in `app/Http/Controllers/`, pure static helpers in `app/Support/`, first-party AI/MCP in `app/Ai/` and `app/Mcp/`, and 4-tier frontend scoping (`layouts/`, `components/app/<domain>/`, `components/ui/`, `components/icon/`, `pages/<domain>/<feature>/`). Mandatory Pest 3 architectural boundary tests in `tests/Arch/`.
 
 ---
 
@@ -141,7 +141,7 @@ All agent interactions automatically enforce the strict standards codified in [`
 Located in [`docs/architecture/`](docs/architecture/):
 
 1. **[`Architectural.md`](docs/architecture/Architectural.md)**: Executive Decision Matrix for the Top 10 Software Architecture Patterns.
-2. **[`project-directory-tree-patterns.md`](docs/architecture/project-directory-tree-patterns.md)**: Standardized codebase directory blueprints, namespace mappings, boundary invariants, and Pest 3 boundary suites across Action-Driven, Modular Monolith, DDD, Hexagonal, and CQRS architectures.
+2. **[`project-directory-tree-patterns.md`](docs/architecture/project-directory-tree-patterns.md)**: Standardized codebase directory blueprints, namespace mappings, boundary invariants, and Pest 3 boundary suites across Action-Driven, Service-Class Monolith, Modular Monolith, DDD, Hexagonal, and CQRS architectures.
 3. **[`frontend-layouts-components-and-pages.md`](docs/architecture/frontend-layouts-components-and-pages.md)**: Standardized 4-tier frontend hierarchy, domain layout shells, UI design tokens, SVG icon primitives, and multi-tenant layout isolation.
 4. **[`blade-and-livewire.md`](docs/architecture/blade-and-livewire.md)**: Server-rendered Blade components, slots, Alpine.js, Livewire v3/v4 reactive state, and `wire:stream` AI streaming.
 5. **[`inertia-and-frontend-stacks.md`](docs/architecture/inertia-and-frontend-stacks.md)**: Inertia.js v2 SPAs with Vue 3 (TS), React 19/18 (TS), Svelte 5 (Runes), Deferred Props, and Vite SSR.

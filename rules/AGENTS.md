@@ -512,11 +512,16 @@ All applications maintained or scaffolded under this plugin must strictly adhere
 All codebases developed, refactored, or audited under this plugin must strictly adhere to standardized architectural directory patterns and placement rules:
 
 - **Strict Architectural Base Hierarchy**:
-  - Standard applications must use the **Action-Driven Monolith** pattern by default (`app/Actions/<Domain>/`, `app/Data/<Domain>/`, `app/Builders/`, `app/Models/`).
+  - Standard applications must use the **Action-Driven Monolith** pattern (`app/Actions/<Domain>/`, `app/Data/<Domain>/`, `app/Builders/`) or the **Service-Class Oriented Monolith** pattern (`app/Services/<Domain>/`, `app/Contracts/Services/<Domain>/`, `app/Data/<Domain>/`).
   - Large multi-team platforms must partition into **Modular Monolith** bounded contexts (`modules/<Domain>/src/`).
   - Core banking and highly complex domains must use **Domain-Driven Design (DDD)** (`src/Domain/`, `src/Application/`, `src/Infrastructure/`) or **Hexagonal Architecture** (`src/Core/`, `src/Adapters/`).
 - **Canonical Folder Placement Rules**:
-  - **Business Logic & Use Cases**: MUST reside in `app/Actions/<Domain>/<Verb><Noun>Action.php` (final, invokable). NEVER place business logic in Controllers, Eloquent Models, or Blade templates.
+  - **Business Logic & Use Cases**: MUST reside in `app/Actions/<Domain>/<Verb><Noun>Action.php` (final, invokable) or cohesive domain services in `app/Services/<Domain>/<Domain><Capability>Service.php`. NEVER place business logic in Controllers, Eloquent Models, or Blade templates.
+  - **Service-Class Architecture Standards**:
+    - Services MUST implement explicit interface contracts under `app/Contracts/Services/<Domain>/<Capability>ServiceInterface.php` bound via the IoC container.
+    - Services MUST accept strongly-typed immutable DTOs (`app/Data/<Domain>/`), NEVER raw `$request->all()` or untyped arrays.
+    - Services MUST encapsulate ACID transaction boundaries (`DB::transaction(..., attempts: 3)`) and post-commit event dispatching (`DB::afterCommit()`).
+    - PROHIBIT "God Services": Services must maintain high cohesion and narrow operational scope (e.g., split bloated `OrderService` into `OrderCreationService`, `OrderFulfillmentService`, `OrderPricingService`).
   - **Data Transfer Objects (DTOs)**: MUST reside in `app/Data/<Domain>/<Noun>Data.php` as `final readonly class`.
   - **Custom Query Builders**: MUST reside in `app/Builders/<Model>QueryBuilder.php` bound via `#[UseEloquentBuilder]`.
   - **Controllers**: MUST reside in `app/Http/Controllers/` as Single-Action Invokables (`__invoke`).
