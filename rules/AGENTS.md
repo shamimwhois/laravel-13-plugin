@@ -571,6 +571,51 @@ All payment processing code written or audited under this plugin must strictly a
 - **Checkout Velocity Defense (Anti-Carding)**:
   - Enforce tiered rate limiting (`payment.checkout`) via `RateLimiter::for()` on all payment initiation endpoints to mitigate card testing and MFS bot abuse.
 
+---
+
+## 23. Database Schema Design, Eloquent Attributes, Indexing & FK Architecture Rules
+
+All database migrations, Eloquent models, and schema designs must strictly comply with the following architectural rules:
+
+- **Mandatory Native PHP 8 Attributes on Eloquent Models**:
+  - Models MUST declare table names, fillable attributes, hidden attributes, custom query builders, and global scopes using native PHP 8 attributes:
+    ```php
+    #[Table('orders')]
+    #[Fillable(['tenant_id', 'status', 'total_amount_cents'])]
+    #[Hidden(['gateway_secret'])]
+    #[UseEloquentBuilder(OrderQueryBuilder::class)]
+    #[ScopedBy([TenantScope::class])]
+    class Order extends Model
+    ```
+  - Prohibit legacy protected property arrays (`protected $fillable`, `protected $hidden`, `protected $table`).
+  - Attribute casts MUST be declared inside the `casts(): array` method using backed enums, `AsFluent::class`, integer cents, or `immutable_datetime`.
+- **Relationship Type-Safety & PHPStan Level 8 Generics**:
+  - Every Eloquent relationship method MUST declare a native return type and a PHPStan generic docblock indicating related model and owner:
+    ```php
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\OrderItem, $this>
+     */
+    public function items(): HasMany
+    ```
+  - Enforce global strictness in `AppServiceProvider::boot()`:
+    - `Model::preventLazyLoading(! app()->isProduction())`
+    - `Model::preventSilentlyDiscardingAttributes(! app()->isProduction())`
+    - `Model::preventAccessingMissingAttributes(! app()->isProduction())`
+- **Primary Key (PK) Architecture Standard**:
+  - Modern public and multi-tenant SaaS tables MUST use ULIDs (`$table->ulid('id')->primary();`) with `HasUlids` trait to prevent sequential ID harvesting.
+  - Inter-service integrations with Kafka/Snowflake may use UUIDv7 (`$table->uuid('id')->primary();`).
+  - Auto-incrementing BigInts (`$table->id();`) are strictly reserved for high-throughput, internal-only append tables (e.g. log streams, internal ledger lines).
+- **Foreign Key (FK) Integrity & Cascades**:
+  - All foreign keys MUST declare explicit cascades:
+    - `cascadeOnDelete()` for tightly-bound child items (e.g. `order_items`).
+    - `restrictOnDelete()` for master entities referenced in financial transactions (e.g. `products`, `customers`).
+    - `nullOnDelete()` for optional associations.
+  - Foreign key columns must always be indexed to prevent full table lock escalation during parent row deletions.
+- **Indexing Standards & The Leftmost Prefix Rule**:
+  - Multi-column indexes MUST adhere to the Equality-then-Range (ESR) rule: high-cardinality equality columns first, range/sort columns last (e.g. `index(['tenant_id', 'status', 'created_at'])`).
+  - NEVER create standalone indexes on low-cardinality boolean columns. Combine them into composite indexes or use partial indexes (`WHERE deleted_at IS NULL`).
+
+
 
 
 
