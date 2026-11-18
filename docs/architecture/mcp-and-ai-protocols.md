@@ -157,7 +157,9 @@ use App\Data\Orders\CreateOrderDto;
 use App\Models\User;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\JsonSchema as JsonSchemaFacade;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
@@ -186,10 +188,17 @@ final class CreateOrderTool extends Tool
 
     public function handle(Request $request): Response
     {
-        $customerId = (string) $request->input('customer_id');
-        $sku = (string) $request->input('sku');
-        $quantity = (int) ($request->input('quantity') ?? 1);
-        $idempotencyKey = (string) $request->input('idempotency_key');
+        // Laravel 13.43+: Translate declared schema directly into validation rules
+        /** @var array{customer_id: string, sku: string, quantity?: int, idempotency_key: string} $validated */
+        $validated = Validator::validate(
+            $request->all(),
+            JsonSchemaFacade::rules($this->schema(...))
+        );
+
+        $customerId = $validated['customer_id'];
+        $sku = $validated['sku'];
+        $quantity = (int) ($validated['quantity'] ?? 1);
+        $idempotencyKey = $validated['idempotency_key'];
 
         $user = User::query()->find($customerId);
         if ($user === null) {

@@ -142,6 +142,8 @@ namespace App\Ai\Tools;
 
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\JsonSchema as JsonSchemaFacade;
+use Illuminate\Support\Facades\Validator;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 use Stringable;
@@ -164,7 +166,14 @@ final readonly class LookupUserSubscriptionTool implements Tool
 
     public function handle(Request $request): Stringable|string
     {
-        $email = (string) $request['email'];
+        // Laravel 13.43+: Derive native validation rules directly from schema
+        /** @var array{email: string} $validated */
+        $validated = Validator::validate(
+            $request->all(),
+            JsonSchemaFacade::rules($this->schema(...))
+        );
+
+        $email = $validated['email'];
         $user = User::query()->where('email', $email)->first();
 
         if ($user === null) {
@@ -181,6 +190,9 @@ final readonly class LookupUserSubscriptionTool implements Tool
     }
 }
 ```
+
+> 💡 **Laravel 13.43+ JSON Schema Validation Rules (`JsonSchema::rules()`)**:
+> In Laravel 13.43+, `JsonSchema::rules($schema)` automatically transforms a JSON Schema definition into native Laravel validation rules (`array<string, list<mixed>>`). This bridges tool parameter definitions with Laravel's validation engine, supporting nested dot-notation (`address.city`), string lengths, numeric ranges, and enums without duplicated validation code.
 
 Attach to Agent via `HasTools`:
 ```php
@@ -399,11 +411,13 @@ use App\Events\Ai\LeadProcessingEvent;
 use App\Models\Lead;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\RetryFor;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\Attributes\WithQueue;
 use Throwable;
 
 #[WithQueue(connection: 'redis', queue: 'ai-processing', tries: 3, timeout: 180)]
+#[RetryFor(hours: 2)]
 final class ProcessLeadJob implements ShouldQueue
 {
     use Queueable;

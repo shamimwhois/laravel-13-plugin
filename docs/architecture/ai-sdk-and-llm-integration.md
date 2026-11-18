@@ -210,6 +210,8 @@ namespace App\Ai\Tools;
 
 use App\Models\Order;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\JsonSchema as JsonSchemaFacade;
+use Illuminate\Support\Facades\Validator;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 use Stringable;
@@ -240,8 +242,15 @@ final readonly class LookupOrdersTool implements Tool
 
     public function handle(Request $request): Stringable|string
     {
-        $status = (string) $request['status'];
-        $limit = min((int) ($request['limit'] ?? 5), 10);
+        // Laravel 13.43+: Translate JSON schema to validation rules directly
+        /** @var array{status: string, limit?: int} $validated */
+        $validated = Validator::validate(
+            $request->all(),
+            JsonSchemaFacade::rules($this->schema(...))
+        );
+
+        $status = $validated['status'];
+        $limit = min((int) ($validated['limit'] ?? 5), 10);
 
         $orders = Order::query()
             ->when($this->userId, fn ($q) => $q->where('user_id', $this->userId))
@@ -537,12 +546,14 @@ use App\Events\Ai\AuditProgressUpdated;
 use App\Models\AuditRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\RetryFor;
 use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\Attributes\WithQueue;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
 #[WithQueue(connection: 'redis', queue: 'ai-processing', tries: 3, timeout: 180)]
+#[RetryFor(hours: 2)]
 final class ProcessCodeAuditJob implements ShouldQueue
 {
     use Queueable;

@@ -56,6 +56,7 @@ These rules govern all PHP and Laravel code written, reviewed, or refactored whe
     - `authorize(): bool` (enforcing authorization gates/policies)
     - `rules(): array` (declaring explicit validation rules)
     - Strongly typed helper methods or DTO transformation (`toDto()`).
+  - When validating structured payloads defined by a JSON Schema (e.g. AI tool inputs, MCP parameters, or dynamic schemas), derive rules dynamically via `JsonSchema::rules($schema)` inside `rules(): array` to guarantee a single source of truth without duplicating validation constraints.
 - **API Resources Required**:
   - NEVER return raw Eloquent models, collections, or unmapped arrays from API endpoints.
   - ALWAYS transform API output using `JsonResource` or `ResourceCollection`.
@@ -219,14 +220,17 @@ All generated code must be fully compliant with PHPStan / Larastan at Level 8 or
 ## 10. Queues, Caching & Events
 
 - **Queue Configuration Attributes**:
-  - Declare queue settings on Job classes using the `#[WithQueue]` attribute:
+  - Declare queue settings and retry windows on Job classes using the `#[WithQueue]` and `#[RetryFor]` attributes:
     ```php
     #[WithQueue(connection: 'redis', queue: 'notifications', tries: 3, timeout: 60)]
+    #[RetryFor(hours: 4)]
     final class SendWelcomeEmail implements ShouldQueue
     {
         use Queueable;
     }
     ```
+  - NEVER write procedural `retryUntil(): DateTimeInterface` methods or imperative `$retryUntil` properties when defining job expiration windows. ALWAYS declare retry limits via the declarative `#[RetryFor(hours: ..., minutes: ...)]` attribute.
+  - `#[RetryFor]` accepts explicit time units (`hours: 4`, `minutes: 30`, `seconds: 3600`) and applies seamlessly to queued jobs, notifications, mailables, and event listeners.
 - **Atomic Caching & TTL Management**:
   - Utilize `Cache::touch($key, $ttl)` to refresh expiration times without deserializing and rewriting payloads.
   - Use `Cache::lock($name, $seconds)->get(fn() => ...)` or `->block(...)` for atomic operations to prevent race conditions.
@@ -306,7 +310,8 @@ All AI features must adhere strictly to Laravel's official first-party AI SDK st
   - ALWAYS explicitly scope conversation keys to specific user/team/model entities (`conversationKey(): string`) to prevent cross-tenant conversation context leakage.
 - **Application & Provider Tools**:
   - Encapsulate internal tool actions in `app/Ai/Tools/` implementing `Laravel\Ai\Contracts\Tool`.
-  - ALWAYS declare explicit typed parameter constraints in `schema(JsonSchema $schema)` and validate inputs before invoking internal models/services in `handle(Request $request)`.
+  - ALWAYS declare explicit typed parameter constraints in `schema(JsonSchema $schema)`.
+  - In `handle(Request $request)`, validate inputs directly against the schema using `Validator::validate($request->all(), JsonSchema::rules($this->schema(...)))` to eliminate duplicated validation definitions.
   - Leverage cloud provider tools (`Laravel\Ai\Providers\Tools\WebSearch`, `FileSearch`, `CodeExecution`) for external operations rather than building custom scrapers.
 - **Mandatory Structured Outputs**:
   - NEVER parse freeform model text with regular expressions.
@@ -344,9 +349,10 @@ All Model Context Protocol servers and client integrations must adhere strictly 
 - **Web Routing & Transport Standards**:
   - Expose web-facing MCP endpoints exclusively in `routes/ai.php` using `Mcp::web('/mcp/...', ServerClass::class)`.
   - Stdio transport for local development or desktop IDEs (Cursor, Claude Desktop, Antigravity) must run via `php artisan mcp:serve <ServerName>`.
-- **Strict Parameter Schemas**:
+- **Strict Parameter Schemas & Validation**:
   - Every Tool and Prompt MUST define explicit, typed parameters in `schema(JsonSchema $schema)`.
   - NEVER accept untyped or loose parameter arrays; declare descriptions, types, and required fields.
+  - In Tool `handle(Request $request)` methods, validate client execution parameters using `Validator::validate($request->all(), JsonSchema::rules($this->schema(...)))` to guarantee alignment with the declared schema contract.
 - **Zero-Trust Security & Authentication**:
   - NEVER expose unauthenticated public MCP web endpoints.
   - ALWAYS protect `routes/ai.php` web routes with `auth:sanctum` or `auth:api` and explicit ability middleware (`ability:mcp:execute`).

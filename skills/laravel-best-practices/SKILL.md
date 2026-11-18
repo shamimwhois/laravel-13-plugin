@@ -106,6 +106,11 @@ final class CreateOrderRequest extends FormRequest
         ];
     }
 
+    /**
+     * In Laravel 13.43+, rules can also be derived directly from a JSON Schema:
+     * return JsonSchema::rules($schema);
+     */
+
     public function userOrFail(): User
     {
         /** @var User|null $user */
@@ -253,9 +258,13 @@ public function summarizeQuantities(Collection $items): Collection {}
 
 ## 5. Background Jobs & Caching
 
-### Job Configuration via PHP Attributes (`#[WithQueue]`)
+### Job Configuration via PHP Attributes (`#[WithQueue]`, `#[RetryFor]`)
 ```php
+use Illuminate\Queue\Attributes\RetryFor;
+use Illuminate\Queue\Attributes\WithQueue;
+
 #[WithQueue(connection: 'redis', queue: 'payments', tries: 3, timeout: 120)]
+#[RetryFor(hours: 4)]
 final class ProcessPaymentJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;

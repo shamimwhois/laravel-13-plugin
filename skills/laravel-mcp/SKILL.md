@@ -104,7 +104,9 @@ use App\Actions\Billing\RefundOrderAction;
 use App\Models\Order;
 use Exception;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\JsonSchema as JsonSchemaFacade;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
@@ -134,10 +136,17 @@ final class ProcessRefundTool extends Tool
 
     public function handle(Request $request): Response
     {
-        $orderId = (string) $request->input('order_id');
-        $amountCents = (int) $request->input('amount_cents');
-        $reason = (string) $request->input('reason');
-        $idempotencyKey = (string) $request->input('idempotency_key');
+        // Laravel 13.43+: Derive native validation rules from the declared JSON Schema
+        /** @var array{order_id: string, amount_cents: int, reason: string, idempotency_key: string} $validated */
+        $validated = Validator::validate(
+            $request->all(),
+            JsonSchemaFacade::rules($this->schema(...))
+        );
+
+        $orderId = $validated['order_id'];
+        $amountCents = $validated['amount_cents'];
+        $reason = $validated['reason'];
+        $idempotencyKey = $validated['idempotency_key'];
 
         $order = Order::query()->find($orderId);
         if ($order === null) {
