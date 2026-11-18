@@ -1,77 +1,272 @@
-# Laravel 13 & Modern PHP 8.5+ Plugin
+# Laravel 13 & Modern PHP 8.5+ Antigravity Plugin
 
 [![GitHub Repository](https://img.shields.io/badge/GitHub-shamimwhois%2Flaravel--13--plugin-181717?style=flat&logo=github)](https://github.com/shamimwhois/laravel-13-plugin)
 [![Version](https://img.shields.io/badge/version-2.6.0-red.svg)](https://github.com/shamimwhois/laravel-13-plugin/releases)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?logo=laravel)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.5%2B-777BB4?logo=php)](https://php.net)
 [![Pest](https://img.shields.io/badge/Tested%20with-Pest%203-9333EA)](https://pestphp.com)
+[![PHPStan](https://img.shields.io/badge/PHPStan-Level%208%20%2F%20Max-brightgreen)](https://phpstan.org)
+[![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-blue)](https://modelcontextprotocol.io)
 
-A complete toolkit for developing, refactoring, and architecting modern PHP (8.4 & **PHP 8.5+**) and **Laravel 13** applications with the Antigravity assistant.
-
----
-
-## 🚀 Features & Capabilities
-
-- **Always-On Quality Rules (`rules/AGENTS.md`)**: Automatically enforces:
-  - `declare(strict_types=1);` on every PHP file.
-  - PHP 8.4 property hooks & asymmetric visibility (`public private(set)`).
-  - PHP 8.5 pipe operator (`|>`), `clone $obj with (...)`, and `#[\NoDiscard]`.
-  - Fullstack consistency across Migrations, Models, Factories, Seeders, Controllers, and Routes.
-  - Standardized routing conventions: kebab-case URLs (`/user-profiles`), dot notation names (`admin.users.index`), plural resources, and singular parameters.
-  - Thin controllers & dedicated Form Requests (zero inline `$request->validate()`).
-  - Strict eager loading & N+1 query prevention (`with()`, `loadMissing()`, `withExists()`, `withCount()`).
-  - Strict PHPStan / Larastan Level 8 / `max` type annotations, generics, and null safety.
-  - Official Laravel AI SDK standards (`laravel/ai`): Agent architecture, `schema()` validation, structured output DTOs, SSE streaming, XML prompt injection boundaries, and async queue execution.
-  - Model Context Protocol (MCP) standards (`laravel/mcp`): Server coordinators, typed tool schemas, read-only resource URI templates, reusable prompt templates, Sanctum security, and stdio/web transports.
-  - Console command isolation (`Isolatable`) & query log memory defense (`DB::disableQueryLog()`).
-  - ACID transaction boundaries with automatic deadlock retries (`DB::transaction(..., attempts: 3)`), row locking (`lockForUpdate()`), and `afterCommit` hooks.
-- **`laravel-console-and-scheduling` Skill & [`docs/architecture/console-commands-and-scheduling.md`](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/console-commands-and-scheduling.md)**: Master guide for Artisan console commands (`make:command`), CLI signature DSL, concurrency locking (`implements Isolatable`), interactive UX via Laravel Prompts, memory safety in batch loops, and centralized scheduling in `routes/console.php`.
-- **`docs/architecture/database-transactions-and-concurrency.md`**: Master architecture guide for database concurrency: ACID boundaries, deadlock auto-recovery (`attempts: 3`), pessimistic row locking (`lockForUpdate()`), lock-order deadlock prevention, HTTP transaction call prohibition, and `ShouldHandleEventsAfterCommit`.
-- **`laravel-mcp` Skill & [`docs/architecture/mcp-and-ai-protocols.md`](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/mcp-and-ai-protocols.md)**: Master guide for Model Context Protocol in Laravel 13 (`composer require laravel/mcp`):
-  - Server Coordinators (`make:mcp-server`) with `#[Name]`, `#[Version]`, and `#[Instructions]` attributes.
-  - Actionable Tools (`make:mcp-tool`) with JSON Schema parameter validation and domain action dispatching.
-  - Read-Only Resources (`make:mcp-resource`) with dynamic URI templates (`HasUriTemplate`).
-  - Standardized Prompts (`make:mcp-prompt`) for reproducible AI workflows.
-  - Dual transports: Web SSE (`routes/ai.php` via `Mcp::web()`) and stdio (`php artisan mcp:serve`).
-  - Sanctum token authentication, rate limiting, IDOR defenses, and Pest 3 tests with `Mcp::server()`.
-- **`laravel-ai-sdk` Skill & [`docs/architecture/ai-sdk-and-llm-integration.md`](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/ai-sdk-and-llm-integration.md)**: Master guide for Laravel's official AI SDK (`composer require laravel/ai`) covering the 8 Core Pillars:
-  1. **Prompts**: Dedicated Agent classes (`make:agent`), instructions, dynamic prompting.
-  2. **Context**: Conversational memory (`RemembersConversations`, `Conversational`), database chat history, scoped keys.
-  3. **Tools**: Local application function calling (`make:tool`), parameter schema contracts, typed handlers.
-  4. **Provider Tools**: Cloud-side tools (`WebSearch`, `WebFetch`, `FileSearch`, `CodeExecution`) running natively on AI infrastructure.
-  5. **Structured Output**: `HasStructuredOutput` schemas hydrated into PHP 8.5+ immutable DTOs (`final readonly class`).
-  6. **Streaming**: Real-time token streaming via SSE, Livewire `wire:stream`, and Vercel AI Data Protocol.
-  7. **Async**: Background queue jobs (`#[WithQueue]`), rate limit exponential backoff (`[10, 30, 90]`), and Laravel Echo WebSockets broadcasting.
-  8. **Attachments**: Multimodal payloads (`Laravel\Ai\Files\Image`, `Document`, `Audio`, HTTP uploads), prompt injection defense, and Pest 3 tests with `Agent::fake()`.
-- **`laravel-controllers-and-middleware` Skill & [`docs/architecture/controllers-and-middleware.md`](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/controllers-and-middleware.md)**: Modern controller and middleware architecture: Single-Action Invokables (`__invoke`), Form Request to DTO pipeline, fluent middleware in `bootstrap/app.php` (append, prepend, aliases, priority), Terminable Middleware for zero-latency background logging, and isolated Pest 3 unit/arch tests.
-- **`laravel-security-and-hardening` Skill & [`docs/architecture/security-and-hacker-protection.md`](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/security-and-hacker-protection.md)**: Enterprise security hardening & hacker defense: CVE continuous scanning (`composer audit`, OSV-Scanner, Semgrep), OWASP Top 10 mitigation, SSRF private IP defense, timing attack immunity (`hash_equals()`), hardened binary file uploads, IDOR scoped bindings, SQL parameterization, and supply chain protection detailed in **[`docs/architecture/cve-management.md`](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/cve-management.md)**.
-- **`laravel-performance-and-caching` Skill & [`docs/architecture/caching-and-performance.md`](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/caching-and-performance.md)**: High-speed caching, payload compression (`igbinary`, `zstd` saving up to 85% Redis RAM), Cache Stampede defense via `Cache::flexible()` (Stale-While-Revalidate), atomic distributed locks (`Cache::lock()->block()`), OPcache/JIT execution tuning, and refactoring messy caching into Cached Repository Decorators.
-- **`laravel-memory-safety` Skill & [`docs/architecture/memory-safety-and-performance.md`](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/memory-safety-and-performance.md)**: Production memory safety, leak prevention, and high-throughput resource management: constant $O(1)$ database streaming with `cursor()`, mutation safety with `chunkById()`, Octane/FrankenPHP concurrency state safety, `WeakMap` object caching, zero-memory file downloads via `streamDownload()`, and queue worker recycling.
-- **`laravel-api-design` Skill & [`docs/api/design.md`](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/api/design.md)**: Production-grade RESTful API architecture: URL versioning (`/api/v1/`), kebab-case URIs, shallow nesting, strict HTTP semantics (201, 204, 422), unified RFC 7807 problem details, mandatory `JsonResource` serialization, Form Request to DTO pipeline, Sanctum token abilities, tiered rate limiting, and idempotency keys.
-- **`architectural-decision-matrix` Skill & [`docs/architecture/Architectural.md`](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/Architectural.md)**: Comprehensive evaluation framework covering the Top 10 software architecture patterns (Classic MVC, Action-Driven, Modular Monolith, DDD, Hexagonal, CQRS, EDA, Clean Architecture, etc.) across complexity, velocity, testability, blast radius, team size, and Conway's Law.
-- **`laravel-routing` Skill & [`docs/Route.md`](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/Route.md)**: Master routing guide organized in 5 core styles:
-  1. Route Declarations & Controller Mapping (Invokable controllers, direct classes, API resources)
-  2. Route Grouping & Prefixes (Hierarchies, prefixes, middleware stacks)
-  3. Route Model Binding & Custom Keys (Slugs, scoped bindings, `withTrashed()`)
-  4. Parameter Constraints & Fallbacks (`whereUlid`, `whereUuid`, regex, fallbacks)
-  5. Rate Limiting & Health Routing (`Limit::perSecond()`, throttles, `/up` check)
-- **`pest-testing` Skill**: Comprehensive testing guide for Pest 3: Feature & API endpoint tests, Unit tests, Architectural boundary testing (`arch()`), first-party Mocking & Fakes (`Event::fake()`, `Http::fake()`), time travel, parameterized datasets, and type coverage verification.
-- **`artisan-make-commands` Skill**: Complete catalog of all 30+ `php artisan make:*` generator commands, compound flags (`php artisan make:model -mfs --controller --requests --resource --pest`), and stub customization (`stub:publish`).
-- **`laravel-scaffolding` Skill**: Complete end-to-end blueprint for scaffolding all 6 core layers of a feature (Migration $\rightarrow$ Route).
-- **`phpstan-larastan` Skill**: Guide and patterns for configuring `phpstan.neon`, using Larastan extensions, writing generic annotations, and CI workflows.
-- **`laravel-eloquent-orm` Skill**: Master guide for Laravel 13 Eloquent ORM, attributes, custom builders, casts, and AI vector similarity queries (`whereVectorSimilarTo`).
-- **`laravel-best-practices` Skill**: Architecture guidelines covering lean `bootstrap/app.php` bootstrapping, Actions, Form Requests, Resources, and Pest 3 testing.
-- **`php-modern-syntax` Skill**: Reference for PHP 8.4 and PHP 8.5+ features including property hooks, asymmetric visibility, pipe operator, clone-with, and `#[\NoDiscard]`.
-- **`laravel-architect` Agent**: Dedicated subagent to perform code reviews, query audits, and Pest test suite design.
+An enterprise-grade, comprehensive toolkit, architectural framework, and autonomous agent skill pack for developing, refactoring, and architecting modern PHP (**PHP 8.4 & PHP 8.5+**) and **Laravel 13** applications with the Antigravity AI assistant.
 
 ---
 
-## 📂 Plugin Structure
+## 📑 Table of Contents
+
+- [Executive Overview](#-executive-overview)
+- [Quick Installation](#-quick-installation)
+  - [1. Global Machine-Local Installation](#1-global-machine-local-installation)
+  - [2. Workspace / Team-Shared Installation](#2-workspace--team-shared-installation)
+- [The 17 Registered Skills](#-the-17-registered-skills)
+- [The 17 Always-On Quality & Security Rules](#-the-17-always-on-quality--security-rules)
+- [The 18 Master Architectural Guides](#-the-18-master-architectural-guides)
+- [First-Party AI SDK (`laravel/ai`) - The 8 Core Pillars](#-first-party-ai-sdk-laravelai---the-8-core-pillars)
+- [Model Context Protocol (`laravel/mcp`) Architecture](#-model-context-protocol-laravelmcp-architecture)
+- [High-Throughput & Memory Safety Standards](#-high-throughput--memory-safety-standards)
+- [Dedicated Autonomous Subagent (`laravel-architect`)](#-dedicated-autonomous-subagent-laravel-architect)
+- [Directory Tree](#-directory-tree)
+- [License](#-license)
+
+---
+
+## 🌟 Executive Overview
+
+This plugin transforms the Antigravity AI assistant into an expert **Principal Laravel 13 & PHP 8.5+ Software Architect**. It provides:
+
+- **Strict Modern PHP 8.5+ Syntax**: Enforces `declare(strict_types=1);`, native property hooks, asymmetric visibility, pipe operators (`|>`), `clone $obj with (...)`, and `#[\NoDiscard]`.
+- **First-Party AI Integration**: Complete support for `composer require laravel/ai` (Prompts, Context, Tools, Provider Tools, Structured Outputs, SSE Streaming, Async Queues, and Attachments).
+- **First-Party Model Context Protocol**: Complete support for `composer require laravel/mcp` (Servers, Tools, Resources, Prompts, Web SSE, and stdio transports).
+- **Zero N+1 Queries & Memory Safety**: $O(1)$ database streaming with `cursor()`, mutation chunking with `chunkById()`, WeakMap caching, and query log deactivation (`DB::disableQueryLog()`).
+- **Enterprise Security & Concurrency**: 2026 CVE supply-chain management, OWASP Top 10 mitigation, SSRF defense, constant-time cryptography, and ACID deadlock recovery (`attempts: 3`).
+
+---
+
+## 🚀 Quick Installation
+
+### 1. Global Machine-Local Installation
+Applies across all projects opened in Antigravity on your machine:
+
+```bash
+# Windows (PowerShell)
+git clone https://github.com/shamimwhois/laravel-13-plugin.git "$env:USERPROFILE\.gemini\config\plugins\laravel"
+
+# macOS / Linux
+git clone https://github.com/shamimwhois/laravel-13-plugin.git ~/.gemini/config/plugins/laravel
+```
+
+### 2. Workspace / Team-Shared Installation
+Checked directly into your repository so everyone on your engineering team shares identical skills and rules:
+
+```bash
+mkdir -p .agents/plugins
+git clone https://github.com/shamimwhois/laravel-13-plugin.git .agents/plugins/laravel
+git add .agents/plugins/laravel
+git commit -m "chore: add Laravel 13 & Modern PHP 8.5+ Antigravity plugin"
+```
+
+---
+
+## 🧩 The 17 Registered Skills
+
+Every skill adheres to progressive disclosure—loaded into context only when needed:
+
+| # | Skill Name | Path | Primary Purpose |
+| :-: | :--- | :--- | :--- |
+| **1** | **`architectural-decision-matrix`** | [`skills/architectural-decision-matrix/SKILL.md`](skills/architectural-decision-matrix/SKILL.md) | Evaluates Top 10 patterns (MVC, Action-Driven, Modular Monolith, DDD, Hexagonal, CQRS). |
+| **2** | **`artisan-make-commands`** | [`skills/artisan-make-commands/SKILL.md`](skills/artisan-make-commands/SKILL.md) | Catalog of all 30+ `make:*` generator commands with PHP 8.5+ stubs & options. |
+| **3** | **`laravel-ai-sdk`** | [`skills/laravel-ai-sdk/SKILL.md`](skills/laravel-ai-sdk/SKILL.md) | Official `laravel/ai` SDK: Prompts, Context, Tools, Streaming, and Attachments. |
+| **4** | **`laravel-api-design`** | [`skills/laravel-api-design/SKILL.md`](skills/laravel-api-design/SKILL.md) | Production RESTful API design, RFC 7807 problem details, Sanctum token abilities, idempotency. |
+| **5** | **`laravel-best-practices`** | [`skills/laravel-best-practices/SKILL.md`](skills/laravel-best-practices/SKILL.md) | Request lifecycle, Actions, Form Requests, thin controllers, and Pest 3 tests. |
+| **6** | **`laravel-console-and-scheduling`** | [`skills/laravel-console-and-scheduling/SKILL.md`](skills/laravel-console-and-scheduling/SKILL.md) | `make:command`, `Isolatable` overlap locking, Prompts, $O(1)$ memory safety, `routes/console.php`. |
+| **7** | **`laravel-controllers-and-middleware`** | [`skills/laravel-controllers-and-middleware/SKILL.md`](skills/laravel-controllers-and-middleware/SKILL.md) | Single-Action Invokables (`__invoke`), fluent middleware in `bootstrap/app.php`, terminables. |
+| **8** | **`laravel-eloquent-orm`** | [`skills/laravel-eloquent-orm/SKILL.md`](skills/laravel-eloquent-orm/SKILL.md) | PHP 8 attributes, custom query builders, casts, AI vector similarity search. |
+| **9** | **`laravel-mcp`** | [`skills/laravel-mcp/SKILL.md`](skills/laravel-mcp/SKILL.md) | Official `laravel/mcp`: Tools, Resources, Prompts, Web SSE, and stdio transports. |
+| **10** | **`laravel-memory-safety`** | [`skills/laravel-memory-safety/SKILL.md`](skills/laravel-memory-safety/SKILL.md) | Octane concurrency safety, $O(1)$ cursor streaming, WeakMap caching, worker recycling. |
+| **11** | **`laravel-performance-and-caching`** | [`skills/laravel-performance-and-caching/SKILL.md`](skills/laravel-performance-and-caching/SKILL.md) | Redis compression (`igbinary`, `zstd`), `Cache::flexible()` stampede defense, locks. |
+| **12** | **`laravel-routing`** | [`skills/laravel-routing/SKILL.md`](skills/laravel-routing/SKILL.md) | 5 routing styles: Invokable mapping, grouping, scoped bindings, `whereUlid`, rate limiting. |
+| **13** | **`laravel-scaffolding`** | [`skills/laravel-scaffolding/SKILL.md`](skills/laravel-scaffolding/SKILL.md) | End-to-end blueprint for scaffolding all 6 layers of a feature (Migration $\rightarrow$ Route). |
+| **14** | **`laravel-security-and-hardening`** | [`skills/laravel-security-and-hardening/SKILL.md`](skills/laravel-security-and-hardening/SKILL.md) | OWASP Top 10 defense, SSRF private IP filters, `hash_equals()`, safe uploads, IDOR. |
+| **15** | **`pest-testing`** | [`skills/pest-testing/SKILL.md`](skills/pest-testing/SKILL.md) | Pest 3 test suite: feature tests, architectural boundary tests (`arch()`), fakes. |
+| **16** | **`php-modern-syntax`** | [`skills/php-modern-syntax/SKILL.md`](skills/php-modern-syntax/SKILL.md) | PHP 8.4 property hooks, asymmetric visibility, PHP 8.5 pipe operator (`\|>`), `#[\NoDiscard]`. |
+| **17** | **`phpstan-larastan`** | [`skills/phpstan-larastan/SKILL.md`](skills/phpstan-larastan/SKILL.md) | PHPStan Level 8 / max configuration, generic Eloquent typing, CI workflows. |
+
+---
+
+## 🛡️ The 17 Always-On Quality & Security Rules
+
+All agent interactions automatically enforce the strict standards codified in [`rules/AGENTS.md`](rules/AGENTS.md):
+
+1. **Strict Typing & Modern Syntax**: `declare(strict_types=1);` mandatory. Explicit top-level imports; zero inline leading backslashes (`\App\...`). Mark classes `final` by default. Promoted constructor properties.
+2. **Thin Controllers**: No business logic or queries in controllers. Mandatory Form Requests (`app/Http/Requests`). API Resources (`JsonResource`) mandatory for all responses.
+3. **Canonical Routing**: Kebab-case URLs (`/user-profiles`), dot notation names (`admin.users.index`), plural resources, singular parameters (`{user}`).
+4. **RESTful Semantics**: `POST` $\rightarrow$ 201 Created; `PUT`/`PATCH` $\rightarrow$ 200 OK; `DELETE` $\rightarrow$ 204 No Content; Validation failure $\rightarrow$ 422 with RFC 7807 problem details.
+5. **Eloquent Model Attributes**: Use `#[Table]`, `#[Fillable]`, `#[Hidden]`, and `#[UseEloquentBuilder]`. Method-based attribute casts (`casts(): array`).
+6. **Anonymous Migrations**: `return new class extends Migration`. Typed blueprints, ULIDs/UUIDs, explicit cascades, and composite indexes.
+7. **Idempotent Factories & Seeders**: Realistic defaults via `fake()`. Explicit state methods. Never loop queries in seeders.
+8. **Strict Eager Loading**: Zero N+1 queries. Global enforcement of `Model::preventLazyLoading(!app()->isProduction())`.
+9. **PHPStan Level 8 / Max**: 100% parameter and return type declarations. Generic annotations for Collections (`Collection<int, Model>`) and Builders (`Builder<Model>`).
+10. **Queues, Caching & Events**: `#[WithQueue]` attributes. Atomic distributed locks (`Cache::lock`). Stale-While-Revalidate caching via `Cache::flexible()`.
+11. **Pest 3 Architecture Testing**: Boundary tests verifying controllers are invokable and models extend Eloquent.
+12. **Memory Safety & Streaming**: $O(1)$ cursor streaming via generators (`cursor()`), mutation chunking (`chunkById()`), Octane state safety, and streaming file downloads.
+13. **Security Hardening**: PDO parameter bindings, whitelisted dynamic order columns, SSRF private IP validation, constant-time `hash_equals()`, and MIME magic bytes inspection.
+14. **Laravel AI SDK Standards**: Encapsulated Agent classes, scoped conversation memory, typed tool schemas, structured output DTOs, SSE streaming, XML prompt injection boundaries (`<user_input>`), and Pest fakes (`Agent::fake()`).
+15. **Model Context Protocol Standards**: Canonical `app/Mcp/` directories, `routes/ai.php` web SSE routing with Sanctum authentication, stdio CLI execution, and typed tool schemas.
+16. **Console Commands & Scheduling**: `#[AsCommand]` attributes, `implements Isolatable` to eliminate overlapping crons, `DB::disableQueryLog()` memory protection, and `laravel/prompts`.
+17. **Database Transactions & Concurrency**: Mandatory `DB::transaction(..., attempts: 3)` with deadlock retry, pessimistic row locking (`lockForUpdate()`), **strict prohibition of external HTTP inside transactions**, and post-commit `afterCommit` hooks.
+
+---
+
+## 📚 The 18 Master Architectural Guides
+
+Located in [`docs/architecture/`](docs/architecture/):
+
+1. **[`Architectural.md`](docs/architecture/Architectural.md)**: Executive Decision Matrix for the Top 10 Software Architecture Patterns.
+2. **[`ai-sdk-and-llm-integration.md`](docs/architecture/ai-sdk-and-llm-integration.md)**: First-party `laravel/ai` SDK architecture & 8 Core Pillars.
+3. **[`mcp-and-ai-protocols.md`](docs/architecture/mcp-and-ai-protocols.md)**: First-party Model Context Protocol (`laravel/mcp`) server & client architecture.
+4. **[`console-commands-and-scheduling.md`](docs/architecture/console-commands-and-scheduling.md)**: Concurrency isolation (`Isolatable`), Laravel Prompts, memory safety, and `routes/console.php`.
+5. **[`database-transactions-and-concurrency.md`](docs/architecture/database-transactions-and-concurrency.md)**: ACID boundaries, deadlock retries, row locks, and `afterCommit` hooks.
+6. **[`controllers-and-middleware.md`](docs/architecture/controllers-and-middleware.md)**: Single-Action Invokables (`__invoke`), fluent middleware in `bootstrap/app.php`, terminables.
+7. **[`caching-and-performance.md`](docs/architecture/caching-and-performance.md)**: Redis compression (igbinary + zstd), `Cache::flexible()`, and Cached Repositories.
+8. **[`memory-safety-and-performance.md`](docs/architecture/memory-safety-and-performance.md)**: Octane concurrency, $O(1)$ cursor streaming, WeakMap caching, worker recycling.
+9. **[`security-and-hacker-protection.md`](docs/architecture/security-and-hacker-protection.md)**: OWASP Top 10 defenses, SSRF IP filtering, timing attacks, and hardened file uploads.
+10. **[`cve-management.md`](docs/architecture/cve-management.md)**: 2026 CVE scanning (`composer audit`, OSV-Scanner, Semgrep), CVSS SLAs, and supply chain security.
+11. **[`clean-code-and-concerns.md`](docs/architecture/clean-code-and-concerns.md)**: DRY principles, trait organization (`app/Concerns/`), DTOs, and Pint formatting.
+12. **[`oop-pillars-and-organization.md`](docs/architecture/oop-pillars-and-organization.md)**: OOP 4 pillars, Composition over Inheritance, domain directory architecture.
+13. **[`namespace-import-class-standards.md`](docs/architecture/namespace-import-class-standards.md)**: PSR-4, explicit root class imports, zero inline backslashes, Pint rules.
+14. **[`enums.md`](docs/architecture/enums.md)**: Domain-based backed enums, state transitions, traits, and `php artisan make:enum`.
+15. **[`codebase-organization-and-maintenance.md`](docs/architecture/codebase-organization-and-maintenance.md)**: Exception handling, replacing `helpers.php` with `app/Support/`, model pruning.
+16. **[`senior-developer-code-review-and-refactoring.md`](docs/architecture/senior-developer-code-review-and-refactoring.md)**: Dead code purging, arrow-code flattening, Rector automation, code smells.
+17. **[`routing.md`](docs/architecture/routing.md)**: Master routing patterns, prefixes, and constraints in Laravel 13.
+18. **[`patterns.md`](docs/architecture/patterns.md)**: Detailed blueprints for Modular Monolith, DDD, Hexagonal, and CQRS.
+
+---
+
+## 🤖 First-Party AI SDK (`laravel/ai`) - The 8 Core Pillars
+
+```mermaid
+graph TD
+    UserQuery["User Prompt / File"] --> Guard["PromptSanitizer (XML Boundary)"]
+    Guard --> Attachments["8. Multimodal Attachments (Files/Images/Audio)"]
+    Attachments --> AgentOrchestrator["Dedicated Agent Class (make:agent)"]
+
+    subgraph AgentCapabilities["Agent Capabilities"]
+        Prompts["1. Prompts & System Instructions"]
+        Context["2. Context & Conversational Memory"]
+        Tools["3. Local Tools (make:tool)"]
+        ProviderTools["4. Provider Tools (WebSearch / FileSearch)"]
+        StructuredOutput["5. Structured Output DTO Schemas"]
+    end
+
+    AgentOrchestrator --> AgentCapabilities
+
+    AgentOrchestrator --> ExecutionFlow{"Execution Flow"}
+    ExecutionFlow -- Interactive UI --> Streaming["6. SSE / Livewire Streaming"]
+    ExecutionFlow -- Heavy / Batch --> Async["7. Async Queues & Echo Broadcasting"]
+```
+
+1. **Prompts**: Dedicated Agent classes implementing `Laravel\Ai\Contracts\Agent` using `Promptable`.
+2. **Context**: Multi-turn chat memory persisted via `RemembersConversations` and `Conversational`.
+3. **Tools**: Local application function calling scaffolded with `php artisan make:tool`.
+4. **Provider Tools**: Cloud-side provider tools (`WebSearch`, `WebFetch`, `FileSearch`, `CodeExecution`).
+5. **Structured Output**: `HasStructuredOutput` schemas hydrated into PHP 8.5+ immutable DTOs (`final readonly class`).
+6. **Streaming**: Real-time token streaming with `stream()` via SSE, Livewire, or Vercel Data Protocol.
+7. **Async Queues**: Heavy model executions pushed to queues (`#[WithQueue]`) with exponential retry backoff.
+8. **Attachments**: Multimodal inputs with `Laravel\Ai\Files\Image`, `Document`, and `Audio`.
+
+---
+
+## 🔌 Model Context Protocol (`laravel/mcp`) Architecture
+
+```mermaid
+graph TD
+    Client["AI Client (Claude / Antigravity / Cursor)"]
+    
+    subgraph TransportLayer["Transport Layer"]
+        SSE["Web Transport: HTTP SSE (routes/ai.php)"]
+        Stdio["Local Transport: Stdio (php artisan mcp:serve)"]
+    end
+    
+    Client --> TransportLayer
+    
+    subgraph LaravelMcpServer["Laravel MCP Server (app/Mcp/Servers/)"]
+        AuthGuard["Sanctum Token & Ability Guard"]
+        ServerCore["Server Coordinator (#[Name], #[Version])"]
+        
+        Tools["Tools: Executable Functions (make:mcp-tool)"]
+        Resources["Resources: Read-Only URIs (make:mcp-resource)"]
+        Prompts["Prompts: Reusable Templates (make:mcp-prompt)"]
+    end
+    
+    TransportLayer --> AuthGuard
+    AuthGuard --> ServerCore
+    ServerCore --> Tools
+    ServerCore --> Resources
+    ServerCore --> Prompts
+```
+
+- **Tools**: Callable functions defining parameter schemas with `schema(JsonSchema $schema)` and executed via `handle()`.
+- **Resources**: Read-only contextual URIs implementing `HasUriTemplate` (e.g. `orders://{id}/details`).
+- **Prompts**: Standardized conversation templates for repeatable prompt engineering.
+- **Dual Transports**: Web SSE registered in `routes/ai.php` via `Mcp::web()`, and stdio CLI via `php artisan mcp:serve`.
+
+---
+
+## ⚡ High-Throughput & Memory Safety Standards
+
+```mermaid
+graph TD
+    Trigger["CLI Command / Background Job"] --> DisableLog["DB::disableQueryLog() (Memory Protection)"]
+    DisableLog --> StreamMethod{"Read-Only or Mutation?"}
+    StreamMethod -- Read-Only Query --> CursorStream["cursor() -> $O(1) Generator Streaming"]
+    StreamMethod -- Database Mutation --> ChunkById["chunkById(500) -> Prevents Page Shifting"]
+    
+    CursorStream --> BatchLoop["Processing Batch Loop"]
+    ChunkById --> BatchLoop
+    
+    BatchLoop --> GCCheck{"Batch % 1000 == 0?"}
+    GCCheck -- Yes --> GCCollect["gc_collect_cycles() + gc_mem_caches()"]
+    GCCheck -- No --> NextItem["Next Item"]
+    GCCollect --> NextItem
+```
+
+- **Query Logging**: Always disable SQL query logging (`DB::disableQueryLog()`) in batch CLI commands to eliminate memory bloat.
+- **Safe Database Streaming**: Never use `Model::all()` or `$query->get()`. Use `$query->cursor()` for read streaming or `$query->chunkById()` for updates.
+- **Octane Concurrency**: Zero request-scoped state stored in static properties or singletons; use `WeakMap` for garbage-collectible caches.
+
+---
+
+## 🤖 Dedicated Autonomous Subagent (`laravel-architect`)
+
+The plugin includes a dedicated autonomous subagent (`agents/laravel-architect.md`) that you can invoke for deep architectural audits:
+
+```bash
+# Example user prompt triggering the subagent:
+"Audit my checkout flow using the laravel-architect subagent"
+```
+
+The architect audits:
+- Feature layer harmony (Migration $\rightarrow$ Route).
+- Model Context Protocol (`laravel/mcp`) server and tool schemas.
+- Autonomous agent guardrails & prompt injection boundaries (`laravel/ai`).
+- Console command concurrency isolation (`Isolatable`) and memory leaks.
+- Database transaction boundaries, deadlock retries, and lock ordering.
+- AppSec, OWASP Top 10, SSRF defenses, and supply chain CVEs.
+- PHPStan Level 8 / max type coverage.
+
+---
+
+## 📂 Directory Tree
 
 ```text
 ~/.gemini/config/plugins/laravel/
 ├── plugin.json
 ├── README.md
+├── agents/
+│   └── laravel-architect.md
+├── rules/
+│   └── AGENTS.md
 ├── docs/
 │   ├── Route.md
 │   ├── api/
@@ -98,43 +293,28 @@ A complete toolkit for developing, refactoring, and architecting modern PHP (8.4
 │       ├── mcp-and-ai-protocols.md
 │       ├── console-commands-and-scheduling.md
 │       └── database-transactions-and-concurrency.md
-├── rules/
-│   └── AGENTS.md
-├── skills/
-│   ├── laravel-console-and-scheduling/
-│   │   └── SKILL.md
-│   ├── laravel-mcp/
-│   │   └── SKILL.md
-│   ├── laravel-ai-sdk/
-│   │   └── SKILL.md
-│   ├── laravel-controllers-and-middleware/
-│   │   └── SKILL.md
-│   ├── laravel-security-and-hardening/
-│   │   └── SKILL.md
-│   ├── laravel-performance-and-caching/
-│   │   └── SKILL.md
-│   ├── laravel-memory-safety/
-│   │   └── SKILL.md
-│   ├── laravel-api-design/
-│   │   └── SKILL.md
-│   ├── pest-testing/
-│   │   └── SKILL.md
-│   ├── architectural-decision-matrix/
-│   │   └── SKILL.md
-│   ├── laravel-routing/
-│   │   └── SKILL.md
-│   ├── artisan-make-commands/
-│   │   └── SKILL.md
-│   ├── laravel-scaffolding/
-│   │   └── SKILL.md
-│   ├── phpstan-larastan/
-│   │   └── SKILL.md
-│   ├── laravel-best-practices/
-│   │   └── SKILL.md
-│   ├── laravel-eloquent-orm/
-│   │   └── SKILL.md
-│   └── php-modern-syntax/
-│       └── SKILL.md
-└── agents/
-    └── laravel-architect.md
+└── skills/
+    ├── architectural-decision-matrix/SKILL.md
+    ├── artisan-make-commands/SKILL.md
+    ├── laravel-ai-sdk/SKILL.md
+    ├── laravel-api-design/SKILL.md
+    ├── laravel-best-practices/SKILL.md
+    ├── laravel-console-and-scheduling/SKILL.md
+    ├── laravel-controllers-and-middleware/SKILL.md
+    ├── laravel-eloquent-orm/SKILL.md
+    ├── laravel-mcp/SKILL.md
+    ├── laravel-memory-safety/SKILL.md
+    ├── laravel-performance-and-caching/SKILL.md
+    ├── laravel-routing/SKILL.md
+    ├── laravel-scaffolding/SKILL.md
+    ├── laravel-security-and-hardening/SKILL.md
+    ├── pest-testing/SKILL.md
+    ├── php-modern-syntax/SKILL.md
+    └── phpstan-larastan/SKILL.md
 ```
+
+---
+
+## 📄 License
+
+This open-source plugin is licensed under the [MIT License](LICENSE). Contributions, issues, and feature requests are welcome on [GitHub](https://github.com/shamimwhois/laravel-13-plugin).
