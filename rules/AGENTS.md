@@ -505,5 +505,29 @@ All applications maintained or scaffolded under this plugin must strictly adhere
 - **Dead Composer Dependencies**:
   - Audit `composer.json` using `composer-unused` to identify and remove declared dependencies that are never referenced in production code.
 
+---
+
+## 21. Architectural Base Project Directory Tree Patterns & Placement Guidelines
+
+All codebases developed, refactored, or audited under this plugin must strictly adhere to standardized architectural directory patterns and placement rules:
+
+- **Strict Architectural Base Hierarchy**:
+  - Standard applications must use the **Action-Driven Monolith** pattern by default (`app/Actions/<Domain>/`, `app/Data/<Domain>/`, `app/Builders/`, `app/Models/`).
+  - Large multi-team platforms must partition into **Modular Monolith** bounded contexts (`modules/<Domain>/src/`).
+  - Core banking and highly complex domains must use **Domain-Driven Design (DDD)** (`src/Domain/`, `src/Application/`, `src/Infrastructure/`) or **Hexagonal Architecture** (`src/Core/`, `src/Adapters/`).
+- **Canonical Folder Placement Rules**:
+  - **Business Logic & Use Cases**: MUST reside in `app/Actions/<Domain>/<Verb><Noun>Action.php` (final, invokable). NEVER place business logic in Controllers, Eloquent Models, or Blade templates.
+  - **Data Transfer Objects (DTOs)**: MUST reside in `app/Data/<Domain>/<Noun>Data.php` as `final readonly class`.
+  - **Custom Query Builders**: MUST reside in `app/Builders/<Model>QueryBuilder.php` bound via `#[UseEloquentBuilder]`.
+  - **Controllers**: MUST reside in `app/Http/Controllers/` as Single-Action Invokables (`__invoke`).
+  - **Form Requests**: MUST reside in `app/Http/Requests/<Domain>/`. NEVER run inline validation in controllers.
+  - **API Serialization**: MUST reside in `app/Http/Resources/<Version>/<Domain>/`. NEVER return raw models from endpoints.
+  - **Vendor Integrations**: External 3rd party SDK wrappers belong exclusively in `app/Services/<Vendor>/`. NEVER create generic "God" services (`OrderService`, `GeneralService`).
+  - **Pure Algorithmic Helpers**: MUST reside as pure static classes in `app/Support/`. NEVER dump procedural functions into a global `helpers.php` or `app/Utils/` folder.
+  - **First-Party AI & MCP**: Autonomous agents reside in `app/Ai/Agents/`, AI tools in `app/Ai/Tools/`, and Model Context Protocol servers in `app/Mcp/Servers/`.
+  - **Frontend 4-Tier Scoping**: View templates (`resources/views/`) and Inertia SPAs (`resources/js/`) must strictly adhere to the 4-tier hierarchy (`layouts/`, `components/app/<domain>/`, `components/ui/`, `components/icon/`, `pages/<domain>/<feature>/`). Total prohibition of view root sprawl.
+  - **Architectural Boundary Enforcement**: Every project must maintain automated Pest 3 boundary tests in `tests/Arch/` ensuring controllers remain invokable, actions remain final, models do not leak into controllers directly, and no generic dumping grounds exist.
+
+
 
 

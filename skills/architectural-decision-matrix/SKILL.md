@@ -154,6 +154,8 @@ flowchart LR
 ## Complete Documentation References
 
 - 🏛️ **Executive Decision Matrix**: 👉 **[docs/architecture/Architectural.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/Architectural.md)**
+- 📁 **Architectural Base Directory Tree Patterns**: 👉 **[docs/architecture/project-directory-tree-patterns.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/project-directory-tree-patterns.md)**
+- 🧩 **Project Structure Skill**: 👉 **[skills/laravel-project-structure/SKILL.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/skills/laravel-project-structure/SKILL.md)**
 - 📚 **Top 10 Patterns Deep Dive**: 👉 **[docs/architecture/patterns.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/patterns.md)**
 - 🌐 **Enterprise Modular Routing**: 👉 **[docs/architecture/routing.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/routing.md)**
 - 📄 **Route Implementation Guide**: 👉 **[docs/Route.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/Route.md)**
