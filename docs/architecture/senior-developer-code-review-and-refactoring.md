@@ -94,6 +94,7 @@ return RectorConfig::configure()
         SetList::DEAD_CODE,
         SetList::PHP_84,
         SetList::PHP_85,
+        SetList::PHP_86,
     ]);
 ```
 
@@ -103,6 +104,28 @@ return RectorConfig::configure()
 vendor/bin/rector process --dry-run
 
 # Automatically purge dead code
+vendor/bin/rector process
+```
+
+---
+
+### D. Dead Composer Package Auditing (`composer-unused`)
+
+Over time, unused dependencies accumulate in `composer.json`, slowing down CI and enlarging Docker image sizes:
+
+```bash
+# Audit for unused declared packages
+vendor/bin/composer-unused
+```
+
+---
+
+### E. Orphaned Frontend Templates & Dead Routes
+
+Regularly audit:
+1. `resources/views/components/` and `resources/js/components/`: Delete any component that has zero references across all views and tests.
+2. `php artisan route:list`: Detect routes bound to removed controller classes or deprecated endpoints.
+3. Form Requests & API Resources: Delete classes that are never injected or returned by active controllers.
 vendor/bin/rector process
 ```
 

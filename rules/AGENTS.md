@@ -480,4 +480,30 @@ All frontend assets across Blade, Livewire, Vue 3, React 19/18, and Svelte 5 mus
     return Inertia::render('admin/dashboard/Index', $data);
     ```
 
+---
+
+## 20. Dead Code Elimination, Zombie Logic Hunting & Codebase Hygiene
+
+All applications maintained or scaffolded under this plugin must strictly adhere to these dead code elimination standards:
+
+- **Zero Commented-Out Code (Strict Rule)**:
+  - NEVER commit commented-out code blocks ("just in case we need it later").
+  - Version control (Git) retains full history. Commented-out code rots, creates ambiguity, and adds cognitive drag. Delete ruthlessly.
+- **Unused Imports & Dead Aliases**:
+  - Every PHP file must contain zero unused `use` statements or orphaned aliases.
+  - Enforce automated stripping via Laravel Pint (`"no_unused_imports": true`) in local hooks and CI workflows.
+- **Immediate Deletion of Legacy Skeleton Files**:
+  - Immediately delete legacy framework files from Laravel 9/10 (`app/Http/Kernel.php`, `app/Console/Kernel.php`, `app/Exceptions/Handler.php`, `app/Providers/RouteServiceProvider.php`).
+  - Laravel 13 configures middleware, exception handling, and routing exclusively in `bootstrap/app.php` and `routes/console.php`.
+- **Automated Dead Code Purging with Rector**:
+  - Enforce `SetList::DEAD_CODE` in `rector.php` to continuously detect and automatically delete:
+    - Unused private methods and private properties.
+    - Dead method parameters and unreachable conditional branches.
+    - Unreferenced class constants and unused local variables.
+- **Dead Route & Component Pruning**:
+  - Ruthlessly delete orphaned routes, unused Form Requests, dead API resources, and unreferenced Blade views, Livewire components, or Inertia page templates.
+- **Dead Composer Dependencies**:
+  - Audit `composer.json` using `composer-unused` to identify and remove declared dependencies that are never referenced in production code.
+
+
 

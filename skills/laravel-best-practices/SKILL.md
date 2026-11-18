@@ -26,6 +26,7 @@ This guide establishes the production-grade architectural patterns for building 
 > 🎨 **Blade & Livewire (v3 & v4)**: For Blade components, slots, Alpine.js, Livewire reactive state, wire:stream AI token streaming, and Pest 3 tests, see **[docs/architecture/blade-and-livewire.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/blade-and-livewire.md)**.
 > ⚡ **Inertia.js v2 Multi-Frontend SPAs**: For Vue 3 (TS), React 19/18 (TS), Svelte 5 (Runes), Deferred Props, Vite SSR, and Pest 3 tests, see **[docs/architecture/inertia-and-frontend-stacks.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/inertia-and-frontend-stacks.md)**.
 > 📂 **Frontend Layouts, Components & Pages**: For canonical 4-tier directory architecture (`layouts/`, `components/app/*`, `components/ui/*`, `pages/*`) across Blade, Livewire, Vue 3, React 19, and Svelte 5, see **[docs/architecture/frontend-layouts-components-and-pages.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/frontend-layouts-components-and-pages.md)**.
+> 🗑️ **Dead Code Elimination & Hygiene**: For automated dead code detection (Rector, Pint, PHPStan, composer-unused), see **[docs/architecture/senior-developer-code-review-and-refactoring.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/senior-developer-code-review-and-refactoring.md)**.
 
 ---
 
