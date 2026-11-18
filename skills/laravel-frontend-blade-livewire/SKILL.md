@@ -309,4 +309,4 @@ test('prevents tampering with locked user id', function (): void {
 
 ## 5. Architectural Reference
 
-Read the complete architectural guide in [blade-and-livewire.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/blade-and-livewire.md) for advanced topics including lazy loading placeholders, Alpine entangle, and SPA-like navigation with `wire:navigate`.
+Read the complete architectural guide in [blade-and-livewire.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/blade-and-livewire.md) and [frontend-layouts-components-and-pages.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/frontend-layouts-components-and-pages.md) for 4-tier directory structuring (`layouts/`, `components/app/*`, `components/ui/*`, `pages/*`), lazy loading placeholders, Alpine entangle, and SPA navigation with `wire:navigate`.

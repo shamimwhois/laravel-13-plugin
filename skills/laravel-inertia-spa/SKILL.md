@@ -323,4 +323,4 @@ test('renders dashboard component with user and deferred metrics', function (): 
 
 ## 7. Architectural Reference
 
-Read the complete architectural guide in [inertia-and-frontend-stacks.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/inertia-and-frontend-stacks.md) for full stack deep-dives, Vite asset bundling, and TypeScript configurations.
+Read the complete architectural guide in [inertia-and-frontend-stacks.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/inertia-and-frontend-stacks.md) and [frontend-layouts-components-and-pages.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/frontend-layouts-components-and-pages.md) for 4-tier directory structuring (`layouts/`, `components/app/*`, `components/ui/*`, `pages/*`), Vite asset bundling, and TypeScript configurations.

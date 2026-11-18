@@ -435,3 +435,28 @@ All frontend templates, components, and client-side single-page applications mus
   - Test Livewire components with Pest 3 using `Livewire::test()` verifying computed properties, action execution, validation errors, and locked property security exceptions.
   - Test Inertia endpoints with Pest 3 using `assertInertia(fn (AssertableInertia $page) => ...)` asserting component names, typed prop structures, and deferred groups.
 
+---
+
+## 19. Canonical Frontend Directory Organization: Layouts, Components & Pages
+
+All frontend assets across Blade, Livewire, Vue 3, React 19/18, and Svelte 5 must strictly adhere to the standardized 4-tier directory architecture:
+
+- **Strict 4-Tier Directory Scoping**:
+  - `layouts/`: Master application shells. Must ONLY contain outer HTML scaffolding, asset tags, and slot insertion points (`layouts/app`, `layouts/auth`, `layouts/customer`, `layouts/admin`, `layouts/public`).
+  - `components/app/<domain>/`: Domain-specific navigation chrome. Contains `header`, `nav`, `footer`, and `sidebar` partitioned by domain (`admin/`, `customer/`, `auth/`, `public/`).
+  - `components/ui/` & `components/icon/`: Atomic, reusable design tokens (`button`, `input`, `modal`, `card`, `badge`, `table`, `dropdown`) and SVG icons. Must NEVER contain database queries, domain entities, or business logic.
+  - `pages/<domain>/<feature>/`: Concrete page entrypoints corresponding 1:1 with HTTP controller routes (e.g., `pages/admin/dashboard/index`, `pages/customer/dashboard/index`, `pages/home/index`).
+- **Prohibition of View Root Sprawl**:
+  - NEVER dump ad-hoc template files directly in the root of `resources/views/` (except the base `app.blade.php` for Inertia bootstrapping) or `resources/js/`.
+  - NEVER mix admin back-office navigation chrome into customer-facing or public templates.
+- **Controller Route-to-Page Resolution**:
+  - Controllers must resolve view names following canonical dot-notation paths:
+    ```php
+    // Blade / Livewire
+    return view('pages.admin.dashboard.index', $data);
+
+    // Inertia.js (Vue 3 / React / Svelte 5)
+    return Inertia::render('admin/dashboard/Index', $data);
+    ```
+
+

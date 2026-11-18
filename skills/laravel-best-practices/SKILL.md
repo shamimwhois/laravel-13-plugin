@@ -25,6 +25,7 @@ This guide establishes the production-grade architectural patterns for building 
 > 💳 **Database Transactions & Concurrency**: For ACID boundaries, deadlock retry (`attempts: 3`), pessimistic row locking (`lockForUpdate`), and `afterCommit` hooks, see **[docs/architecture/database-transactions-and-concurrency.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/database-transactions-and-concurrency.md)**.
 > 🎨 **Blade & Livewire (v3 & v4)**: For Blade components, slots, Alpine.js, Livewire reactive state, wire:stream AI token streaming, and Pest 3 tests, see **[docs/architecture/blade-and-livewire.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/blade-and-livewire.md)**.
 > ⚡ **Inertia.js v2 Multi-Frontend SPAs**: For Vue 3 (TS), React 19/18 (TS), Svelte 5 (Runes), Deferred Props, Vite SSR, and Pest 3 tests, see **[docs/architecture/inertia-and-frontend-stacks.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/inertia-and-frontend-stacks.md)**.
+> 📂 **Frontend Layouts, Components & Pages**: For canonical 4-tier directory architecture (`layouts/`, `components/app/*`, `components/ui/*`, `pages/*`) across Blade, Livewire, Vue 3, React 19, and Svelte 5, see **[docs/architecture/frontend-layouts-components-and-pages.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/frontend-layouts-components-and-pages.md)**.
 
 ---
 
