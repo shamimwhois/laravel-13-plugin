@@ -533,6 +533,33 @@ All codebases developed, refactored, or audited under this plugin must strictly 
   - **Frontend 4-Tier Scoping**: View templates (`resources/views/`) and Inertia SPAs (`resources/js/`) must strictly adhere to the 4-tier hierarchy (`layouts/`, `components/app/<domain>/`, `components/ui/`, `components/icon/`, `pages/<domain>/<feature>/`). Total prohibition of view root sprawl.
   - **Architectural Boundary Enforcement**: Every project must maintain automated Pest 3 boundary tests in `tests/Arch/` ensuring controllers remain invokable, actions remain final, models do not leak into controllers directly, and no generic dumping grounds exist.
 
+---
+
+## 22. Payment Gateway Architecture, Webhook Security & Fintech Rules
+
+All payment processing code written or audited under this plugin must strictly adhere to the following fintech security and architectural rules:
+
+- **PCI-DSS Compliance & Zero Plaintext Card Storage**:
+  - NEVER store credit/debit card numbers (PAN), CVVs, expiration dates, or cryptocurrency private keys in the database, cache, session, or application logs.
+  - Rely exclusively on client-side tokenization (Stripe Elements, bKash Hosted Page, Binance QR, PayPal Buttons) so raw credentials never touch the Laravel application server.
+  - Redact sensitive gateway responses from log files using `Http::withHeaders()->withoutLogging()`.
+- **Constant-Time Webhook Signature Verification**:
+  - EVERY incoming webhook and Instant Payment Notification (IPN) must verify its cryptographic signature using constant-time comparison (`hash_equals()`) to prevent timing side-channel attacks.
+  - Reject any webhook with missing, malformed, or invalid signatures with `400 Bad Request` or `401 Unauthorized`.
+- **Atomic Idempotency & Double-Billing Defense**:
+  - Charge initiation must be protected against race conditions using Redis distributed locks (`Cache::lock("payment:charge:{$orderId}", 15)`) or database unique constraint idempotency tables.
+  - Webhook processing MUST be idempotent. Track incoming event IDs in a `processed_webhooks` table locked via `lockForUpdate()` inside `DB::transaction(..., attempts: 3)` to ensure retry storms do not trigger duplicate fulfillment or multiple emails.
+- **Strict Out-of-Band Verification**:
+  - NEVER mark an order as `Paid` solely because a customer redirected to a callback URL (`?paymentID=...&status=success`).
+  - Always execute or query the gateway directly out-of-band (e.g., bKash `/tokenized/checkout/execute`, Binance Pay `/binancepay/openapi/v2/order/query`, Stripe `PaymentIntent::retrieve`) before transitioning order state.
+- **bKash Tokenized Checkout Standards**:
+  - Cache authorization grant tokens atomically in Redis with a 50-minute TTL to minimize redundant token requests.
+  - Mandate the 3-step sequence: (1) `token/grant`, (2) `checkout/create`, (3) `checkout/execute` followed by status verification.
+- **Binance Pay Cryptographic Standards**:
+  - Sign every request using HMAC-SHA512 with millisecond UTC timestamp and cryptographically secure 32-character random nonce.
+  - Verify incoming Binance Pay webhook payloads using the identical SHA512 string-to-sign protocol.
+
+
 
 
 
