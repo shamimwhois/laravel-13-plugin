@@ -615,6 +615,41 @@ All database migrations, Eloquent models, and schema designs must strictly compl
   - Multi-column indexes MUST adhere to the Equality-then-Range (ESR) rule: high-cardinality equality columns first, range/sort columns last (e.g. `index(['tenant_id', 'status', 'created_at'])`).
   - NEVER create standalone indexes on low-cardinality boolean columns. Combine them into composite indexes or use partial indexes (`WHERE deleted_at IS NULL`).
 
+---
+
+## 24. Frontend Design Craft, Anti-AI-Slop & Aesthetic Taste Rules
+
+All frontend templates, Blade views, Livewire components, and Inertia.js (Vue 3, React 19, Svelte 5) pages must strictly adhere to the following design craft and anti-slop rules, synthesized from Paul Bakaus's Impeccable (`pbakaus/impeccable`), Leon Lin's Taste Skill (`Leonxlnx/taste-skill`), and Hassan El Mghari's Hallmark (`nutlope/hallmark`):
+
+- **Absolute Prohibition of AI-Slop Visual Clichés**:
+  - **No Cliché Gradients**: Strictly forbid generic purple-to-blue or indigo-to-pink gradients (`bg-gradient-to-r from-purple-600 to-blue-500`, `from-indigo-500 to-pink-500`). Use intentional monochromatic palettes with subtle tonal depth, warm analog neutrals, or bold brand-anchored contrast.
+  - **No Identical 3-Card Feature Grids**: Strictly forbid repeating `[Icon in rounded circle + H3 + 2 lines of filler text]` across 3 uniform cards. Cards are the lazy container; nested cards are always wrong. Replace with asymmetric Bento grids, direct interactive component previews, live data tables, or editorial columns.
+  - **No Eyebrow or Pill Badges Above Headings**: Strictly forbid floating kicker labels (e.g., `[✨ AI-POWERED PLATFORM]`, `[NEW FEATURE]`). The headline must carry its own semantic weight; let typography speak.
+  - **No Fake Metrics or Imaginary Proof**: Strictly forbid inventing metrics ("Trusted by 10,000+ teams", "99.9% customer happiness"), fake testimonials, or placeholder logo walls. Show the real application interface or clearly labeled structural mockups.
+  - **No Emoji as UI Icons**: Strictly forbid unicode emoji (`🚀`, `✨`, `🔥`, `💡`) serving as UI glyphs. Use clean, single-weight SVG vector primitives from `components/icon/`, Lucide, or Heroicons.
+- **The Hero Viewport Invariant (1280x800 & 1440x900)**:
+  - The hero headline, single supporting sentence, and primary action button must be 100% visible above the fold without scrolling at both 1280x800 and 1440x900 viewport resolutions.
+  - Maximum ~80 words in the entire initial viewport. Eliminate giant empty vertical paddings (`py-32`) that push the CTA off-screen.
+- **Restrained Motion & GPU-Accelerated Animation**:
+  - **Never use `transition: all`**. Only transition explicit GPU-accelerated properties (`transform`, `opacity`, `filter`).
+  - Never animate layout triggers (`width`, `height`, `top`, `left`).
+  - Always enforce `@media (prefers-reduced-motion: reduce)` fallbacks disabling motion for sensitive users.
+  - Authored micro-interactions: card hover lift of 2px (`translate-y-[-2px]`), photo zoom of 1.02 inside frame, button active press scale of 0.98.
+- **Themed Browser Native Surfaces**:
+  - Theme `::selection` to match brand accent tones (`var(--color-accent-subtle)`).
+  - Theme input caret (`caret-color: var(--color-accent)`).
+  - Theme custom scrollbars (`scrollbar-color: var(--color-border) transparent`).
+  - Mandatory high-contrast `:focus-visible` ring on every interactive control; never default browser blue focus rings.
+- **Surface Mode Discipline**:
+  - **`Persuade Mode`** (Landing pages, marketing, pricing): Bold, distinctive, high visual tension, real product previews.
+  - **`Operate Mode`** (Admin panels, dashboards, CRM, data tables): High scanability, compact padding, monospace data tables, restrained neutral chrome.
+  - **`Read Mode`** (Documentation, guides, changelogs): Optimal reading measure (65–75ch), generous line-height, zero distracting motion.
+  - **`Experience Mode`** (Portfolios, onboarding wizards, showcases): Artifact leads from the first viewport, interface recedes to quiet frame.
+- **Design Governance & Automated Verification**:
+  - Audit templates with `npx impeccable detect resources/views/` and `npx impeccable audit <path>`.
+  - Validate with automated Pest 3 boundary tests in `tests/Arch/FrontendDesignTest.php` forbidding forbidden gradient classes and unorganized inline styles.
+
+
 
 
 
