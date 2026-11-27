@@ -1,8 +1,8 @@
-# Modern PHP 8.5+ & Laravel 13 Clean Code, DRY & Trait Architecture
+# Modern PHP 8.6+ & Laravel 13 Clean Code, DRY & Trait Architecture
 
 > **Document**: `docs/architecture/clean-code-and-concerns.md`  
-> **Framework**: Laravel 13 & PHP 8.5+  
-> **Focus**: DRY Principles, Trait Organization (`Concerns/`), DTOs, Pipe Pipelines, and Anti-Patterns.
+> **Framework**: Laravel 13 & PHP 8.6+  
+> **Focus**: DRY Principles, Trait Organization (`Concerns/`), DTOs, Pipe + PFA Pipelines, and Anti-Patterns.
 
 ---
 
@@ -144,6 +144,7 @@ declare(strict_types=1);
 namespace App\Data;
 
 use App\Enums\OrderStatus;
+use NoDiscard;
 
 final readonly class OrderDto
 {
@@ -164,21 +165,23 @@ final readonly class OrderDto
     }
 
     /**
-     * PHP 8.5+ Clone-With syntax for non-destructive mutation
+     * PHP 8.5+ Clone With v2 syntax for non-destructive mutation
      */
-    #[\NoDiscard]
+    #[NoDiscard]
     public function withStatus(OrderStatus $newStatus): self
     {
-        return clone $this with (status: $newStatus);
+        return clone($this, [
+            'status' => $newStatus,
+        ]);
     }
 }
 ```
 
 ---
 
-## 4. Modern Data Pipelines with the PHP 8.5+ Pipe Operator (`|>`)
+## 4. Modern Data Pipelines with Pipe Operator (`|>`) & PHP 8.6 PFA (`?`)
 
-Avoid messy intermediate variables or nested function calls by chaining transformations with the native pipe operator:
+Avoid messy intermediate variables or nested closures by chaining transformations with the native PHP 8.5 pipe operator (`|>`) and PHP 8.6 Partial Function Application (`?`):
 
 ```php
 <?php
@@ -187,17 +190,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Content;
 
+use Illuminate\Support\Str;
+use NoDiscard;
+
 final readonly class NormalizeArticleContentAction
 {
-    #[\NoDiscard]
+    #[NoDiscard]
     public function execute(string $rawInput): string
     {
-        // Left-to-right readable transformation pipeline
+        // Left-to-right readable transformation pipeline (PHP 8.5 |> + PHP 8.6 PFA ?)
         return $rawInput
             |> trim(...)
             |> strip_tags(...)
-            |> (fn(string $s): string => preg_replace('/\s+/', ' ', $s) ?? '')
-            |> (fn(string $s): string => Str::limit($s, 500));
+            |> (static fn (string $s): string => preg_replace('/\s+/', ' ', $s) ?? '')
+            |> Str::limit(?, 500);
     }
 }
 ```
@@ -282,6 +288,6 @@ Standardize code formatting across the team using Laravel Pint.
 2. ✅ **Concerns Directory**: Place reusable traits in `app/Concerns/` or `app/Models/Concerns/`.
 3. ✅ **No Junk Traits**: Traits must represent a single, focused capability (`HasSlug`, `TracksActivity`).
 4. ✅ **DTOs over Arrays**: Pass typed DTOs into Actions rather than unstructured arrays.
-5. ✅ **Pipe Operator (`|>`)**: Use native PHP 8.5 pipes for string/array data transformations.
+5. ✅ **Pipe Operator (`|>`) & PFA (`?`)**: Use native PHP 8.5 pipes with PHP 8.6 `?` placeholders for string/array data transformations.
 6. ✅ **Backed Enums**: Replace constants and status strings with type-safe Enums.
 7. ✅ **Pint & PHPStan**: Enforce style via Pint and static analysis via PHPStan Level 8.

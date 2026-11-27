@@ -93,10 +93,11 @@ namespace App\Contracts;
 
 use App\Data\ChargeResultDto;
 use App\Models\Order;
+use NoDiscard;
 
 interface PaymentGatewayInterface
 {
-    #[\NoDiscard]
+    #[NoDiscard]
     public function charge(Order $order, string $paymentToken): ChargeResultDto;
 }
 ```
@@ -114,7 +115,6 @@ final readonly class ProcessOrderPaymentAction
         private PaymentGatewayInterface $gateway, // Abstract dependency injected
     ) {}
 
-    #[\NoDiscard]
     public function execute(Order $order, string $token): void
     {
         $result = $this->gateway->charge($order, $token);

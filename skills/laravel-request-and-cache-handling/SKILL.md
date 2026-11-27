@@ -79,6 +79,7 @@ namespace App\Http\Requests\Api\V1\Orders;
 use App\Data\Orders\CreateOrderData;
 use App\Models\Order;
 use Illuminate\Foundation\Http\FormRequest;
+use NoDiscard;
 
 final class StoreOrderRequest extends FormRequest
 {
@@ -109,7 +110,7 @@ final class StoreOrderRequest extends FormRequest
         ];
     }
 
-    #[\NoDiscard]
+    #[NoDiscard]
     public function toDto(): CreateOrderData
     {
         /** @var array{customer_email: string, currency: string, items: list<array{product_id: string, quantity: int}>} $validated */
@@ -316,6 +317,7 @@ use Closure;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use NoDiscard;
 use Throwable;
 
 final class ResilientCache
@@ -330,7 +332,7 @@ final class ResilientCache
      * @param Closure(): TValue $callback
      * @return TValue
      */
-    #[\NoDiscard]
+    #[NoDiscard]
     public static function flexible(string $key, int $freshSeconds, int $staleSeconds, Closure $callback): mixed
     {
         $callbackRan = false;
@@ -366,7 +368,7 @@ final class ResilientCache
      * @param Closure(): TValue $onTimeout
      * @return TValue
      */
-    #[\NoDiscard]
+    #[NoDiscard]
     public static function withLock(
         string $lockName,
         int $lockSeconds,

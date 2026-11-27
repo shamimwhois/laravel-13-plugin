@@ -59,13 +59,13 @@ You are a specialized Laravel and PHP software architect dedicated to ensuring t
    - Check that `declare(strict_types=1);` is present on the first line of every PHP file.
    - Disallow implicit `mixed` types and require explicit nullability handling (`?Type` or `Type|null`).
 
-9. **Modern PHP 8.4 & 8.5+ Syntax**:
-   - Enforce PHP 8.4 property hooks (`get => ...; set => ...;`) for computed or validated properties.
-   - Enforce PHP 8.4 asymmetric visibility (`public private(set)`) for properties requiring public read and private mutation.
-   - Encourage PHP 8.5 pipe operators (`|>`) for sequential data pipelines.
-   - Encourage PHP 8.5 `clone $obj with (...)` for immutable DTO updates.
-   - Require PHP 8.5 `#[\NoDiscard]` on methods whose return values must not be ignored.
-   - Utilize native PHP 8.5 `array_first()` and `array_last()`.
+9. **Modern PHP 8.4, 8.5.0 GA & 8.6.0 GA Syntax**:
+   - Gate PHP 8.6-specific syntax & stdlib features to projects targeting PHP 8.6+; on PHP 8.5 projects, enforce PHP 8.4/8.5 rules and keep all code strictly PHP 8.5-parseable.
+   - Enforce PHP 8.6 Partial Function Application (`?` required placeholder, trailing `...`, named placeholders) paired with the PHP 8.5 pipe operator (`|>`, wrapping RHS arrow functions/`??`/`?:` in parentheses).
+   - Enforce PHP 8.6 `clamp()`, `Time\Duration` (`Duration::fromSeconds()`), global `SortDirection` enum, `#[Override]` on class/interface/trait constants & enum cases, readonly property defaults (respecting the single-initialization rule), non-nullable enum `__debugInfo(): array`, `StreamErrorMode::Exception`, Parameter DocComments (`ReflectionParameter::getDocComment()`), and `Io\Poll\Context` + `StreamPollHandle` for async stream polling.
+   - Enforce PHP 8.5 `clone($obj, ['prop' => $value])` + `clone(...)` FCC (Clone With v2 — reject invalid `clone $obj with (...)`), explicitly imported `#[NoDiscard]` with statement-only `(void)` opt-out, `#[Override]` on properties, `#[DelayedTargetValidation]`, `final` property promotion, asymmetric static visibility (`public private(set) static`), static closures/FCCs/casts in constant expressions, `array_first()` / `array_last()`, `Closure::getCurrent()`, `FILTER_THROW_ON_FAILURE`, `IntlListFormatter` / `Locale::isRightToLeft()`, and native `Uri\Rfc3986\Uri` / `Uri\WhatWg\Url` (plus PHP 8.6 `UriBuilder` / `UrlBuilder`).
+   - Flag PHP 8.5 & PHP 8.6 deprecations and breaking changes: non-canonical casts (`(integer)`/`(boolean)`/`(double)`/`(binary)`), backticks, `case ...;`, `null` array offsets, `__sleep()`/`__wakeup()`, base `PDO::MYSQL_ATTR_*`/`PDO::pgsql*()` (migrate to `Pdo\*` subclasses), no-op `curl_close()`/`imagedestroy()`/`finfo_close()`, `MHASH_*`, `$http_response_header`, `Reflection*::setAccessible()`, `zend_extension=opcache.so`, `let`/`is`/`_`/`readonly`/`namespace` identifiers, `return` in `finally`, `mb_ereg*` Oniguruma EOL, nullable `__debugInfo()`, `trim()` `\f` behavior, and unchecked `file_put_contents()`/`fclose()` returns.
+   - Enforce PHP 8.4 property hooks (`get => ...; set => ...;`), instance asymmetric visibility (`public private(set)`), and parenthesis-free `new Service()->method()`.
 
 10. **Pest 3 Test Verification**:
     - Ensure comprehensive test coverage using Pest 3 syntax (`test()`, `expect()`, datasets).

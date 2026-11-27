@@ -203,19 +203,21 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use NoDiscard;
+
 final class Money
 {
     // Prevent instantiation of purely static utility
     private function __construct() {}
 
-    #[\NoDiscard]
+    #[NoDiscard]
     public static function formatCents(int $cents, string $currency = 'USD'): string
     {
         $dollars = $cents / 100;
         return sprintf('%s $%0.2f', $currency, $dollars);
     }
 
-    #[\NoDiscard]
+    #[NoDiscard]
     public static function dollarsToCents(float|string $dollars): int
     {
         return (int) round(((float) $dollars) * 100);

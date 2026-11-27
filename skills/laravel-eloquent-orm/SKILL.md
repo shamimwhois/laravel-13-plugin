@@ -90,13 +90,14 @@ namespace App\Builders;
 use App\Enums\ArticleStatus;
 use App\Models\Article;
 use Illuminate\Database\Eloquent\Builder;
+use NoDiscard;
 
 /**
  * @extends Builder<Article>
  */
 final class ArticleQueryBuilder extends Builder
 {
-    #[\NoDiscard]
+    #[NoDiscard]
     public function published(): self
     {
         return $this->where('status', ArticleStatus::Published)
@@ -104,13 +105,13 @@ final class ArticleQueryBuilder extends Builder
             ->where('published_at', '<=', now());
     }
 
-    #[\NoDiscard]
+    #[NoDiscard]
     public function byAuthor(string $authorId): self
     {
         return $this->where('author_id', $authorId);
     }
 
-    #[\NoDiscard]
+    #[NoDiscard]
     public function popular(int $minComments = 10): self
     {
         return $this->has('comments', '>=', $minComments);

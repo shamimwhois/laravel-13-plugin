@@ -1,10 +1,12 @@
-# Laravel 13 & Modern PHP 8.6+ Engineering Guidelines
+# Laravel 13 & Modern PHP 8.5+ / 8.6+ Engineering Guidelines
 
 These rules govern all PHP and Laravel code written, reviewed, or refactored when this plugin is active. Adhere to these standards strictly without exception.
 
+> **Version Gating**: Apply PHP 8.6-specific syntax and standard library rules (PFA `?`/`...`, `clamp()`, readonly property defaults, `#[Override]` on constants/enum cases, `Time\Duration`, `SortDirection`, `Io\Poll\*`, `StreamErrorMode`, Parameter DocComments, enum `__debugInfo()`) **only when the project targets PHP 8.6+**. When a project targets **PHP 8.5**, keep code strictly PHP 8.5-parseable using the PHP 8.4/8.5 standards below.
+
 ---
 
-## 1. Strict Typing & Modern PHP 8.6+ Syntax Standards
+## 1. Strict Typing & Modern PHP 8.5+ / 8.6+ Syntax Standards
 
 - **Strict Types**: Always place `declare(strict_types=1);` at the very top of every PHP file without exception.
 - **Namespaces & Imports**:
@@ -16,41 +18,66 @@ These rules govern all PHP and Laravel code written, reviewed, or refactored whe
   - Mark classes `final` by default (except abstract bases and Eloquent models requiring inheritance).
   - Use `final readonly class` for immutable DTOs and Value Objects.
   - Follow canonical member ordering: (1) Traits, (2) Constants, (3) Properties (static, public/asymmetric, protected, private), (4) Constructor with promoted properties, (5) Framework hooks, (6) Magic methods, (7) Public API methods, (8) Private implementation methods.
-- **PHP 8.6 Partial Function Application (PFA)**: Use `?` placeholders with first-class callables and the pipe operator (`|>`) for clean, closure-free data transformations:
+- **PHP 8.6 Partial Function Application (PFA)**: Use `?` (single required placeholder) and trailing `...` (variadic leftover placeholder) with positional or named arguments and the pipe operator (`|>`) for clean, closure-free data transformations (strict order: positional → named → optional `...`; `?` always yields a required parameter even if the target has a default):
   ```php
-  $slug = $title |> trim(...) 
-                |> str_replace(' ', '-', ?) 
-                |> strtolower(...);
+  $slug = $title
+      |> trim(...)
+      |> str_replace(' ', '-', ?)
+      |> strtolower(...);
+
+  $retry = calculateBackoff($baseMs, $maxMs, attempt: ?);
   ```
-- **PHP 8.6 Native `clamp()` Function**: Use native `clamp($value, $min, $max)` for bounding numbers, metrics, and pagination limits instead of legacy `min(max(...))` boilerplate:
+- **PHP 8.6 Native `clamp()` Function**: Use native `clamp($value, $min, $max)` for bounding numbers and comparable objects (`Time\Duration`, `DateTimeImmutable`, strings) instead of legacy `min(max(...))` boilerplate (note: throws `ValueError` if `$min > $max` or either bound is `NAN`):
   ```php
   $perPage = clamp($request->integer('per_page', 15), min: 5, max: 100);
   ```
-- **PHP 8.6 Readonly Property Defaults**: Leverage default value initializers directly on readonly class properties to eliminate redundant constructor parameter boilerplate:
+- **PHP 8.6 Readonly Property Defaults**: Instance `readonly` properties (and `readonly class` properties) may declare inline default values for fixed defaults or interface property-hook satisfaction. Remember that a property-level default counts as the **single initializing write** and cannot be overwritten in `__construct()` — use promoted constructor defaults when callers may override per instance:
   ```php
-  final readonly class QueryFilter
+  final readonly class SlugRule implements ParsingRule
   {
-      public string $sort = 'created_at';
-      public string $direction = 'desc';
+      public string $parser = 'slug'; // Fixed readonly default (counts as initialization)
 
-      public function __construct(public string $query = '') {}
+      public function __construct(
+          public string $query = '',
+          public SortDirection $direction = SortDirection::Descending,
+      ) {}
   }
   ```
-- **PHP 8.6 `#[Override]` on Constants**: Enforce compile-time contract integrity on overridden class and interface constants using the `#[Override]` attribute:
+- **PHP 8.6 `#[Override]` on Constants & Enum Cases**: Enforce compile-time contract integrity on overridden class, interface, and trait constants (and enum cases) using explicitly imported `use Override;` + `#[Override]` (requires a matching `public`/`protected` parent or interface constant):
   ```php
-  #[\Override]
+  use Override;
+
+  #[Override]
   public const int TIMEOUT_SECONDS = 60;
   ```
-- **PHP 8.6 `Time\Duration` Class**: Prefer the native `Time\Duration` class for precise elapsed time representation, nanosecond arithmetic, and ISO 8601 formatting.
+- **PHP 8.6 `Time\Duration` & `Time\TimeException`**: Prefer native `Time\Duration` (`Duration::fromSeconds()`, `fromMilliseconds()`, `fromMinutes()`, `fromIso8601DurationString()`, `add()`, `sub()`, `multiplyBy()`, `divideBy()`, `static compare()`) for nanosecond-precision elapsed time, retry delays, and timeouts. Read `$duration->seconds` / `$duration->nanoseconds` directly (no `__toString()` or `toIsoString()` exists).
+- **PHP 8.6 Native `SortDirection` Enum**: Use the built-in global `SortDirection` enum (`SortDirection::Ascending`, `SortDirection::Descending`) in repositories, query builders, and filters instead of duplicating userland sort enums.
+- **PHP 8.6 Stream Error Handling, `Io\Poll`, Parameter DocComments & `WeakMap` Refs**:
+  - Prefer `StreamErrorMode::Exception` + `StreamException` (via `stream_context_create(['stream' => ['error_mode' => StreamErrorMode::Exception]])`) over `@` warning suppression for stream I/O.
+  - Use `Io\Poll\Context` + `StreamPollHandle` + `Io\Poll\Event` (with `wait(timeout: Duration::fromSeconds(...), maxEvents: ...)`) for scalable event-loop socket multiplexing instead of `stream_select()`.
+  - Use Parameter DocComments (`ReflectionParameter::getDocComment()`) when documenting dynamic tool/MCP parameters, and `WeakMap` reference assignment (`$map[$obj] =& $val`) where appropriate.
+  - Never mutate objects stored in constants (`const_object_property_write`) with request-scoped data under Laravel Octane / long-running workers.
+- **PHP 8.6 Deprecation & BC Hygiene**: Never name identifiers `let` or `is`, constants `_`, functions `readonly`, or class constants `namespace`; never `return` inside `finally`; never declare nullable `?array` on `__debugInfo()` (must return `array`); use PCRE `/u` instead of deprecated `mb_ereg*`/`mb_split` (Oniguruma EOL); account for `trim()` stripping `\f`, `fclose()`/`file_put_contents()`/`copy()` returning `false` on flush/close failure, and `json_last_error_msg()`/`JsonException` appending `near location {line}:{column}`.
 - **PHP 8.4 Property Hooks**: Use property hooks (`get => ...; set => ...;`) for computed, formatted, or validated properties instead of boilerplate getter and setter methods.
-- **PHP 8.4 Asymmetric Visibility**: Utilize `public private(set)` or `protected private(set)` for properties that need public read access but restricted write access, eliminating boilerplate getters.
-- **PHP 8.5 Pipe Operator (`|>`)**: Use the native pipe operator for sequential data transformations and pipelines.
-- **PHP 8.5 Clone-With Syntax**: Use `clone $obj with (...)` for immutable DTOs and value objects when modifying state:
+- **PHP 8.4 & 8.5 Asymmetric Visibility**: Utilize `public private(set)` or `protected private(set)` on instance properties (PHP 8.4) and `public private(set) static` on static properties (PHP 8.5) to eliminate boilerplate getters.
+- **PHP 8.5 `final` Constructor Property Promotion**: Use `final` on promoted constructor parameters (`public function __construct(final string $id)`) when subclasses must not override a promoted property.
+- **PHP 8.5 Pipe Operator (`|>`)**: Use the native left-associative pipe operator for sequential single-argument data transformations; wrap RHS arrow functions, `??`, and `?:` in parentheses (`|> (static fn ($v) => ...)`), and remember `|>` binds tighter than comparisons and `??` (and does not accept pass-by-reference parameters).
+- **PHP 8.5 Clone With v2 Syntax & FCC**: Use `clone($object, [...])` (and `clone(...)` as a first-class callable, e.g., `array_map(clone(...), $items)`) for immutable DTOs and value objects when modifying state (NEVER invent `clone $obj with (...)`). Note that `__clone()` runs **before** property overrides and constructor validation is bypassed — for value objects enforcing invariants, validate overridden values in a property `set` hook or reconstruct through the validating constructor (`new self(...)`) instead of `clone(...)`:
   ```php
-  $updatedUser = clone $user with (status: UserStatus::Active);
+  $updatedUser = clone($user, [
+      'status' => UserStatus::Active,
+  ]);
   ```
-- **PHP 8.5 `#[NoDiscard]` Attribute**: Mark methods and functions whose return values must never be ignored (e.g., calculations, builders, status checks) with `#[\NoDiscard]`.
-- **PHP 8.5 Native Array Helpers**: Prefer native `array_first($items)` and `array_last($items)` over manual pointer manipulations.
+- **PHP 8.5 `#[NoDiscard]` & `(void)` Cast**: Mark methods and functions whose return values must never be ignored with explicitly imported `use NoDiscard;` + `#[NoDiscard]` (optional message argument). Use the statement-only `(void) expr;` cast to intentionally discard a `#[NoDiscard]` return value (never use `(void)` as an expression). Remember `#[NoDiscard]` is not inherited from interfaces or parent classes (only preserved from traits).
+- **PHP 8.5 Attributes & Constant Expressions**:
+  - Use `#[Override]` on overridden properties (PHP 8.5) as well as methods (8.3) and constants/enum cases (8.6).
+  - Use `#[DelayedTargetValidation]` when maintaining dual PHP 8.5/8.6 attribute compatibility; use `#[Deprecated]` on traits and compile-time non-class constants (`const`) as well as functions/methods/class constants.
+  - Use `static` closures (without `use (...)` — never arrow functions), first-class callables (`strlen(...)`, `Class::method(...)`), and scalar type casts in constant expressions, attribute arguments, and default values.
+- **PHP 8.5 Native URI Extension & Standard Library**:
+  - Prefer `Uri\Rfc3986\Uri` and `Uri\WhatWg\Url` (plus PHP 8.6 `UriBuilder`/`UrlBuilder`) over brittle `parse_url()` for security-critical URL parsing, normalization, and SSRF validation.
+  - Prefer native `array_first($items)` and `array_last($items)` over manual pointer manipulations, `Closure::getCurrent()` for self-recursive closures, `get_error_handler()`/`get_exception_handler()`, `FILTER_THROW_ON_FAILURE`, `IntlListFormatter`, `Locale::isRightToLeft()`, `Pdo\Sqlite::setAuthorizer()`, and `'partitioned' => true` (CHIPS) for embedded cookies.
+  - Account for OPcache being always compiled in on PHP 8.5+ (omit `zend_extension=opcache.so` to avoid startup warnings), keep `fatal_error_backtraces=1`, and enforce `max_memory_limit` in production containers.
+- **PHP 8.5 Deprecation & BC Hygiene**: Never use non-canonical scalar casts (`(integer)`, `(boolean)`, `(double)`, `(binary)`), the backtick shell operator (`` `cmd` ``), semicolon-terminated `case` clauses, `null` as array offset/`array_key_exists()`, non-numeric string increments (`$s++` → `str_increment()`), `__sleep()`/`__wakeup()` (use `__serialize()`/`__unserialize()`), returning `null` from `__debugInfo()`, legacy driver constants/methods on base `PDO` (`PDO::MYSQL_ATTR_*`, `PDO::pgsql*()` → use `Pdo\Mysql`/`Pdo\Pgsql`/`Pdo\Sqlite`), no-op close calls (`curl_close()`, `finfo_close()`, `imagedestroy()`, `xml_parser_free()`), `MHASH_*`, `DATE_RFC7231`, `mysqli_execute()`, `socket_set_timeout()`, `$http_response_header`, `Reflection*::setAccessible()`, or `disable_classes`.
 - **PHP 8.4+ Instantiation**: Chain directly onto new instances without wrapping parentheses: `new Service()->process()`.
 - **Constructor Property Promotion**: Always promote constructor parameters with explicit visibility, types, and `readonly` where appropriate:
   ```php
@@ -59,7 +86,7 @@ These rules govern all PHP and Laravel code written, reviewed, or refactored whe
       private readonly LoggerInterface $logger,
   ) {}
   ```
-- **Enums**: Replace magic strings and constants with backed enums (e.g., `enum OrderStatus: string { case Pending = 'pending'; }`). Use `__debugInfo()` to sanitize sensitive enum secrets.
+- **Enums**: Replace magic strings and constants with backed enums (e.g., `enum OrderStatus: string { case Pending = 'pending'; }`). Use PHP 8.6 `public function __debugInfo(): array` (non-nullable) on enums to redact sensitive secrets in debug output (`var_dump()` / `dd()`); note that Monolog JSON normalization does not invoke `__debugInfo()`, so keep separate log scrubbing enabled.
 - **Match Expressions**: Always prefer `match` expressions over `switch` statements for cleaner, type-safe condition handling.
 - **Trailing Commas & Callables**: Always use trailing commas in multi-line parameter lists, arrays, and arguments. Use first-class callable syntax: `array_map(strtoupper(...), $items)`.
 

@@ -126,8 +126,6 @@ Regularly audit:
 1. `resources/views/components/` and `resources/js/components/`: Delete any component that has zero references across all views and tests.
 2. `php artisan route:list`: Detect routes bound to removed controller classes or deprecated endpoints.
 3. Form Requests & API Resources: Delete classes that are never injected or returned by active controllers.
-vendor/bin/rector process
-```
 
 ---
 
@@ -165,7 +163,9 @@ public function processOrder(Order $order, User $user, ?Coupon $coupon): OrderRe
 
 ### ✅ The 20+ Year Senior Standard: Guard Clauses & Early Returns
 ```php
-#[\NoDiscard]
+use NoDiscard;
+
+#[NoDiscard]
 public function processOrder(Order $order, User $user, ?Coupon $coupon): OrderResult
 {
     // 1. Guard clauses eliminate invalid preconditions immediately

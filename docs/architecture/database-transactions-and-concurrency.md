@@ -61,6 +61,7 @@ use App\Exceptions\Billing\InsufficientBalanceException;
 use App\Models\LedgerEntry;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\DB;
+use NoDiscard;
 use Throwable;
 
 final readonly class TransferFundsAction
@@ -68,7 +69,7 @@ final readonly class TransferFundsAction
     /**
      * @throws InsufficientBalanceException|Throwable
      */
-    #[\NoDiscard]
+    #[NoDiscard]
     public function execute(TransferFundsDto $dto): LedgerEntry
     {
         // 1. Wrap in transaction with 3 deadlock retry attempts

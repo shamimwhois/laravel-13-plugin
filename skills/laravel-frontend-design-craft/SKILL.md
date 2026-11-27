@@ -142,12 +142,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Customer;
 
-use Livewire\Component;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\Computed;
-use Illuminate\Contracts\View\View;
-use App\Models\Invoice;
 use App\Enums\InvoiceStatus;
+use App\Models\Invoice;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
+use Livewire\Component;
 
 final class InvoiceLedger extends Component
 {
@@ -158,10 +159,10 @@ final class InvoiceLedger extends Component
     public string $statusFilter = 'all';
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Invoice>
+     * @return Collection<int, Invoice>
      */
     #[Computed]
-    public function invoices(): \Illuminate\Database\Eloquent\Collection
+    public function invoices(): Collection
     {
         return Invoice::query()
             ->where('tenant_id', $this->tenantId)

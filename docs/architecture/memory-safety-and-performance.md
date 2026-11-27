@@ -69,8 +69,9 @@ For exports, reporting, and processing where records are read sequentially, use 
 ```php
 use App\Models\Order;
 use Illuminate\Support\LazyCollection;
+use NoDiscard;
 
-#[\NoDiscard]
+#[NoDiscard]
 public function streamPendingOrders(): LazyCollection
 {
     // Memory usage remains flat (~15MB) whether reading 10 or 1,000,000 orders

@@ -264,7 +264,7 @@ Route::prefix('v1/orders')->name('api.v1.orders.')->group(function (): void {
     Route::put('/{order:ulid}/cancel', CancelOrderController::class)->name('cancel');
 });
 ```
-- **Controller Design**: The controller unpacks input via Form Request, invokes `#[\NoDiscard]` Action class, and returns `JsonResource`.
+- **Controller Design**: The controller unpacks input via Form Request, invokes `#[NoDiscard]` Action class, and returns `JsonResource`.
 - **Key Advantage**: Zero merge conflicts; every endpoint is independently testable in Pest.
 
 ---

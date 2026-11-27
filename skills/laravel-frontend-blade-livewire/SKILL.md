@@ -270,6 +270,7 @@ declare(strict_types=1);
 
 use App\Livewire\Orders\CreateOrder;
 use App\Models\User;
+use Livewire\Exceptions\CannotMutateLockedPropertyException;
 use Livewire\Livewire;
 
 test('creates order successfully with reactive updates', function (): void {
@@ -297,7 +298,7 @@ test('creates order successfully with reactive updates', function (): void {
 test('prevents tampering with locked user id', function (): void {
     $user = User::factory()->create();
 
-    $this->expectException(\Livewire\Exceptions\CannotMutateLockedPropertyException::class);
+    $this->expectException(CannotMutateLockedPropertyException::class);
 
     Livewire::actingAs($user)
         ->test(CreateOrder::class, ['user' => $user])

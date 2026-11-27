@@ -130,6 +130,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use NoDiscard;
 
 final readonly class CircuitBreaker
 {
@@ -147,7 +148,7 @@ final readonly class CircuitBreaker
      * @param Closure(): TResult $operation
      * @return TResult
      */
-    #[\NoDiscard]
+    #[NoDiscard]
     public function call(Closure $operation): mixed
     {
         $openKey = "circuit:{$this->service}:open";
@@ -218,6 +219,7 @@ namespace App\Support;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use NoDiscard;
 
 final class TenantCacheKey
 {
@@ -225,7 +227,7 @@ final class TenantCacheKey
 
     private function __construct() {}
 
-    #[\NoDiscard]
+    #[NoDiscard]
     public static function for(string $tenantId, string $domain, string $suffix): string
     {
         $store = Cache::store(self::VERSION_STORE);

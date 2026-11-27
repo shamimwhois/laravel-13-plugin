@@ -136,6 +136,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Validation\ValidationException;
+use NoDiscard;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
@@ -144,7 +145,7 @@ final class ProblemDetailsFactory
 {
     private function __construct() {}
 
-    #[\NoDiscard]
+    #[NoDiscard]
     public static function fromThrowable(Throwable $e, Request $request): JsonResponse
     {
         $traceId = (string) Context::get('trace_id', $request->attributes->get('trace_id', ''));

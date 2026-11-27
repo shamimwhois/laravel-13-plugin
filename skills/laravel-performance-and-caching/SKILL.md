@@ -59,8 +59,9 @@ Serve stale data instantly to users while refreshing the cache asynchronously in
 ```php
 use App\Models\Product;
 use Illuminate\Support\Facades\Cache;
+use NoDiscard;
 
-#[\NoDiscard]
+#[NoDiscard]
 public function getTrendingProducts(): array
 {
     // [Fresh TTL: 5 min, Stale Grace Window: 30 min]

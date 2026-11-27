@@ -197,6 +197,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use NoDiscard;
 
 final class StoreUserAvatarAction
 {
@@ -206,7 +207,7 @@ final class StoreUserAvatarAction
         'image/webp' => 'webp',
     ];
 
-    #[\NoDiscard]
+    #[NoDiscard]
     public function execute(UploadedFile $file, string $userId): string
     {
         // 1. Inspect real binary magic bytes on disk

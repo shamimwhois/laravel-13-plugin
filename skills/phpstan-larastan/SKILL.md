@@ -58,6 +58,7 @@ namespace App\Builders;
 
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
+use NoDiscard;
 
 /**
  * @extends Builder<Order>
@@ -67,7 +68,7 @@ final class OrderQueryBuilder extends Builder
     /**
      * @return self
      */
-    #[\NoDiscard]
+    #[NoDiscard]
     public function completed(): self
     {
         return $this->where('status', 'completed');

@@ -132,6 +132,7 @@ use App\Enums\PaymentStatus;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Override;
 use RuntimeException;
 
 final readonly class BkashDriver implements PaymentGatewayInterface
@@ -151,7 +152,7 @@ final readonly class BkashDriver implements PaymentGatewayInterface
             : 'https://tokenized.pay.bka.sh/v1.2.0-beta';
     }
 
-    #[\Override]
+    #[Override]
     public function charge(ChargePayloadData $payload): PaymentResponseData
     {
         $token = $this->grantToken();
@@ -212,7 +213,7 @@ final readonly class BkashDriver implements PaymentGatewayInterface
         );
     }
 
-    #[\Override]
+    #[Override]
     public function query(string $transactionId): PaymentResponseData
     {
         $token = $this->grantToken();
@@ -238,14 +239,14 @@ final readonly class BkashDriver implements PaymentGatewayInterface
         );
     }
 
-    #[\Override]
+    #[Override]
     public function handleWebhook(Request $request): PaymentResponseData
     {
         $paymentId = $request->string('paymentID')->toString();
         return $this->query($paymentId);
     }
 
-    #[\Override]
+    #[Override]
     public function refund(RefundPayloadData $payload): RefundResponseData
     {
         $token = $this->grantToken();
@@ -339,6 +340,7 @@ use App\Enums\PaymentStatus;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Override;
 use RuntimeException;
 
 final readonly class BinancePayDriver implements PaymentGatewayInterface
@@ -356,7 +358,7 @@ final readonly class BinancePayDriver implements PaymentGatewayInterface
             : 'https://bpay.binanceapi.com';
     }
 
-    #[\Override]
+    #[Override]
     public function charge(ChargePayloadData $payload): PaymentResponseData
     {
         $endpoint = '/binancepay/openapi/v2/order';
@@ -401,7 +403,7 @@ final readonly class BinancePayDriver implements PaymentGatewayInterface
         );
     }
 
-    #[\Override]
+    #[Override]
     public function handleWebhook(Request $request): PaymentResponseData
     {
         // 1. Verify Binance Webhook Signature
@@ -428,7 +430,7 @@ final readonly class BinancePayDriver implements PaymentGatewayInterface
         );
     }
 
-    #[\Override]
+    #[Override]
     public function query(string $transactionId): PaymentResponseData
     {
         $endpoint = '/binancepay/openapi/v2/order/query';
@@ -453,7 +455,7 @@ final readonly class BinancePayDriver implements PaymentGatewayInterface
         );
     }
 
-    #[\Override]
+    #[Override]
     public function refund(RefundPayloadData $payload): RefundResponseData
     {
         $endpoint = '/binancepay/openapi/v1/refund/order';
@@ -523,6 +525,7 @@ use App\Data\Payments\RefundPayloadData;
 use App\Data\Payments\RefundResponseData;
 use App\Enums\PaymentStatus;
 use Illuminate\Http\Request;
+use Override;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\PaymentIntent;
 use Stripe\Refund;
@@ -539,7 +542,7 @@ final readonly class StripeDriver implements PaymentGatewayInterface
         Stripe::setApiKey($this->secretKey);
     }
 
-    #[\Override]
+    #[Override]
     public function charge(ChargePayloadData $payload): PaymentResponseData
     {
         $intent = PaymentIntent::create([
@@ -559,7 +562,7 @@ final readonly class StripeDriver implements PaymentGatewayInterface
         );
     }
 
-    #[\Override]
+    #[Override]
     public function handleWebhook(Request $request): PaymentResponseData
     {
         $signature = $request->header('Stripe-Signature', '');
@@ -588,7 +591,7 @@ final readonly class StripeDriver implements PaymentGatewayInterface
         );
     }
 
-    #[\Override]
+    #[Override]
     public function query(string $transactionId): PaymentResponseData
     {
         $intent = PaymentIntent::retrieve($transactionId);
@@ -607,7 +610,7 @@ final readonly class StripeDriver implements PaymentGatewayInterface
         );
     }
 
-    #[\Override]
+    #[Override]
     public function refund(RefundPayloadData $payload): RefundResponseData
     {
         $refund = Refund::create([
@@ -684,6 +687,7 @@ namespace App\Logging;
 
 use Monolog\LogRecord;
 use Monolog\Processor\ProcessorInterface;
+use Override;
 
 final class MaskSensitivePaymentData implements ProcessorInterface
 {
@@ -693,7 +697,7 @@ final class MaskSensitivePaymentData implements ProcessorInterface
         '/(Bearer\s+)[A-Za-z0-9\-_.]+/i' => '$1[MASKED_TOKEN]',
     ];
 
-    #[\Override]
+    #[Override]
     public function __invoke(LogRecord $record): LogRecord
     {
         $message = $record->message;
@@ -863,7 +867,9 @@ declare(strict_types=1);
 use App\Contracts\Payments\PaymentGatewayInterface;
 use App\Data\Payments\ChargePayloadData;
 use App\Enums\PaymentStatus;
+use App\Logging\WebhookReplayGuard;
 use Illuminate\Support\Facades\Http;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 test('bkash driver initiates tokenized checkout and returns payment url', function () {
     Http::fake([
@@ -904,8 +910,8 @@ test('payment state machine forbids illegal status transitions', function () {
 });
 
 test('webhook replay guard rejects expired timestamps', function () {
-    expect(fn() => \App\Logging\WebhookReplayGuard::verify((string) (time() - 400), 'nonce_123'))
-        ->toThrow(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
+    expect(fn() => WebhookReplayGuard::verify((string) (time() - 400), 'nonce_123'))
+        ->toThrow(BadRequestHttpException::class);
 });
 ```
 
