@@ -1,14 +1,14 @@
-# Modern PHP 8.5+ & Laravel 13 Enum Architecture & Directory Organization
+# Modern PHP 8.6+ & Laravel 13 Enum Architecture & Directory Organization
 
 > **Document**: `docs/architecture/enums.md`  
-> **Framework**: Laravel 13 & PHP 8.5+  
+> **Framework**: Laravel 13 & PHP 8.6+  
 > **Key Commands**: `php artisan make:enum` with directory paths and backing flags (`--string`, `--int`).
 
 ---
 
 ## 🏛️ Executive Summary
 
-Enums are first-class domain citizens in modern PHP 8.5+ and Laravel 13. They replace magic strings, integer status codes, and scattered arrays of constants with **type-safe, behavior-rich objects**.
+Enums are first-class domain citizens in modern PHP 8.6+ and Laravel 13. They replace magic strings, integer status codes, and scattered arrays of constants with **type-safe, behavior-rich objects** — now enhanced in PHP 8.6 with the built-in global `SortDirection` enum, `__debugInfo(): array` secret redaction, and `#[Override]` on enum constants and cases.
 
 In enterprise applications, enums must not be dumped into a single flat directory. This guide establishes:
 1. **Directory-Based Organization (`dir base`)**: Domain-partitioned subdirectories under `app/Enums/` or modular monolith domains.
@@ -47,10 +47,9 @@ Group enums by domain boundaries inside `app/Enums/{Domain}/`:
 ✅ Clean Domain-Based Structure:
 app/
 ├── Enums/
-│   ├── Common/                         # Cross-cutting system enums
+│   ├── Common/                         # Cross-cutting system enums (use native PHP 8.6 SortDirection!)
 │   │   ├── Environment.php
-│   │   ├── HttpMethod.php
-│   │   └── SortDirection.php
+│   │   └── HttpMethod.php
 │   ├── Identity/                       # Auth & User management
 │   │   ├── AccountStatus.php
 │   │   ├── MfaMethod.php
@@ -92,9 +91,12 @@ php artisan make:enum "Orders/OrderStatus" --string
 # 2. Integer-backed enum in a domain subdirectory
 php artisan make:enum "Identity/UserRole" --int
 
-# 3. Pure (unbacked) enum in a common directory
-php artisan make:enum "Common/SortDirection"
+# 3. Pure (unbacked) enum in a common directory (note: use native PHP 8.6 global SortDirection for sorting!)
+php artisan make:enum "Common/CacheStrategy"
 ```
+
+> [!TIP]
+> **Use PHP 8.6's Built-In Global `SortDirection` Enum**: Do not create `App\Enums\Common\SortDirection`. PHP 8.6 ships `enum SortDirection { case Ascending; case Descending; }` in the global namespace (`use SortDirection;`).
 
 ### B. Flag Reference:
 | Flag | Short | Output Syntax | Use Case |
@@ -246,6 +248,48 @@ enum OrderStatus: string
     public function canTransitionTo(self $next): bool
     {
         return in_array($next, $this->allowedTransitions(), strict: true);
+    }
+}
+```
+
+### PHP 8.6 Enum Features: `__debugInfo(): array` & `#[Override]` on Enum Cases/Constants
+
+PHP 8.6 allows enums to implement `public function __debugInfo(): array` (strictly non-nullable `array`, since `?array` is deprecated in PHP 8.6) to mask sensitive backing values in **debug output** (`var_dump()`, Symfony VarDumper / `dd()`), and supports `#[Override]` (explicitly imported via `use Override;`) on enum constants and cases overriding an implemented interface constant:
+
+> [!WARNING]
+> **Debug Output vs. Application Logging**: `__debugInfo()` only governs debug dumps (`var_dump()` / `dd()`). In Monolog 3.10+, `NormalizerFormatter` uses JSON normalization rather than `__debugInfo()`, which serializes the full backing value (e.g., `sk_live_billing_write`). Always enforce separate Monolog processor/formatter redaction when logging sensitive enums.
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Enums\Security;
+
+use Override;
+
+interface TokenScopeContract
+{
+    public const string DEFAULT_PREFIX = 'tok_';
+}
+
+enum ApiTokenScope: string implements TokenScopeContract
+{
+    #[Override]
+    public const string DEFAULT_PREFIX = 'sk_live_';
+
+    case BillingWrite = 'sk_live_billing_write';
+    case AuditRead = 'sk_live_audit_read';
+
+    /**
+     * @return array{case: string, masked: string}
+     */
+    public function __debugInfo(): array
+    {
+        return [
+            'case' => $this->name,
+            'masked' => substr($this->value, 0, 8) . '****',
+        ];
     }
 }
 ```
@@ -422,4 +466,5 @@ public function toArray(Request $request): array
 5. ✅ **Database Column**: Use `$table->string('status')` with index, avoiding brittle DB enums.
 6. ✅ **Validation**: Validate with `Rule::enum(OrderStatus::class)`.
 7. ✅ **Behavior Rich**: Use `match ($this)` for labels, badges, and state transitions.
-8. ✅ **Pest Tests**: Test all transitions and cases in your unit test suite.
+8. ✅ **PHP 8.6 Native Capabilities**: Use built-in global `SortDirection`, non-nullable `__debugInfo(): array` for secret redaction, and `#[Override]` on overridden enum constants/cases.
+9. ✅ **Pest Tests**: Test all transitions and cases in your unit test suite.

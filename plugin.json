@@ -1,8 +1,8 @@
 {
   "name": "laravel",
   "displayName": "Laravel 13 & Modern PHP 8.6+",
-  "version": "3.0.0",
-  "description": "All-in-one Modern PHP 8.6+ & Laravel 13.43+ Enterprise Architecture + 19-Point Security Guard toolkit: Unified Error Handling, Error Pages (400-504), Reusable UI & HTTP/HTTPS Transport Error Components, Resilient Request & Cache Handling (failover store, LockTimeoutException recovery, Idempotency-Key, Circuit Breaker, X-Request-Id Context), Merged Laravel Security Guard (19 vulnerability classes, active PreToolUse real-time write hook, zero-dependency static scanner, laravel-security-auditor subagent, Pest 3 security tests), Frontend Design Craft & Anti-AI-Slop (Impeccable, Taste Skill, Hallmark), Database Architecture & Schema Design (PHP 8 attributes, ULIDs, ESR indexes, pgvector), Payment Gateways & Fintech AppSec (Top 10 gateways including bKash, Binance Pay, Stripe), Architectural Base Directory Trees, Dead Code Elimination, PHP 8.6 syntax, 4-Tier Frontend Directory Organization, JSON Schema validation, #[RetryFor] attributes, Blade/Livewire v3-v4, Inertia.js v2 (Vue 3/React 19/Svelte 5), laravel/mcp, laravel/ai, Pest 3, and PHPStan Level 8+.",
+  "version": "3.1.0",
+  "description": "All-in-one Modern PHP 8.6.0 GA & Laravel 13.43+ Enterprise Architecture + 19-Point Security Guard toolkit: Verified PHP 8.6.0 GA syntax & migration handbook (Partial Function Application ? & ..., clamp(), Readonly property defaults, #[Override] on constants & enum cases, Time\\Duration, global SortDirection enum, Io\\Poll\\Context + StreamPollHandle, StreamErrorMode/StreamException, Parameter DocComments, WeakMap refs, Sodium IPcrypt/XOF/PQ-KEM, Session Security Defaults, and 8.5->8.6 deprecation checklist), Unified Error Handling, Error Pages (400-504), Reusable UI & HTTP/HTTPS Transport Error Components, Resilient Request & Cache Handling (failover store, LockTimeoutException recovery, Idempotency-Key, Circuit Breaker, X-Request-Id Context), Merged Laravel Security Guard (19 vulnerability classes, active PreToolUse real-time write hook, zero-dependency static scanner, laravel-security-auditor subagent, Pest 3 security tests), Frontend Design Craft & Anti-AI-Slop (Impeccable, Taste Skill, Hallmark), Database Architecture & Schema Design (PHP 8 attributes, ULIDs, ESR indexes, pgvector), Payment Gateways & Fintech AppSec (Top 10 gateways including bKash, Binance Pay, Stripe), Architectural Base Directory Trees, Dead Code Elimination, 4-Tier Frontend Directory Organization, JSON Schema validation, #[RetryFor] attributes, Blade/Livewire v3-v4, Inertia.js v2 (Vue 3/React 19/Svelte 5), laravel/mcp, laravel/ai, Pest 3, and PHPStan Level 8+.",
   "logo": "assets/logo.svg",
   "author": {
     "name": "Shamim",
@@ -23,7 +23,7 @@
     "Integrate and secure payment gateways with bKash Tokenized Checkout, Binance Pay Crypto, or Stripe with webhook HMAC validation",
     "Design or audit an architectural base project directory tree for Action-Driven, Service-Oriented, Modular, DDD, Hexagonal, or CQRS in Laravel 13",
     "Audit and purge dead code, unused imports, zombie methods, and legacy skeleton files with Rector and Pint",
-    "Refactor and modernize code using PHP 8.6 syntax: Partial Function Application (?), clamp(), and #[Override] on constants",
+    "Refactor and modernize code using PHP 8.6.0 GA syntax: Partial Function Application (? and ...), clamp(), Time\\Duration, SortDirection, #[Override] on constants/enum cases, and StreamErrorMode::Exception",
     "Organize frontend directory with 4-tier layouts (app, admin, customer, auth, error), components (app, ui, error, icon), and pages",
     "Build a reactive Livewire v3/v4 component with wire:stream AI token streaming, form objects, and #[Locked] security",
     "Build an Inertia.js v2 SPA page with Vue 3 / React 19 / Svelte 5, Deferred Props, and TypeScript interfaces",

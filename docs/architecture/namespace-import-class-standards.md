@@ -66,6 +66,7 @@ use App\Models\Order;
 use DateTimeImmutable;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use NoDiscard;
 
 // 2. Functions (A-Z)
 use function array_first;
@@ -188,6 +189,7 @@ use App\Models\User;
 use DateTimeImmutable;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use NoDiscard;
 
 // 2. Attributes & Class Declaration
 final class OrderProcessingService
@@ -228,7 +230,7 @@ final class OrderProcessingService
     }
 
     // 8. Public API Methods
-    #[\NoDiscard]
+    #[NoDiscard]
     public function process(Order $order, string $paymentToken): OrderResultDto
     {
         $this->attemptsCount++;
@@ -299,10 +301,12 @@ final readonly class CreateOrderDto
 }
 ```
 
-### C. Modern Attributes Usage
-Leverage PHP 8.4 & PHP 8.5+ native attributes:
-- `#[\NoDiscard]`: Ensures callers cannot ignore critical return values (e.g. calculation results, builder instances, transaction status).
-- `#[Override]`: Explicitly marks methods intended to override parent or trait behavior (ensures compile-time validation if parent method signature changes).
+### C. Modern Attributes, Parameter DocComments & PHP 8.6 Identifier Hygiene
+Leverage PHP 8.4, PHP 8.5, and PHP 8.6 native attributes (always imported explicitly via `use NoDiscard;` and `use Override;` — zero inline backslashes):
+- `#[NoDiscard]`: Ensures callers cannot ignore critical return values (e.g., calculation results, builder instances, transaction status).
+- `#[Override]`: Explicitly marks overridden methods (PHP 8.3+), properties (PHP 8.5+), and **class/interface/trait constants & enum cases (PHP 8.6+)** for compile-time validation against `public`/`protected` parent or interface contracts.
+- **Parameter DocComments (PHP 8.6)**: Document individual function/method parameters cleanly so tooling and `laravel/mcp` schemas can inspect them via `ReflectionParameter::getDocComment()`.
+- **PHP 8.6 Reserved Identifier Hygiene**: Never name classes, interfaces, traits, enums, functions, constants, or aliases `let` or `is`; never name a constant `_`, a function `readonly`, or a class constant `namespace` (all deprecated in PHP 8.6).
 - Eloquent Attributes: `#[Table('orders')]`, `#[Fillable([...])]`, `#[Hidden([...])]`, `#[UseEloquentBuilder(OrderQueryBuilder::class)]`.
 
 ---

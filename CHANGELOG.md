@@ -6,6 +6,30 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ---
 
+## [3.1.0] - 2026-11-28
+
+### Added
+- **Authoritative PHP 8.6.0 GA Syntax & Migration Overhaul** (verified live against `php.net/releases/8.6/en.php`, `php.watch/versions/8.6`, `php/php-src` `PHP-8.6/UPGRADING`, and `wiki.php.net/rfc`):
+  - New **Master Architectural Guide #28**: `docs/architecture/php-8-6-modern-syntax-and-migration.md` covering every shipped PHP 8.6.0 GA RFC, full standard-library API synopses, engine/compiler optimizations, Laravel 13 integration blueprints, PHP 8.5 → 8.6 upgrade runbook, and an anti-hallucination table of declined/pending RFCs.
+  - Complete overhaul of `skills/php-modern-syntax/SKILL.md` with Partial Function Application (`?` required placeholder, trailing `...` variadic placeholder, named placeholders, strict ordering & optionality rules), `clamp()` on numbers and comparable objects (`Time\Duration`, `DateTimeImmutable`), Readonly Property Defaults (single-initialization invariant), `#[Override]` on class/interface/trait constants & enum cases, Object Property Writes on Constants (`const_object_property_write`, with Octane safety warning), Debugable Enums (`__debugInfo(): array`), Parameter DocComments (`ReflectionParameter::getDocComment()`), `WeakMap` reference assignment, global `SortDirection` enum, structured Stream Error Handling (`StreamErrorMode`, `StreamErrorStore`, `StreamError`, `StreamException`, `stream_last_errors()`), Reflection additions (`isReadable`/`isWritable`, `ReflectionAttribute` namespace methods), `UriBuilder`/`UrlBuilder`, Session Security Defaults, Sodium IPcrypt/XOF/Post-Quantum KEM, and complete PHP 8.6 deprecation & BC matrix.
+  - Updated `rules/AGENTS.md` (Section 1), `agents/laravel-architect.md` (Section 9), `docs/architecture/clean-code-and-concerns.md`, `docs/architecture/enums.md` (adopting native global `SortDirection`, `__debugInfo(): array`, and `#[Override]` on enum constants/cases), and `docs/architecture/namespace-import-class-standards.md`.
+
+### Fixed
+- **PHP 8.5 Clone With v2 Syntax**: Corrected invalid `clone $obj with (prop: $val)` to the shipped `clone($obj, ['prop' => $val])` syntax across `skills/php-modern-syntax/SKILL.md`, `rules/AGENTS.md`, `agents/laravel-architect.md`, `docs/architecture/clean-code-and-concerns.md`, and `README.md`.
+- **Exact `Time\Duration` API**: Replaced fabricated `Duration::ofSeconds()`, `toIsoString()`, and `toSeconds()` calls with verified `Duration::fromSeconds()`, `fromIso8601DurationString()`, `static compare()`, and readonly `$seconds` / `$nanoseconds` / `$negative` properties.
+- **Exact `Io\Poll\*` API**: Replaced fabricated `new Io\Poll()` / `Poll::READ` / `wait(timeoutMs: ...)` with verified `Io\Poll\Context`, global `StreamPollHandle`, `Io\Poll\Event`, `Io\Poll\Backend`, `Io\Poll\Watcher`, and `wait(timeout: Duration::fromSeconds(...), maxEvents: ...)`.
+- **Exact JSON Error Location API**: Replaced fabricated `JsonException::getOffset()` with verified `json_last_error_msg()` / `JsonException::getMessage()` (`near location {line}:{column}`).
+- **Zero Inline Backslashes Consistency**: Standardized `#[\Override]` and `#[\NoDiscard]` to explicit top-level `use Override;` / `use NoDiscard;` across core PHP syntax guides, `rules/AGENTS.md`, `agents/laravel-architect.md`, and `README.md`.
+
+### Hardened (CodeRabbit CLI Review Findings Resolved)
+- Updated `Io\Poll\Context::wait()` across `SKILL.md`, `php-8-6-modern-syntax-and-migration.md`, `rules/AGENTS.md`, and `CHANGELOG.md` to PHP 8.6.0 GA's shipped `wait(?Time\Duration $timeout = null, ?int $maxEvents = null): array` signature.
+- Nested `error_mode` and `error_store` under `'stream' => [...]` inside `stream_context_create()` in `SKILL.md` and `rules/AGENTS.md` to prevent top-level `ValueError`.
+- Kept the PHP 8.5 pipe-operator example in `SKILL.md` strictly PHP 8.5-parseable (using a closure instead of PHP 8.6 `?`).
+- Fixed `Duration::add(Duration $duration)` / `sub(Duration $duration)` parameter names for named-argument compatibility and fixed class constant object initialization in `php-8-6-modern-syntax-and-migration.md` to reference a global constant instead of an unsupported class-constant `new` expression.
+- Clarified in `enums.md`, `SKILL.md`, `php-8-6-modern-syntax-and-migration.md`, and `rules/AGENTS.md` that enum `__debugInfo(): array` redacts debug dumps (`var_dump()`/`dd()`), whereas Monolog JSON normalization requires separate log scrubbing.
+
+---
+
 ## [3.0.0] - 2026-11-27
 
 ### Added
