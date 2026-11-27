@@ -61,15 +61,18 @@ resources/views/
 │   ├── auth.blade.php
 │   ├── customer.blade.php
 │   ├── admin.blade.php
-│   └── public.blade.php
+│   ├── public.blade.php
+│   └── error.blade.php                      # Zero-DB-query isolated error layout
 ├── components/
 │   ├── app/
 │   │   ├── admin/      (header, nav, footer, sidebar)
 │   │   ├── customer/   (header, nav, footer, sidebar)
 │   │   ├── auth/       (header, nav, footer)
 │   │   └── public/     (header, nav, footer)
-│   ├── ui/             (button, input, modal, card, badge, table, dropdown)
+│   ├── error/          (http-status, https-transport)
+│   ├── ui/             (button, input, modal, card, badge, table, dropdown, error/{field,summary,inline-fallback})
 │   └── icon/           (search, user, chevron-down, check, alert-circle)
+├── errors/             (400, 401, 402, 403, 404, 419, 422, 429, 500, 502, 503, 504)
 └── pages/
     ├── admin/
     │   └── dashboard/
@@ -89,16 +92,20 @@ resources/js/
 │   ├── AppLayout.[vue|tsx|svelte]
 │   ├── AuthLayout.[vue|tsx|svelte]
 │   ├── CustomerLayout.[vue|tsx|svelte]
-│   └── AdminLayout.[vue|tsx|svelte]
+│   ├── AdminLayout.[vue|tsx|svelte]
+│   └── ErrorLayout.[vue|tsx|svelte]
 ├── components/
 │   ├── app/
 │   │   ├── admin/      (AdminHeader, AdminNav, AdminFooter, AdminSidebar)
 │   │   ├── customer/   (CustomerHeader, CustomerNav, CustomerFooter, CustomerSidebar)
 │   │   ├── auth/       (AuthHeader, AuthNav, AuthFooter)
 │   │   └── public/     (PublicHeader, PublicNav, PublicFooter)
-│   ├── ui/             (Button, Input, Modal, Card, Badge, Table, Dropdown)
+│   ├── error/          (HttpErrorCard, HttpsTransportAlert)
+│   ├── ui/             (Button, Input, Modal, Card, Badge, Table, Dropdown, error/{FieldError,ErrorSummary,ErrorBoundary})
 │   └── icon/           (IconSearch, IconUser, IconChevronDown, IconCheck, IconAlertCircle)
 └── pages/
+    ├── errors/
+    │   └── Index.[vue|tsx|svelte]
     ├── admin/
     │   └── dashboard/
     │       └── Index.[vue|tsx|svelte]

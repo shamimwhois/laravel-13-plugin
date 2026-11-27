@@ -8,7 +8,8 @@ description: Enterprise security hardening and anti-hacking architecture for Lar
 This skill guides the auditing, implementation, and verification of enterprise-grade security defenses in Laravel 13 applications, protecting against OWASP Top 10 vulnerabilities, IDOR, SSRF, timing attacks, and malicious file uploads.
 
 > 📖 **Master Specification**: For complete threat modeling, security headers, and SSRF filters, see **[docs/architecture/security-and-hacker-protection.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/security-and-hacker-protection.md)**.
-> 🛡️ **CVE Auditing & Supply Chain**: For discovering, auditing, and patching all CVEs via `composer audit`, Dependabot, and OSV-Scanner, see **[docs/architecture/cve-management.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/cve-management.md)**.
+> 🛡️ **19-Point Security Guard Suite (Merged)**: For the full 19-vulnerability audit runbook, zero-dependency static scanner (`laravel-security-scan.mjs`), active `PreToolUse` write guard (`hooks.json`), and Pest 3 security regression suite, load **`laravel-security-guard`** (with companion deep-dives **`laravel-injection-and-input-guard`**, **`laravel-auth-and-access-guard`**, **`laravel-edge-and-supply-chain-guard`**) or invoke the **`laravel-security-auditor`** subagent.
+> 🔍 **CVE Auditing & Supply Chain**: For discovering, auditing, and patching all CVEs via `composer audit`, Dependabot, and OSV-Scanner, see **[docs/architecture/cve-management.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/cve-management.md)**.
 
 ---
 
@@ -184,8 +185,9 @@ arch('weak hashing functions are strictly banned')
     ->not->toBeUsed();
 
 arch('superglobals are strictly banned in controllers')
-    ->expect(['_GET', '_POST', '_REQUEST', '_COOKIE', '_SERVER'])
+    ->expect(['_GET', '_POST', '_REQUEST', '_COOKIE', '_FILES', '_SERVER'])
     ->not->toBeUsed();
+```
 
 ---
 
@@ -205,5 +207,4 @@ osv-scanner --lockfile=composer.lock
 
 # 4. SAST security scan with Semgrep
 semgrep --config p/laravel --error
-```
 ```

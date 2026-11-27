@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Laravel Security Guard">
+  <defs>
+    <linearGradient id="shieldGrad" x1="16" y1="14" x2="112" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF2D20"/>
+      <stop offset="100%" stop-color="#B91C1C"/>
+    </linearGradient>
+    <linearGradient id="innerRim" x1="64" y1="18" x2="64" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FCA5A5" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#7F1D1D" stop-opacity="0.35"/>
+    </linearGradient>
+  </defs>
+  <!-- Outer shield with ~10% transparent margin baked in -->
+  <path d="M64 13 L106 27 V61 C106 87 88 106 64 115 C40 106 22 87 22 61 V27 Z" fill="url(#shieldGrad)" stroke="#1E1B4B" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Inner highlight rim -->
+  <path d="M64 20 L99 31.5 V60.5 C99 82.5 84 99 64 107 C44 99 29 82.5 29 60.5 V31.5 Z" fill="none" stroke="url(#innerRim)" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Stylized L-prism + padlock keyhole silhouette in crisp white -->
+  <path d="M46 39 H57 V74 H83 V84 H46 Z" fill="#FFFFFF"/>
+  <!-- Security lock check badge in top-right quadrant of shield -->
+  <circle cx="80" cy="48" r="14" fill="#111827" stroke="#FFFFFF" stroke-width="3"/>
+  <path d="M74 48.5 L78.2 52.8 L86.5 43.8" fill="none" stroke="#34D399" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

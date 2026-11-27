@@ -1,7 +1,7 @@
 # Laravel 13 & Modern PHP 8.6+ Antigravity Plugin
 
 [![GitHub Repository](https://img.shields.io/badge/GitHub-shamimwhois%2Flaravel--13--plugin-181717?style=flat&logo=github)](https://github.com/shamimwhois/laravel-13-plugin)
-[![Version](https://img.shields.io/badge/version-2.17.0-red.svg)](https://github.com/shamimwhois/laravel-13-plugin/releases)
+[![Version](https://img.shields.io/badge/version-3.0.0-red.svg)](https://github.com/shamimwhois/laravel-13-plugin/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?logo=laravel)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.6%2B-777BB4?logo=php)](https://php.net)
@@ -19,15 +19,15 @@ An enterprise-grade, comprehensive toolkit, architectural framework, and autonom
 - [Quick Installation](#-quick-installation)
   - [1. Global Machine-Local Installation](#1-global-machine-local-installation)
   - [2. Workspace / Team-Shared Installation](#2-workspace--team-shared-installation)
-- [The 25 Registered Skills](#-the-25-registered-skills)
-- [The 24 Always-On Quality & Security Rules](#-the-24-always-on-quality--security-rules)
-- [The 25 Master Architectural Guides](#-the-25-master-architectural-guides)
+- [The 31 Registered Skills](#-the-31-registered-skills)
+- [The 26 Always-On Quality & Security Rules](#-the-26-always-on-quality--security-rules)
+- [The 27 Master Architectural Guides](#-the-27-master-architectural-guides)
 - [Full-Stack Frontend Architecture (Blade, Livewire, Inertia.js v2)](#-full-stack-frontend-architecture-blade-livewire-inertiajs-v2)
   - [The Canonical 4-Tier Frontend Directory Standard](#-the-canonical-4-tier-frontend-directory-standard)
 - [First-Party AI SDK (`laravel/ai`) - The 8 Core Pillars](#-first-party-ai-sdk-laravelai---the-8-core-pillars)
 - [Model Context Protocol (`laravel/mcp`) Architecture](#-model-context-protocol-laravelmcp-architecture)
 - [High-Throughput & Memory Safety Standards](#-high-throughput--memory-safety-standards)
-- [Dedicated Autonomous Subagent (`laravel-architect`)](#-dedicated-autonomous-subagent-laravel-architect)
+- [Dedicated Autonomous Subagents & Active Security Hook](#-dedicated-autonomous-subagents--active-security-hook)
 - [Directory Tree](#-directory-tree)
 - [License](#-license)
 
@@ -37,6 +37,9 @@ An enterprise-grade, comprehensive toolkit, architectural framework, and autonom
 
 This plugin transforms the Antigravity AI assistant into an expert **Principal Laravel 13 & PHP 8.6+ Software Architect**. It provides:
 
+- **Merged 19-Point Laravel Security Guard (`hooks.json` + Static Scanner + `laravel-security-auditor`)**: Full integration of `shamimwhois/laravel-security-guard` covering all 19 vulnerability classes (SQLi, XSS, CSRF, BAC/IDOR, SSRF, Path Traversal, Command Injection, Mass Assignment, Open Redirect, Leaked Secrets, CVEs, Debug Mode/Assets, Broken Auth, Deserialization/`phar://`, XXE, SSTI, Clickjacking, CORS, HTTP Request Smuggling + TLS verification), active `PreToolUse` real-time write guard hook, zero-dependency Node.js static scanner, and Pest 3 security regression suite.
+- **Error Handling, Error Pages & HTTP/HTTPS Transport Components**: Unified `bootstrap/app.php` exception handling with RFC 7807 Problem Details, ULID `X-Request-Id` Trace IDs, complete `400`–`504` error pages (Blade, Livewire v3/v4, Inertia v2 Vue 3 / React 19 / Svelte 5), isolated zero-DB `layouts/error`, accessible UI validation/boundary error components, and HTTP/HTTPS transport error components (`419` CSRF refresh, `429` countdown, HTTPS enforcement, offline/TLS recovery).
+- **Resilient Request & Cache Handling**: Inbound `AttachRequestContextMiddleware`, Form Requests + DTOs + `JsonSchema::rules()`, atomic `Idempotency-Key` locks, tiered `RateLimiter`, outbound `Http::` timeouts/jittered retries/SSRF/TLS/Circuit Breakers, Laravel 13 `failover` cache stores (`redis -> database -> array`), `LockTimeoutException` recovery, versioned multi-tenant cache keys, and HTTP `Cache-Control` / `ETag` / `no-store` headers.
 - **Frontend Design Craft & Anti-AI-Slop Standards**: Synthesizes the core principles of Paul Bakaus's Impeccable (`pbakaus/impeccable`), Leon Lin's Taste Skill (`Leonxlnx/taste-skill`), and Hassan El Mghari's Hallmark (`nutlope/hallmark`) into Blade, Livewire v3/v4, and Inertia.js v2 (Vue 3, React 19, Svelte 5). Enforces the Hero Viewport Invariant (headline, 1 sentence, and CTA at 1280x800 without scrolling), strict ban on cliché purple-to-blue gradients and identical 3-card grids, asymmetric Bento layouts, themed native browser surfaces (`::selection`, `caret-color`, custom scrollbars, `:focus-visible`), and automated verification via `npx impeccable detect` and `sloplint`.
 - **Database Architecture & Schema Standards**: Comprehensive schema design with PHP 8 attributes (`#[Table]`, `#[Fillable]`, `#[Hidden]`, `#[UseEloquentBuilder]`, `#[ScopedBy]`), typed relationship generics, ULID primary keys, explicit FK cascade behaviors (`cascadeOnDelete()`, `restrictOnDelete()`, `nullOnDelete()`), Leftmost Prefix / ESR composite indexing, and pgvector HNSW vector search.
 - **Fintech & Payment Gateway Architecture**: Multi-driver architecture supporting Top 10 gateways (Stripe, bKash Tokenized Checkout, Binance Pay Crypto Web3, PayPal, Razorpay, Paddle, Mollie, Adyen, Square, SSLCommerz) with constant-time HMAC webhook verification, replay attack defense ($\pm 300\text{s}$ window + nonces), double-entry bookkeeping ledgers, payment FSMs, and PCI-DSS compliance.
@@ -80,7 +83,7 @@ git commit -m "chore: add Laravel 13 & Modern PHP 8.5+ Antigravity plugin"
 
 ---
 
-## 🧩 The 25 Registered Skills
+## 🧩 The 31 Registered Skills
 
 Every skill adheres to progressive disclosure—loaded into context only when needed:
 
@@ -90,31 +93,37 @@ Every skill adheres to progressive disclosure—loaded into context only when ne
 | **2** | **`artisan-make-commands`** | [`skills/artisan-make-commands/SKILL.md`](skills/artisan-make-commands/SKILL.md) | Catalog of all 30+ `make:*` generator commands with PHP 8.5+ stubs & options. |
 | **3** | **`laravel-ai-sdk`** | [`skills/laravel-ai-sdk/SKILL.md`](skills/laravel-ai-sdk/SKILL.md) | Official `laravel/ai` SDK: Prompts, Context, Tools, Streaming, and Attachments. |
 | **4** | **`laravel-api-design`** | [`skills/laravel-api-design/SKILL.md`](skills/laravel-api-design/SKILL.md) | Production RESTful API design, RFC 7807 problem details, Sanctum token abilities, idempotency. |
-| **5** | **`laravel-best-practices`** | [`skills/laravel-best-practices/SKILL.md`](skills/laravel-best-practices/SKILL.md) | Request lifecycle, Actions, Form Requests, thin controllers, and Pest 3 tests. |
-| **6** | **`laravel-console-and-scheduling`** | [`skills/laravel-console-and-scheduling/SKILL.md`](skills/laravel-console-and-scheduling/SKILL.md) | `make:command`, `Isolatable` overlap locking, Prompts, $O(1)$ memory safety, `routes/console.php`. |
-| **7** | **`laravel-controllers-and-middleware`** | [`skills/laravel-controllers-and-middleware/SKILL.md`](skills/laravel-controllers-and-middleware/SKILL.md) | Single-Action Invokables (`__invoke`), fluent middleware in `bootstrap/app.php`, terminables. |
-| **8** | **`laravel-database-architecture`** | [`skills/laravel-database-architecture/SKILL.md`](skills/laravel-database-architecture/SKILL.md) | Database schema design, PHP 8 attributes, relationship generics, ULID PKs, FK cascade rules, composite indexes, and pgvector. |
-| **9** | **`laravel-dead-code-elimination`** | [`skills/laravel-dead-code-elimination/SKILL.md`](skills/laravel-dead-code-elimination/SKILL.md) | Purge dead code, zombie logic, unused imports, unused composer packages, and legacy skeleton files via Rector, Pint, & Pest 3. |
-| **10** | **`laravel-eloquent-orm`** | [`skills/laravel-eloquent-orm/SKILL.md`](skills/laravel-eloquent-orm/SKILL.md) | PHP 8 attributes, custom query builders, casts, AI vector similarity search. |
-| **11** | **`laravel-frontend-blade-livewire`** | [`skills/laravel-frontend-blade-livewire/SKILL.md`](skills/laravel-frontend-blade-livewire/SKILL.md) | Blade component architecture, slots, Alpine.js, Livewire v3/v4 reactive state, `wire:stream` AI token streaming, `#[Locked]` tampering defense. |
-| **12** | **`laravel-frontend-design-craft`** | [`skills/laravel-frontend-design-craft/SKILL.md`](skills/laravel-frontend-design-craft/SKILL.md) | Anti-AI-slop design craft (synthesizing Impeccable, Taste Skill, and Hallmark), Hero viewport invariant, Bento grids, and themed browser surfaces. |
-| **13** | **`laravel-frontend-layouts-and-pages`** | [`skills/laravel-frontend-layouts-and-pages/SKILL.md`](skills/laravel-frontend-layouts-and-pages/SKILL.md) | Standardized 4-tier directory hierarchy (`layouts/`, `components/app/*`, `components/ui/*`, `pages/*`) across Blade, Livewire, Vue 3, React 19, Svelte 5. |
-| **14** | **`laravel-inertia-spa`** | [`skills/laravel-inertia-spa/SKILL.md`](skills/laravel-inertia-spa/SKILL.md) | Inertia.js v2 SPAs with Vue 3 (TS), React 19/18 (TS), Svelte 5 (Runes), Deferred Props (`Inertia::defer`), and Vite SSR. |
-| **15** | **`laravel-mcp`** | [`skills/laravel-mcp/SKILL.md`](skills/laravel-mcp/SKILL.md) | Official `laravel/mcp`: Tools, Resources, Prompts, Web SSE, and stdio transports. |
-| **16** | **`laravel-memory-safety`** | [`skills/laravel-memory-safety/SKILL.md`](skills/laravel-memory-safety/SKILL.md) | Octane concurrency safety, $O(1)$ cursor streaming, WeakMap caching, worker recycling. |
-| **17** | **`laravel-payment-gateways`** | [`skills/laravel-payment-gateways/SKILL.md`](skills/laravel-payment-gateways/SKILL.md) | Multi-driver architecture for Top 10 payment gateways (Stripe, bKash Tokenized, Binance Pay Crypto, PayPal, Razorpay) with replay defense, double-entry ledger, FSM, and PCI-DSS compliance. |
-| **18** | **`laravel-performance-and-caching`** | [`skills/laravel-performance-and-caching/SKILL.md`](skills/laravel-performance-and-caching/SKILL.md) | Redis compression (`igbinary`, `zstd`), `Cache::flexible()` stampede defense, locks. |
-| **19** | **`laravel-project-structure`** | [`skills/laravel-project-structure/SKILL.md`](skills/laravel-project-structure/SKILL.md) | Architectural base directory tree patterns (Action-Driven, Service-Class Monolith, Modular, DDD, Hexagonal, CQRS) & Pest 3 Arch tests. |
-| **20** | **`laravel-routing`** | [`skills/laravel-routing/SKILL.md`](skills/laravel-routing/SKILL.md) | 5 routing styles: Invokable mapping, grouping, scoped bindings, `whereUlid`, rate limiting. |
-| **21** | **`laravel-scaffolding`** | [`skills/laravel-scaffolding/SKILL.md`](skills/laravel-scaffolding/SKILL.md) | End-to-end blueprint for scaffolding all 6 layers of a feature (Migration $\rightarrow$ Route). |
-| **22** | **`laravel-security-and-hardening`** | [`skills/laravel-security-and-hardening/SKILL.md`](skills/laravel-security-and-hardening/SKILL.md) | OWASP Top 10 defense, SSRF private IP filters, `hash_equals()`, safe uploads, IDOR. |
-| **23** | **`pest-testing`** | [`skills/pest-testing/SKILL.md`](skills/pest-testing/SKILL.md) | Pest 3 test suite: feature tests, architectural boundary tests (`arch()`), fakes. |
-| **24** | **`php-modern-syntax`** | [`skills/php-modern-syntax/SKILL.md`](skills/php-modern-syntax/SKILL.md) | PHP 8.6 Partial Function Application (`?`), `clamp()`, `#[Override]` on constants, Readonly defaults, `Time\Duration`, PHP 8.5 pipe operator (`\|>`), `#[NoDiscard]`. |
-| **25** | **`phpstan-larastan`** | [`skills/phpstan-larastan/SKILL.md`](skills/phpstan-larastan/SKILL.md) | PHPStan Level 8 / max configuration, generic Eloquent typing, CI workflows. |
+| **5** | **`laravel-auth-and-access-guard`** | [`skills/laravel-auth-and-access-guard/SKILL.md`](skills/laravel-auth-and-access-guard/SKILL.md) | Security deep-dive: CSRF, Broken Access Control/IDOR, Livewire `#[Locked]`, Mass Assignment, Open Redirect, Broken Auth. |
+| **6** | **`laravel-best-practices`** | [`skills/laravel-best-practices/SKILL.md`](skills/laravel-best-practices/SKILL.md) | Request lifecycle, Actions, Form Requests, thin controllers, and Pest 3 tests. |
+| **7** | **`laravel-console-and-scheduling`** | [`skills/laravel-console-and-scheduling/SKILL.md`](skills/laravel-console-and-scheduling/SKILL.md) | `make:command`, `Isolatable` overlap locking, Prompts, $O(1)$ memory safety, `routes/console.php`. |
+| **8** | **`laravel-controllers-and-middleware`** | [`skills/laravel-controllers-and-middleware/SKILL.md`](skills/laravel-controllers-and-middleware/SKILL.md) | Single-Action Invokables (`__invoke`), fluent middleware in `bootstrap/app.php`, terminables. |
+| **9** | **`laravel-database-architecture`** | [`skills/laravel-database-architecture/SKILL.md`](skills/laravel-database-architecture/SKILL.md) | Database schema design, PHP 8 attributes, relationship generics, ULID PKs, FK cascade rules, composite indexes, and pgvector. |
+| **10** | **`laravel-dead-code-elimination`** | [`skills/laravel-dead-code-elimination/SKILL.md`](skills/laravel-dead-code-elimination/SKILL.md) | Purge dead code, zombie logic, unused imports, unused composer packages, and legacy skeleton files via Rector, Pint, & Pest 3. |
+| **11** | **`laravel-edge-and-supply-chain-guard`** | [`skills/laravel-edge-and-supply-chain-guard/SKILL.md`](skills/laravel-edge-and-supply-chain-guard/SKILL.md) | Security deep-dive: SSRF (DNS A+AAAA + IP pinning), Leaked Secrets, CVEs, Debug Mode/Assets, Clickjacking CSP, CORS, HTTP Request Smuggling. |
+| **12** | **`laravel-eloquent-orm`** | [`skills/laravel-eloquent-orm/SKILL.md`](skills/laravel-eloquent-orm/SKILL.md) | PHP 8 attributes, custom query builders, casts, AI vector similarity search. |
+| **13** | **`laravel-error-handling-and-pages`** | [`skills/laravel-error-handling-and-pages/SKILL.md`](skills/laravel-error-handling-and-pages/SKILL.md) | `bootstrap/app.php` exceptions, RFC 7807, custom `400`–`504` error pages, reusable UI error components, and HTTP/HTTPS transport error components. |
+| **14** | **`laravel-frontend-blade-livewire`** | [`skills/laravel-frontend-blade-livewire/SKILL.md`](skills/laravel-frontend-blade-livewire/SKILL.md) | Blade component architecture, slots, Alpine.js, Livewire v3/v4 reactive state, `wire:stream` AI token streaming, `#[Locked]` tampering defense. |
+| **15** | **`laravel-frontend-design-craft`** | [`skills/laravel-frontend-design-craft/SKILL.md`](skills/laravel-frontend-design-craft/SKILL.md) | Anti-AI-slop design craft (synthesizing Impeccable, Taste Skill, and Hallmark), Hero viewport invariant, Bento grids, and themed browser surfaces. |
+| **16** | **`laravel-frontend-layouts-and-pages`** | [`skills/laravel-frontend-layouts-and-pages/SKILL.md`](skills/laravel-frontend-layouts-and-pages/SKILL.md) | Standardized 4-tier directory hierarchy (`layouts/`, `components/app/*`, `components/ui/*`, `components/error/*`, `errors/`, `pages/*`) across Blade, Livewire, Vue 3, React 19, Svelte 5. |
+| **17** | **`laravel-inertia-spa`** | [`skills/laravel-inertia-spa/SKILL.md`](skills/laravel-inertia-spa/SKILL.md) | Inertia.js v2 SPAs with Vue 3 (TS), React 19/18 (TS), Svelte 5 (Runes), Deferred Props (`Inertia::defer`), and Vite SSR. |
+| **18** | **`laravel-injection-and-input-guard`** | [`skills/laravel-injection-and-input-guard/SKILL.md`](skills/laravel-injection-and-input-guard/SKILL.md) | Security deep-dive: SQLi, XSS, Path Traversal & Zip Slip, Command Injection, Deserialization/`phar://`, XXE, SSTI. |
+| **19** | **`laravel-mcp`** | [`skills/laravel-mcp/SKILL.md`](skills/laravel-mcp/SKILL.md) | Official `laravel/mcp`: Tools, Resources, Prompts, Web SSE, and stdio transports. |
+| **20** | **`laravel-memory-safety`** | [`skills/laravel-memory-safety/SKILL.md`](skills/laravel-memory-safety/SKILL.md) | Octane concurrency safety, $O(1)$ cursor streaming, WeakMap caching, worker recycling. |
+| **21** | **`laravel-payment-gateways`** | [`skills/laravel-payment-gateways/SKILL.md`](skills/laravel-payment-gateways/SKILL.md) | Multi-driver architecture for Top 10 payment gateways (Stripe, bKash Tokenized, Binance Pay Crypto, PayPal, Razorpay) with replay defense, double-entry ledger, FSM, and PCI-DSS compliance. |
+| **22** | **`laravel-performance-and-caching`** | [`skills/laravel-performance-and-caching/SKILL.md`](skills/laravel-performance-and-caching/SKILL.md) | Redis compression (`igbinary`, `zstd`), `Cache::flexible()` stampede defense, locks. |
+| **23** | **`laravel-project-structure`** | [`skills/laravel-project-structure/SKILL.md`](skills/laravel-project-structure/SKILL.md) | Architectural base directory tree patterns (Action-Driven, Service-Class Monolith, Modular, DDD, Hexagonal, CQRS) & Pest 3 Arch tests. |
+| **24** | **`laravel-request-and-cache-handling`** | [`skills/laravel-request-and-cache-handling/SKILL.md`](skills/laravel-request-and-cache-handling/SKILL.md) | Inbound `X-Request-Id` context, Form Requests + DTOs, Idempotency-Key locks, outbound `Http::` resilience & Circuit Breaker, `failover` cache store, `LockTimeoutException` recovery, HTTP cache headers. |
+| **25** | **`laravel-routing`** | [`skills/laravel-routing/SKILL.md`](skills/laravel-routing/SKILL.md) | 5 routing styles: Invokable mapping, grouping, scoped bindings, `whereUlid`, rate limiting. |
+| **26** | **`laravel-scaffolding`** | [`skills/laravel-scaffolding/SKILL.md`](skills/laravel-scaffolding/SKILL.md) | End-to-end blueprint for scaffolding all 6 layers of a feature (Migration $\rightarrow$ Route). |
+| **27** | **`laravel-security-and-hardening`** | [`skills/laravel-security-and-hardening/SKILL.md`](skills/laravel-security-and-hardening/SKILL.md) | OWASP Top 10 defense, SSRF private IP filters, `hash_equals()`, safe uploads, IDOR (cross-linked to 19-point Security Guard). |
+| **28** | **`laravel-security-guard`** | [`skills/laravel-security-guard/SKILL.md`](skills/laravel-security-guard/SKILL.md) | Master 19-point security audit & hardening runbook with bundled zero-dependency static scanner (`laravel-security-scan.mjs`) and Pest 3 security suite. |
+| **29** | **`pest-testing`** | [`skills/pest-testing/SKILL.md`](skills/pest-testing/SKILL.md) | Pest 3 test suite: feature tests, architectural boundary tests (`arch()`), fakes. |
+| **30** | **`php-modern-syntax`** | [`skills/php-modern-syntax/SKILL.md`](skills/php-modern-syntax/SKILL.md) | PHP 8.6 Partial Function Application (`?`), `clamp()`, `#[Override]` on constants, Readonly defaults, `Time\Duration`, PHP 8.5 pipe operator (`\|>`), `#[NoDiscard]`. |
+| **31** | **`phpstan-larastan`** | [`skills/phpstan-larastan/SKILL.md`](skills/phpstan-larastan/SKILL.md) | PHPStan Level 8 / max configuration, generic Eloquent typing, CI workflows. |
 
 ---
 
-## 🛡️ The 24 Always-On Quality & Security Rules
+## 🛡️ The 26 Always-On Quality & Security Rules
 
 All agent interactions automatically enforce the strict standards codified in [`rules/AGENTS.md`](rules/AGENTS.md):
 
@@ -130,50 +139,54 @@ All agent interactions automatically enforce the strict standards codified in [`
 10. **Queues, Caching & Events**: Declare queue configurations with `#[WithQueue]` and declarative retry windows with `#[RetryFor(hours: ...)]` (prohibiting legacy `retryUntil()` methods). Atomic distributed locks (`Cache::lock`). Stale-While-Revalidate caching via `Cache::flexible()`.
 11. **Pest 3 Architecture Testing**: Boundary tests verifying controllers are invokable and models extend Eloquent.
 12. **Memory Safety & Streaming**: $O(1)$ cursor streaming via generators (`cursor()`), mutation chunking (`chunkById()`), Octane state safety, and streaming file downloads.
-13. **Security Hardening**: PDO parameter bindings, whitelisted dynamic order columns, SSRF private IP validation, constant-time `hash_equals()`, and MIME magic bytes inspection.
+13. **Security Hardening & 19-Point Vulnerability Defense Guard (Merged `laravel-security-guard`)**: Complete 19-class AppSec enforcement (SQLi, XSS, CSRF, BAC/IDOR, SSRF DNS+IP pinning, Path Traversal/Zip Slip, Command Injection, Mass Assignment, Open Redirect, Leaked Secrets, CVEs, Debug Mode/Assets, Broken Auth, Insecure Deserialization/`phar://`, XXE, SSTI, Clickjacking CSP, CORS, HTTP Request Smuggling + strict outbound TLS).
 14. **Laravel AI SDK Standards**: Encapsulated Agent classes, scoped conversation memory, typed tool schemas with `JsonSchema::rules()` validation, structured output DTOs, SSE streaming, XML prompt injection boundaries (`<user_input>`), and Pest fakes (`Agent::fake()`).
 15. **Model Context Protocol Standards**: Canonical `app/Mcp/` directories, `routes/ai.php` web SSE routing with Sanctum authentication, stdio CLI execution, and typed tool schemas validated with `JsonSchema::rules()`.
 16. **Console Commands & Scheduling**: `#[AsCommand]` attributes, `implements Isolatable` to eliminate overlapping crons, `DB::disableQueryLog()` memory protection, and `laravel/prompts`.
 17. **Database Transactions & Concurrency**: Mandatory `DB::transaction(..., attempts: 3)` with deadlock retry, pessimistic row locking (`lockForUpdate()`), **strict prohibition of external HTTP inside transactions**, and post-commit `afterCommit` hooks.
 18. **Modern Frontend Architecture**: Blade components with `@props`, Livewire `#[Locked]` state tampering defense, Form Objects, `wire:stream` AI token streaming, Alpine.js micro-interactions, Inertia v2 Deferred Props (`Inertia::defer`), Vue 3 / React TypeScript interfaces, Svelte 5 Runes, and Pest 3 component assertions.
-19. **Canonical Frontend Directory Organization**: Strict 4-tier directory scoping across Blade, Livewire, and Inertia.js (`layouts/`, `components/app/<domain>/`, `components/ui/`, `components/icon/`, `pages/<domain>/<feature>/index`), total prohibition of view root sprawl, and controller dot-notation resolution (`view('pages.admin.dashboard.index')` / `Inertia::render('admin/dashboard/Index')`).
+19. **Canonical Frontend Directory Organization**: Strict 4-tier directory scoping across Blade, Livewire, and Inertia.js (`layouts/`, `components/app/<domain>/`, `components/ui/`, `components/error/`, `components/icon/`, `errors/`, `pages/<domain>/<feature>/index`), total prohibition of view root sprawl, and controller dot-notation resolution (`view('pages.admin.dashboard.index')` / `Inertia::render('admin/dashboard/Index')`).
 20. **Dead Code Elimination, Zombie Logic Hunting & Codebase Hygiene**: Zero tolerance for commented-out code, unused `use` imports (`laravel/pint`), and unused Composer dependencies (`composer-unused`). Immediate deletion of legacy Laravel skeleton files (`app/Http/Kernel.php`, `app/Console/Kernel.php`, `app/Exceptions/Handler.php`, `app/Providers/RouteServiceProvider.php`). Automated dead code purging with Rector `SetList::DEAD_CODE` and Pest 3 boundary tests forbidding legacy class revival.
-21. **Architectural Base Project Directory Tree Patterns & Placement Guidelines**: Mandatory adherence to standardized architectural directory patterns (Action-Driven Monolith or Service-Class Oriented Monolith by default, Modular Monolith for multi-team platforms, DDD for core banking/fintech, Hexagonal for framework-agnostic engines). Strict canonical folder placement: actions in `app/Actions/<Domain>/`, domain services in `app/Services/<Domain>/` with interface contracts in `app/Contracts/Services/<Domain>/`, immutable DTOs in `app/Data/<Domain>/`, query builders in `app/Builders/`, single-action invokables in `app/Http/Controllers/`, pure static helpers in `app/Support/`, first-party AI/MCP in `app/Ai/` and `app/Mcp/`, and 4-tier frontend scoping (`layouts/`, `components/app/<domain>/`, `components/ui/`, `components/icon/`, `pages/<domain>/<feature>/`). Mandatory Pest 3 architectural boundary tests in `tests/Arch/`.
-22. **Payment Gateway Architecture, Webhook Security & Fintech Rules**: Mandatory PCI-DSS compliance (zero storage of raw card PANs, CVVs, or crypto private keys; Monolog log scrubbing). Constant-time HMAC webhook signature comparison (`hash_equals()`). Replay attack mitigation with $\pm 300\text{s}$ timestamp sliding windows and Redis nonce deduplication. Zero floating-point arithmetic for currency (integer cents / BCMath only). Atomic idempotency via Redis locks (`Cache::lock`) and database-level `lockForUpdate()` transaction checks (`attempts: 3`). Strict payment FSM transition guards and checkout rate limiting against card testing bot attacks.
-23. **Database Schema Design, Eloquent Attributes, Indexing & FK Architecture Rules**: Native PHP 8 attributes (`#[Table]`, `#[Fillable]`, `#[Hidden]`, `#[UseEloquentBuilder]`, `#[ScopedBy]`) mandatory over legacy properties. Explicit relationship return types and generic docblocks (`HasMany<Order, $this>`). Primary key strategy matrix: ULID (`foreignUlid()`) for distributed/multi-tenant entities; BigInt (`id()`) for high-write internal append-only ledgers. Explicit foreign key constraints and cascades (`cascadeOnDelete()`, `restrictOnDelete()`, `nullOnDelete()`) on all foreign keys; no raw string foreign columns. Foreign key indexing mandatory. B-Tree composite indexing following Leftmost Prefix and ESR (Equality, Sort, Range) rules. Partial indexes for stateful queries, and pgvector HNSW indexing (`vector_cosine_ops`) for AI embeddings.
-24. **Frontend Design Craft, Anti-AI-Slop & Aesthetic Taste Rules**: Mandatory compliance with anti-AI-slop craft standards (synthesizing Impeccable, Taste Skill, and Hallmark). Absolute ban on generic purple-to-blue gradients, identical 3-card feature grids, and floating eyebrow/pill badges above headings. The Hero Viewport Invariant: Headline, 1 sentence, and primary action visible at 1280x800 and 1440x900 without scrolling (max 80 words). Material honesty (real UI, authentic numbers, real quotes; zero fake testimonials or unearned metrics). Restrained GPU motion (never `transition: all`, reduced-motion checks, hover lifts of 2px). Themed native browser surfaces (`::selection`, `caret-color`, custom scrollbars, `:focus-visible`). Real SVG icon primitives only; zero emoji glyphs. Automated verification via `npx impeccable detect` and Pest 3 view lint tests.
+21. **Architectural Base Project Directory Tree Patterns & Placement Guidelines**: Mandatory adherence to standardized architectural directory patterns (Action-Driven Monolith or Service-Class Oriented Monolith by default, Modular Monolith for multi-team platforms, DDD for core banking/fintech, Hexagonal for framework-agnostic engines). Strict canonical folder placement and Pest 3 architectural boundary tests in `tests/Arch/`.
+22. **Payment Gateway Architecture, Webhook Security & Fintech Rules**: Mandatory PCI-DSS compliance, constant-time HMAC webhook signature comparison (`hash_equals()`), replay attack mitigation ($\pm 300\text{s}$ window + Redis nonces), zero-float integer cents / BCMath, atomic idempotency, payment FSM transition guards, and checkout rate limiting.
+23. **Database Schema Design, Eloquent Attributes, Indexing & FK Architecture Rules**: Native PHP 8 attributes (`#[Table]`, `#[Fillable]`, `#[Hidden]`, `#[UseEloquentBuilder]`, `#[ScopedBy]`), typed relationship generics, ULID primary keys, explicit FK cascades, B-Tree Leftmost Prefix / ESR composite indexing, partial indexes, and pgvector HNSW indexing.
+24. **Frontend Design Craft, Anti-AI-Slop & Aesthetic Taste Rules**: Anti-AI-slop craft standards (synthesizing Impeccable, Taste Skill, and Hallmark): zero purple-to-blue gradients, zero identical 3-card grids, zero eyebrow pill badges, Hero Viewport Invariant at 1280x800, material honesty, restrained GPU motion, themed browser surfaces, and SVG-only icons.
+25. **Error Handling, Error Pages & HTTP/HTTPS Error Component Rules**: Unified `bootstrap/app.php` `withExceptions()`, RFC 7807 Problem Details with ULID `X-Request-Id` Trace IDs, strict `Cache-Control: no-store, private` on `4xx`/`5xx`, zero stack-trace leaks, complete `400`–`504` error pages with isolated zero-DB `layouts/error`, accessible UI validation/boundary error components, and HTTP/HTTPS transport error components (`419` refresh, `429` countdown, HTTPS enforcement, offline/TLS alerts).
+26. **Resilient Request Handling & Cache Handling Rules**: Inbound `AttachRequestContextMiddleware`, Form Request normalization + DTOs, atomic `Idempotency-Key` locks, tiered `RateLimiter`, outbound `Http::` timeouts/jittered retries/SSRF/TLS/Circuit Breakers, Laravel 13 `failover` cache stores, explicit `LockTimeoutException` handling, versioned multi-tenant cache keys invalidated `DB::afterCommit()`, and HTTP `Cache-Control` / `ETag` headers.
 
 ---
 
-## 📚 The 25 Master Architectural Guides
+## 📚 The 27 Master Architectural Guides
 
 Located in [`docs/architecture/`](docs/architecture/):
 
 1. **[`Architectural.md`](docs/architecture/Architectural.md)**: Executive Decision Matrix for the Top 10 Software Architecture Patterns.
-2. **[`payment-gateways-and-fintech-integrations.md`](docs/architecture/payment-gateways-and-fintech-integrations.md)**: Master fintech guide covering Top 10 payment gateways (Stripe, bKash Tokenized, Binance Pay Crypto, PayPal, Razorpay, Paddle, Mollie, Adyen, Square, SSLCommerz), replay attack defense, double-entry ledger, payment FSM, and Pest 3 tests.
-3. **[`database-schema-design-and-indexing.md`](docs/architecture/database-schema-design-and-indexing.md)**: Production guide to database schema design, PHP 8 attributes, relationship generics, primary key strategies (ULID vs BigInt), foreign key cascades, Leftmost Prefix / ESR indexing, partial indexes, and pgvector HNSW search.
-4. **[`project-directory-tree-patterns.md`](docs/architecture/project-directory-tree-patterns.md)**: Standardized codebase directory blueprints, namespace mappings, boundary invariants, and Pest 3 boundary suites across Action-Driven, Service-Class Monolith, Modular Monolith, DDD, Hexagonal, and CQRS architectures.
-5. **[`frontend-design-craft-and-anti-ai-slop.md`](docs/architecture/frontend-design-craft-and-anti-ai-slop.md)**: Production guide to frontend design craft, anti-AI-slop rules, surface modes (Persuade, Operate, Read, Experience), Hero viewport invariant, Bento grids, themed browser surfaces, and Impeccable/Hallmark CLI audits.
-6. **[`frontend-layouts-components-and-pages.md`](docs/architecture/frontend-layouts-components-and-pages.md)**: Standardized 4-tier frontend hierarchy, domain layout shells, UI design tokens, SVG icon primitives, and multi-tenant layout isolation.
-7. **[`blade-and-livewire.md`](docs/architecture/blade-and-livewire.md)**: Server-rendered Blade components, slots, Alpine.js, Livewire v3/v4 reactive state, and `wire:stream` AI streaming.
-8. **[`inertia-and-frontend-stacks.md`](docs/architecture/inertia-and-frontend-stacks.md)**: Inertia.js v2 SPAs with Vue 3 (TS), React 19/18 (TS), Svelte 5 (Runes), Deferred Props, and Vite SSR.
-9. **[`ai-sdk-and-llm-integration.md`](docs/architecture/ai-sdk-and-llm-integration.md)**: First-party `laravel/ai` SDK architecture & 8 Core Pillars.
-10. **[`mcp-and-ai-protocols.md`](docs/architecture/mcp-and-ai-protocols.md)**: First-party Model Context Protocol (`laravel/mcp`) server & client architecture.
-11. **[`console-commands-and-scheduling.md`](docs/architecture/console-commands-and-scheduling.md)**: Concurrency isolation (`Isolatable`), Laravel Prompts, memory safety, and `routes/console.php`.
-12. **[`database-transactions-and-concurrency.md`](docs/architecture/database-transactions-and-concurrency.md)**: ACID boundaries, deadlock retries, row locks, and `afterCommit` hooks.
-13. **[`controllers-and-middleware.md`](docs/architecture/controllers-and-middleware.md)**: Single-Action Invokables (`__invoke`), fluent middleware in `bootstrap/app.php`, terminables.
-14. **[`caching-and-performance.md`](docs/architecture/caching-and-performance.md)**: Redis compression (igbinary + zstd), `Cache::flexible()`, and Cached Repositories.
-15. **[`memory-safety-and-performance.md`](docs/architecture/memory-safety-and-performance.md)**: Octane concurrency, $O(1)$ cursor streaming, WeakMap caching, worker recycling.
-16. **[`security-and-hacker-protection.md`](docs/architecture/security-and-hacker-protection.md)**: OWASP Top 10 defenses, SSRF IP filtering, timing attacks, and hardened file uploads.
-17. **[`cve-management.md`](docs/architecture/cve-management.md)**: 2026 CVE scanning (`composer audit`, OSV-Scanner, Semgrep), CVSS SLAs, and supply chain security.
-18. **[`clean-code-and-concerns.md`](docs/architecture/clean-code-and-concerns.md)**: DRY principles, trait organization (`app/Concerns/`), DTOs, and Pint formatting.
-19. **[`oop-pillars-and-organization.md`](docs/architecture/oop-pillars-and-organization.md)**: OOP 4 pillars, Composition over Inheritance, domain directory architecture.
-20. **[`namespace-import-class-standards.md`](docs/architecture/namespace-import-class-standards.md)**: PSR-4, explicit root class imports, zero inline backslashes, Pint rules.
-21. **[`enums.md`](docs/architecture/enums.md)**: Domain-based backed enums, state transitions, traits, and `php artisan make:enum`.
-22. **[`codebase-organization-and-maintenance.md`](docs/architecture/codebase-organization-and-maintenance.md)**: Exception handling, replacing `helpers.php` with `app/Support/`, model pruning.
-23. **[`senior-developer-code-review-and-refactoring.md`](docs/architecture/senior-developer-code-review-and-refactoring.md)**: Dead code purging, arrow-code flattening, Rector automation, code smells.
-24. **[`routing.md`](docs/architecture/routing.md)**: Master routing patterns, prefixes, and constraints in Laravel 13.
-25. **[`patterns.md`](docs/architecture/patterns.md)**: Detailed blueprints for Modular Monolith, DDD, Hexagonal, and CQRS.
+2. **[`error-handling-pages-and-components.md`](docs/architecture/error-handling-pages-and-components.md)**: End-to-end Laravel 13 exception handling (`bootstrap/app.php`), RFC 7807 Problem Details, `400`–`504` error pages (Blade, Livewire, Vue 3, React 19, Svelte 5), reusable UI & HTTP/HTTPS transport error components, and Pest 3 tests.
+3. **[`request-and-cache-resilience.md`](docs/architecture/request-and-cache-resilience.md)**: Inbound request lifecycle (`X-Request-Id`, Form Requests/DTOs, Idempotency-Key, RateLimiter, HTTPS/TrustProxies), outbound `Http::` Circuit Breakers & TLS/SSRF resilience, Laravel 13 `failover` cache store, `LockTimeoutException` recovery, and HTTP cache headers.
+4. **[`payment-gateways-and-fintech-integrations.md`](docs/architecture/payment-gateways-and-fintech-integrations.md)**: Master fintech guide covering Top 10 payment gateways (Stripe, bKash Tokenized, Binance Pay Crypto, PayPal, Razorpay, Paddle, Mollie, Adyen, Square, SSLCommerz), replay attack defense, double-entry ledger, payment FSM, and Pest 3 tests.
+5. **[`database-schema-design-and-indexing.md`](docs/architecture/database-schema-design-and-indexing.md)**: Production guide to database schema design, PHP 8 attributes, relationship generics, primary key strategies (ULID vs BigInt), foreign key cascades, Leftmost Prefix / ESR indexing, partial indexes, and pgvector HNSW search.
+6. **[`project-directory-tree-patterns.md`](docs/architecture/project-directory-tree-patterns.md)**: Standardized codebase directory blueprints, namespace mappings, boundary invariants, and Pest 3 boundary suites across Action-Driven, Service-Class Monolith, Modular Monolith, DDD, Hexagonal, and CQRS architectures.
+7. **[`frontend-design-craft-and-anti-ai-slop.md`](docs/architecture/frontend-design-craft-and-anti-ai-slop.md)**: Production guide to frontend design craft, anti-AI-slop rules, surface modes (Persuade, Operate, Read, Experience), Hero viewport invariant, Bento grids, themed browser surfaces, and Impeccable/Hallmark CLI audits.
+8. **[`frontend-layouts-components-and-pages.md`](docs/architecture/frontend-layouts-components-and-pages.md)**: Standardized 4-tier frontend hierarchy, domain layout shells, UI design tokens, SVG icon primitives, and multi-tenant layout isolation.
+9. **[`blade-and-livewire.md`](docs/architecture/blade-and-livewire.md)**: Server-rendered Blade components, slots, Alpine.js, Livewire v3/v4 reactive state, and `wire:stream` AI streaming.
+10. **[`inertia-and-frontend-stacks.md`](docs/architecture/inertia-and-frontend-stacks.md)**: Inertia.js v2 SPAs with Vue 3 (TS), React 19/18 (TS), Svelte 5 (Runes), Deferred Props, and Vite SSR.
+11. **[`ai-sdk-and-llm-integration.md`](docs/architecture/ai-sdk-and-llm-integration.md)**: First-party `laravel/ai` SDK architecture & 8 Core Pillars.
+12. **[`mcp-and-ai-protocols.md`](docs/architecture/mcp-and-ai-protocols.md)**: First-party Model Context Protocol (`laravel/mcp`) server & client architecture.
+13. **[`console-commands-and-scheduling.md`](docs/architecture/console-commands-and-scheduling.md)**: Concurrency isolation (`Isolatable`), Laravel Prompts, memory safety, and `routes/console.php`.
+14. **[`database-transactions-and-concurrency.md`](docs/architecture/database-transactions-and-concurrency.md)**: ACID boundaries, deadlock retries, row locks, and `afterCommit` hooks.
+15. **[`controllers-and-middleware.md`](docs/architecture/controllers-and-middleware.md)**: Single-Action Invokables (`__invoke`), fluent middleware in `bootstrap/app.php`, terminables.
+16. **[`caching-and-performance.md`](docs/architecture/caching-and-performance.md)**: Redis compression (igbinary + zstd), `Cache::flexible()`, and Cached Repositories.
+17. **[`memory-safety-and-performance.md`](docs/architecture/memory-safety-and-performance.md)**: Octane concurrency, $O(1)$ cursor streaming, WeakMap caching, worker recycling.
+18. **[`security-and-hacker-protection.md`](docs/architecture/security-and-hacker-protection.md)**: OWASP Top 10 defenses, SSRF IP filtering, timing attacks, and hardened file uploads.
+19. **[`cve-management.md`](docs/architecture/cve-management.md)**: 2026 CVE scanning (`composer audit`, OSV-Scanner, Semgrep), CVSS SLAs, and supply chain security.
+20. **[`clean-code-and-concerns.md`](docs/architecture/clean-code-and-concerns.md)**: DRY principles, trait organization (`app/Concerns/`), DTOs, and Pint formatting.
+21. **[`oop-pillars-and-organization.md`](docs/architecture/oop-pillars-and-organization.md)**: OOP 4 pillars, Composition over Inheritance, domain directory architecture.
+22. **[`namespace-import-class-standards.md`](docs/architecture/namespace-import-class-standards.md)**: PSR-4, explicit root class imports, zero inline backslashes, Pint rules.
+23. **[`enums.md`](docs/architecture/enums.md)**: Domain-based backed enums, state transitions, traits, and `php artisan make:enum`.
+24. **[`codebase-organization-and-maintenance.md`](docs/architecture/codebase-organization-and-maintenance.md)**: Exception handling, replacing `helpers.php` with `app/Support/`, model pruning.
+25. **[`senior-developer-code-review-and-refactoring.md`](docs/architecture/senior-developer-code-review-and-refactoring.md)**: Dead code purging, arrow-code flattening, Rector automation, code smells.
+26. **[`routing.md`](docs/architecture/routing.md)**: Master routing patterns, prefixes, and constraints in Laravel 13.
+27. **[`patterns.md`](docs/architecture/patterns.md)**: Detailed blueprints for Modular Monolith, DDD, Hexagonal, and CQRS.
 
 ---
 
@@ -315,23 +328,18 @@ graph TD
 
 ---
 
-## 🤖 Dedicated Autonomous Subagent (`laravel-architect`)
+## 🤖 Dedicated Autonomous Subagents & Active Security Hook
 
-The plugin includes a dedicated autonomous subagent (`agents/laravel-architect.md`) that you can invoke for deep architectural audits:
+The plugin includes **2 dedicated autonomous subagents** plus an **active `PreToolUse` real-time security guard hook** and **bundled 19-point static scanner** (merged from `shamimwhois/laravel-security-guard`):
+
+1. **`laravel-architect`** (`agents/laravel-architect.md`): Deep architectural audits covering 6-layer feature harmony, error/request/cache resilience, `laravel/mcp`, `laravel/ai`, console concurrency, ACID transactions, and PHPStan Level 8 / max coverage.
+2. **`laravel-security-auditor`** (`agents/laravel-security-auditor.md`): Dedicated AppSec auditor executing the 19-point vulnerability runbook, running the static scanner + `composer audit`, implementing hardened fixes, and writing Pest 3 security regression tests.
+3. **Active `PreToolUse` Write Guard (`hooks.json` + `scripts/pre-write-guard.mjs`)**: Automatically inspects edits to Laravel `.php`, `.blade.php`, `.env*`, and proxy `.conf` files before writing and prompts for confirmation if high-confidence security hazards (raw SQL interpolation, XSS `{!! $request !!}`, wildcard CSRF, SSRF, Path Traversal, Command Injection, `$guarded = []`, Open Redirect, hardcoded secrets, `APP_DEBUG=true`, weak `md5`/`sha1` password hashes, `unserialize()`, `LIBXML_NOENT`, `Blade::render($...)`, wildcard credentialed CORS, `TrustProxies = '*'`, or disabled TLS `withoutVerifying()`) are introduced.
 
 ```bash
-# Example user prompt triggering the subagent:
-"Audit my checkout flow using the laravel-architect subagent"
+# Run the bundled 19-point zero-dependency static security scanner manually:
+node ~/.gemini/config/plugins/laravel/skills/laravel-security-guard/scripts/laravel-security-scan.mjs /path/to/laravel-app --fail-on-high
 ```
-
-The architect audits:
-- Feature layer harmony (Migration $\rightarrow$ Route).
-- Model Context Protocol (`laravel/mcp`) server and tool schemas.
-- Autonomous agent guardrails & prompt injection boundaries (`laravel/ai`).
-- Console command concurrency isolation (`Isolatable`) and memory leaks.
-- Database transaction boundaries, deadlock retries, and lock ordering.
-- AppSec, OWASP Top 10, SSRF defenses, and supply chain CVEs.
-- PHPStan Level 8 / max type coverage.
 
 ---
 
@@ -340,9 +348,15 @@ The architect audits:
 ```text
 ~/.gemini/config/plugins/laravel/
 ├── plugin.json
+├── hooks.json
 ├── README.md
+├── assets/
+│   └── logo.svg
+├── scripts/
+│   └── pre-write-guard.mjs
 ├── agents/
-│   └── laravel-architect.md
+│   ├── laravel-architect.md
+│   └── laravel-security-auditor.md
 ├── rules/
 │   └── AGENTS.md
 ├── docs/
@@ -375,6 +389,8 @@ The architect audits:
 │       ├── inertia-and-frontend-stacks.md
 │       ├── frontend-design-craft-and-anti-ai-slop.md
 │       ├── frontend-layouts-components-and-pages.md
+│       ├── error-handling-pages-and-components.md
+│       ├── request-and-cache-resilience.md
 │       ├── payment-gateways-and-fintech-integrations.md
 │       ├── database-schema-design-and-indexing.md
 │       └── project-directory-tree-patterns.md
@@ -383,24 +399,33 @@ The architect audits:
     ├── artisan-make-commands/SKILL.md
     ├── laravel-ai-sdk/SKILL.md
     ├── laravel-api-design/SKILL.md
+    ├── laravel-auth-and-access-guard/SKILL.md
     ├── laravel-best-practices/SKILL.md
     ├── laravel-console-and-scheduling/SKILL.md
     ├── laravel-controllers-and-middleware/SKILL.md
     ├── laravel-database-architecture/SKILL.md
     ├── laravel-dead-code-elimination/SKILL.md
+    ├── laravel-edge-and-supply-chain-guard/SKILL.md
     ├── laravel-eloquent-orm/SKILL.md
+    ├── laravel-error-handling-and-pages/SKILL.md
     ├── laravel-frontend-blade-livewire/SKILL.md
     ├── laravel-frontend-design-craft/SKILL.md
     ├── laravel-frontend-layouts-and-pages/SKILL.md
     ├── laravel-inertia-spa/SKILL.md
+    ├── laravel-injection-and-input-guard/SKILL.md
     ├── laravel-mcp/SKILL.md
     ├── laravel-memory-safety/SKILL.md
     ├── laravel-payment-gateways/SKILL.md
     ├── laravel-performance-and-caching/SKILL.md
     ├── laravel-project-structure/SKILL.md
+    ├── laravel-request-and-cache-handling/SKILL.md
     ├── laravel-routing/SKILL.md
     ├── laravel-scaffolding/SKILL.md
     ├── laravel-security-and-hardening/SKILL.md
+    ├── laravel-security-guard/
+    │   ├── SKILL.md
+    │   ├── references/pest-security-tests.md
+    │   └── scripts/laravel-security-scan.mjs
     ├── pest-testing/SKILL.md
     ├── php-modern-syntax/SKILL.md
     └── phpstan-larastan/SKILL.md

@@ -8,6 +8,7 @@ description: High-performance caching, payload compression (igbinary, zstd), Sta
 This skill guides the design, auditing, and refactoring of high-speed caching architectures in Laravel 13, including Redis payload compression, cache stampede defense, and refactoring messy procedural caching code into clean architectural patterns.
 
 > 📖 **Master Specification**: For deep-dive benchmarks, OPcache/JIT settings, and Redis configuration, see **[docs/architecture/caching-and-performance.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/caching-and-performance.md)**.
+> 🛡️ **Cache Failover, Lock Timeout Recovery & HTTP Cache Headers**: For Laravel 13 `failover` cache store (`redis -> database -> array`), `LockTimeoutException` handling, versioned multi-tenant keys, and HTTP `Cache-Control` / `ETag` resilience, see **`laravel-request-and-cache-handling`** and **[docs/architecture/request-and-cache-resilience.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/request-and-cache-resilience.md)**.
 
 ---
 

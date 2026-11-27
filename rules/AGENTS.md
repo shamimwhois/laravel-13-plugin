@@ -297,24 +297,29 @@ All generated code must be fully compliant with PHPStan / Larastan at Level 8 or
 
 ---
 
-## 13. Security Hardening & Vulnerability Prevention
+## 13. Security Hardening & 19-Point Vulnerability Defense Guard
 
-- **SQL Injection Defense**:
-  - NEVER interpolate variables into raw queries (`DB::raw()`, `whereRaw()`). ALWAYS use PDO parameter bindings (`whereRaw('status = ?', [$status])`).
-  - Dynamic `orderBy()` columns must ALWAYS be validated against a strict hardcoded whitelist array.
-- **Access Control & IDOR Prevention**:
-  - ALWAYS apply `->scopeBindings()` on nested route parameters to prevent cross-tenant record tampering.
-  - Mandate explicit Policy authorization (`$user->can(...)` or `$this->authorize(...)`) in Form Requests or Actions before any mutation.
-- **Constant-Time Cryptography**:
-  - ALWAYS compare signatures, HMACs, and auth tokens using `hash_equals()`. NEVER use `===` or `strcmp()` for cryptographic verification (prevents timing side-channel attacks).
-- **SSRF (Server-Side Request Forgery) Defense**:
-  - When fetching user-provided URLs, ALWAYS resolve the hostname and reject private/reserved IP ranges (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `127.0.0.1`, `169.254.169.254`).
-- **File Upload Hardening & RCE Defense**:
-  - NEVER trust client-reported file extensions or MIME types. ALWAYS inspect binary Magic Bytes via `finfo_file()`.
-  - Store uploaded files on private disks outside the web root (`storage/app/private/`) using cryptographically randomized filenames (`Str::random(40)`).
-- **Strict Model Invariants & Deserialization**:
-  - Enable `Model::preventSilentlyDiscardingAttributes(!app()->isProduction())` in `AppServiceProvider`.
-  - NEVER call `unserialize()` on untrusted input; use `json_decode()` with `JSON_THROW_ON_ERROR`.
+Whenever designing, writing, editing, or reviewing Laravel or PHP code, strictly enforce these **19 non-negotiable security guardrails** (merged from `laravel-security-guard`; load `laravel-security-guard` or its domain skills `laravel-injection-and-input-guard`, `laravel-auth-and-access-guard`, `laravel-edge-and-supply-chain-guard`, or invoke `laravel-security-auditor` for deep audits & static scans):
+
+1. **SQL Injection**: NEVER concatenate or interpolate variables into `DB::raw()`, `whereRaw()`, `selectRaw()`, `orderByRaw()`, `havingRaw()`, `groupByRaw()`, or `DB::select()`. Always use `?` or named PDO parameter bindings, and validate dynamic `orderBy()` columns/directions against a strict hardcoded allowlist.
+2. **Cross-Site Scripting (XSS)**: Default to escaped Blade `{{ $var }}`. NEVER render untrusted input with `{!! $var !!}`, `v-html`, or `dangerouslySetInnerHTML` without strict allowlist sanitization (HTML Purifier) and a nonce-based CSP. Serialize PHP into inline JS via `Js::from($data)` and validate `href`/`src` URLs against `https://`, `http://`, or safe relative paths.
+3. **Cross-Site Request Forgery (CSRF)**: Keep `ValidateCsrfToken` active on stateful web routes and include `@csrf` in every HTML form. NEVER add wildcard exclusions (`'*'`, `'api/*'` on cookie-auth routes) to `validateCsrfTokens(except: [...])`; exempt only HMAC-verified stateless webhooks. Never mutate state on `GET` routes; keep session cookies at `same_site => 'lax'` (or `'strict'`).
+4. **Broken Access Control (IDOR & Missing Authorization)**: Enforce authorization on EVERY sensitive endpoint via Form Request `authorize()`, Policies (`$this->authorize()` / `Gate::authorize()`), or `can:` middleware. Apply `->scopeBindings()` on all nested route parameters, use ULIDs/UUIDs for public resources, mark immutable Livewire public properties with `#[Locked]`, and re-authorize inside every Livewire action.
+5. **Server-Side Request Forgery (SSRF)**: Before fetching any user-supplied URL (`Http::`, Guzzle, cURL, `file_get_contents`), enforce an `https`/`http` scheme allowlist, resolve ALL DNS A/AAAA records, reject loopback, private, link-local, multicast, IPv6-mapped IPv4 (`::ffff:127.0.0.1`), and cloud metadata IPs (`169.254.169.254`, `fd00:ec2::254`, `100.100.100.200`), disable/re-validate redirects, and pin the validated IP (`CURLOPT_RESOLVE`).
+6. **Path Traversal & Zip Slip**: NEVER pass raw user input into `Storage::download()`, `response()->file()`, `file_get_contents()`, `include`/`require`, or filesystem deletes. Resolve paths via `basename()` or server-generated IDs (`Str::random(40)`), verify `realpath()` containment inside the base directory, inspect binary magic bytes via `finfo`, store uploads on private disks outside `public/`, and reject `..` entries when extracting archives.
+7. **Command Injection**: Ban `exec()`, `shell_exec()`, `system()`, `passthru()`, `popen()`, `proc_open()`, and backticks. Invoke OS binaries exclusively via `Illuminate\Support\Facades\Process` with argument arrays (`Process::run(['convert', '--', $safeInput])`) and strict regex validation.
+8. **Mass Assignment**: NEVER set `protected $guarded = []` or call `Model::unguard()`. Explicitly declare allowed fields via `#[Fillable([...])]` (excluding `is_admin`, `role`, `balance`, `tenant_id`, `email_verified_at`), persist only `$request->validated()` or typed DTOs, and enable `Model::preventSilentlyDiscardingAttributes(! app()->isProduction())`.
+9. **Open Redirect**: NEVER pass unvalidated user input directly to `redirect($url)`, `redirect()->to($url)`, or `redirect()->away($url)`. Restrict dynamic targets to single-slash relative paths (rejecting `//` and `/\`) or an explicit `https://` host allowlist.
+10. **Leaked Secrets**: NEVER hardcode `APP_KEY`, DB passwords, API keys, JWT/webhook secrets, or private keys; never commit `.env`. Read secrets exclusively via `config()`, never expose secrets via `VITE_*` variables or Inertia shared props, and scrub sensitive keys in Monolog processors.
+11. **Using Components with Known Vulnerabilities (CVEs)**: Run `composer audit --abandoned=fail` and `npm audit --omit=dev` (plus OSV-Scanner/Semgrep in CI) before shipping, commit lockfiles, and stay on supported PHP/Laravel security branches.
+12. **Improper Assets Management (Debug Mode On)**: Enforce `APP_DEBUG=false` and `APP_ENV=production` in production; never default `config/app.php` `debug` to `true`. Strictly gate Telescope/Horizon/Pulse behind production admin allowlists; never leave `phpinfo()`, debug routes, `.git/`, `.env`, `storage/logs`, or SQL dumps web-accessible.
+13. **Broken Authentication**: Hash passwords exclusively with `Hash::make()` (Bcrypt/Argon2id); ban `md5()`/`sha1()`. Enforce `Password::defaults()`, throttle login/reset/MFA endpoints, call `$request->session()->regenerate()` on login and `invalidate()` + `regenerateToken()` on logout, enforce `secure`/`http_only`/`same_site` cookies, scope expiring Sanctum tokens, and compare tokens/HMACs strictly with `hash_equals()`.
+14. **Insecure Deserialization & `phar://`**: NEVER call `unserialize()` on untrusted input; use `json_decode($data, true, 512, JSON_THROW_ON_ERROR)` (or strictly `['allowed_classes' => false]` for legacy data). Reject `phar://` and unknown stream wrappers before filesystem calls.
+15. **XML External Entity (XXE) Injection**: NEVER pass `LIBXML_NOENT` or `LIBXML_DTDLOAD` to XML parsers. Disable external entity loading, pass `LIBXML_NONET`, and reject `<!DOCTYPE` / `<!ENTITY` declarations in untrusted XML/SVG/SAML/Office payloads.
+16. **Server-Side Template Injection (SSTI)**: NEVER pass user-supplied strings to `Blade::render()`, `Blade::compileString()`, `eval()`, or template compilers, and never write user content into `.blade.php` files. Use static templates or allowlisted `strtr()` token replacement.
+17. **Clickjacking**: Attach a global `SecurityHeaders` middleware in `bootstrap/app.php` emitting `X-Frame-Options: DENY` (or `SAMEORIGIN`) AND `Content-Security-Policy: frame-ancestors 'none'`, plus `X-Content-Type-Options: nosniff`, `Referrer-Policy`, and `Strict-Transport-Security`.
+18. **CORS Misconfiguration**: NEVER combine `'allowed_origins' => ['*']` with `'supports_credentials' => true`, NEVER reflect arbitrary `Origin` headers, and NEVER trust `Origin: null`. Use explicit trusted origins or anchored regexes.
+19. **HTTP Request Smuggling & TLS Integrity**: Configure `TrustProxies` with explicit proxy CIDRs and `TrustHosts` in `bootstrap/app.php`. Enforce HTTP/1.1 & HTTP/2 framing parity (`ignore_invalid_headers on`), ensure zero per-request state leakage in Octane/FrankenPHP, and NEVER disable outbound TLS certificate verification (`withoutVerifying()` / `verify => false`) in production.
 
 ---
 
@@ -648,6 +653,47 @@ All frontend templates, Blade views, Livewire components, and Inertia.js (Vue 3,
 - **Design Governance & Automated Verification**:
   - Audit templates with `npx impeccable detect resources/views/` and `npx impeccable audit <path>`.
   - Validate with automated Pest 3 boundary tests in `tests/Arch/FrontendDesignTest.php` forbidding forbidden gradient classes and unorganized inline styles.
+
+---
+
+## 25. Error Handling, Error Pages & HTTP/HTTPS Error Component Rules
+
+All Laravel 13 exception handling, error views, and HTTP/HTTPS error UI components must strictly follow these rules:
+
+- **Unified `bootstrap/app.php` Exception Orchestration**:
+  - NEVER create legacy `app/Exceptions/Handler.php`. Configure `shouldRenderJsonWhen`, RFC 7807 `application/problem+json` rendering, `dontReportDuplicates()`, and Inertia error rendering exclusively inside `withExceptions()` in `bootstrap/app.php`.
+  - ALWAYS attach a correlation Trace ID (`X-Request-Id` ULID via `Context::add('trace_id', ...)`) to every logged exception, RFC 7807 payload, and rendered error page.
+  - ALWAYS emit `Cache-Control: no-store, private` on every `4xx`/`5xx` error response so CDNs and browsers never cache transient errors or user-specific error details.
+  - NEVER expose stack traces, SQL queries, file paths, or `.env` values when `APP_DEBUG=false`.
+- **Complete Error Pages & Isolated Error Layout**:
+  - Ship branded, accessible error pages covering `400`, `401`, `402`, `403`, `404`, `419` (CSRF expired), `422`, `429` (Rate Limited with `Retry-After` countdown), `500`, `502`, `503` (Maintenance / Upstream Unavailable), and `504` across Blade (`resources/views/errors/`), Livewire, and Inertia (`pages/errors/Index`).
+  - Isolate `layouts/error.blade.php` / `ErrorLayout` from all database queries, Redis calls, and `auth()->user()` lookups to prevent cascading double-fault blank pages during outages.
+- **Reusable UI, HTTP & HTTPS Transport Error Components**:
+  - Standardize accessible validation error components (`components/ui/error/field`, `components/ui/error/summary`, `FieldError`, `ErrorSummary`) with `role="alert"`, `aria-live="polite"`, and real SVG icons (zero emoji).
+  - Wrap unstable frontend islands/deferred widgets in Error Boundaries (React `ErrorBoundary`, Vue `onErrorCaptured`, Svelte `<svelte:boundary>`) with non-destructive retry actions.
+  - Provide unified **HTTP status** (`components/error/http-status` / `HttpErrorCard`) and **HTTPS transport** (`components/error/https-transport` / `HttpsTransportAlert`) components handling `419` token refresh, `429` countdown, browser offline/reconnecting alerts, insecure HTTP downgrade alerts, and `502`/`504` gateway recovery.
+  - Enforce `URL::forceScheme('https')` in production, `EnsureHttpsRequest` (`308` web redirect / `426 Upgrade Required` API), HSTS, and `upgrade-insecure-requests` CSP.
+
+---
+
+## 26. Resilient Request Handling & Cache Handling Rules
+
+All inbound HTTP/HTTPS requests, outbound `Http::` calls, and application/HTTP caching must strictly enforce these resilience rules:
+
+- **Inbound Request Handling**:
+  - Prepend `AttachRequestContextMiddleware` to assign/validate a ULID `X-Request-Id`, bind request metadata to `Illuminate\Support\Facades\Context`, and echo `X-Request-Id` on every response.
+  - Normalize inputs in Form Request `prepareForValidation()`, authorize in `authorize()`, validate with `rules()` or `JsonSchema::rules()`, and hydrate immutable `final readonly` DTOs (`toDto()`).
+  - Protect state-mutating payment/order endpoints with `Idempotency-Key` middleware backed by `Cache::lock()` and SHA-256 request payload fingerprinting (`409 Conflict` on concurrent in-flight duplicate, `422` on payload mismatch).
+  - Enforce tiered burst + sustained rate limiting via `RateLimiter::for()` returning RFC 7807 `429` with `Retry-After`.
+- **Outbound HTTP / HTTPS Request Handling**:
+  - ALWAYS configure explicit `connectTimeout()` and `timeout()` on `Illuminate\Support\Facades\Http` calls; never permit unbounded hangs.
+  - Retry ONLY transient failures (`ConnectionException`, `429`, `502`, `503`, `504`) with jittered exponential backoff; never retry non-idempotent writes without an `Idempotency-Key`.
+  - Wrap unstable external HTTPS dependencies in a Cache-backed `CircuitBreaker` and route user-supplied URLs exclusively through SSRF-safe `SafeHttpClient` with strict TLS verification (never `withoutVerifying()` in production).
+- **Resilient Cache Handling**:
+  - Configure Laravel 13's native `failover` cache store (`redis -> database -> array`) in `config/cache.php` and guard critical cache reads with `ResilientCache` so Redis outages degrade gracefully instead of crashing with `500 RedisException`.
+  - ALWAYS handle `LockTimeoutException` explicitly on `Cache::lock()->block()` calls (returning `503` + `Retry-After` or a stale fallback).
+  - Use `Cache::flexible()` for read-heavy SWR keys, `Cache::touch()` for TTL renewal, `igbinary` + `zstd` compression, and versioned multi-tenant cache keys (`t:{tenantId}:{domain}:v{n}:{key}`) invalidated strictly via `DB::afterCommit()`.
+  - Apply `Cache-Control: public, max-age=..., stale-while-revalidate=..., stale-if-error=...` + `ETag` on public GETs and strict `Cache-Control: no-store, private` on authenticated PII, auth, and `4xx`/`5xx` error responses.
 
 
 
