@@ -1,15 +1,23 @@
-# Laravel 13 & Modern PHP 8.6+ Antigravity Plugin
+<p align="center">
+  <img src="assets/banner.png" alt="Laravel 13 &amp; PHP 8.5 / 8.6 Enterprise Architecture &amp; Security Plugin Overview (v3.1.0)" width="100%" />
+</p>
 
-[![GitHub Repository](https://img.shields.io/badge/GitHub-shamimwhois%2Flaravel--13--plugin-181717?style=flat&logo=github)](https://github.com/shamimwhois/laravel-13-plugin)
-[![Version](https://img.shields.io/badge/version-3.1.0-red.svg)](https://github.com/shamimwhois/laravel-13-plugin/releases)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?logo=laravel)](https://laravel.com)
-[![PHP](https://img.shields.io/badge/PHP-8.6%2B-777BB4?logo=php)](https://php.net)
-[![Pest](https://img.shields.io/badge/Tested%20with-Pest%203-9333EA)](https://pestphp.com)
-[![PHPStan](https://img.shields.io/badge/PHPStan-Level%208%20%2F%20Max-brightgreen)](https://phpstan.org)
-[![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-blue)](https://modelcontextprotocol.io)
+<h1 align="center">Laravel 13 &amp; Modern PHP 8.5+ / 8.6+ Antigravity Plugin</h1>
 
-An enterprise-grade, comprehensive toolkit, architectural framework, and autonomous agent skill pack for developing, refactoring, and architecting modern PHP (**PHP 8.4, PHP 8.5 & PHP 8.6+**) and **Laravel 13** applications with the Antigravity AI assistant.
+<p align="center">
+  <a href="https://github.com/shamimwhois/laravel-13-plugin"><img src="https://img.shields.io/badge/GitHub-shamimwhois%2Flaravel--13--plugin-181717?style=flat&logo=github" alt="GitHub Repository" /></a>
+  <a href="https://github.com/shamimwhois/laravel-13-plugin/releases"><img src="https://img.shields.io/badge/version-3.1.0-red.svg" alt="Version" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
+  <a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-13.x-FF2D20?logo=laravel" alt="Laravel" /></a>
+  <a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.5%2B%20%2F%208.6%2B-777BB4?logo=php" alt="PHP" /></a>
+  <a href="https://pestphp.com"><img src="https://img.shields.io/badge/Tested%20with-Pest%203-9333EA" alt="Pest" /></a>
+  <a href="https://phpstan.org"><img src="https://img.shields.io/badge/PHPStan-Level%208%20%2F%20Max-brightgreen" alt="PHPStan" /></a>
+  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-Model%20Context%20Protocol-blue" alt="MCP" /></a>
+</p>
+
+<p align="center">
+  An enterprise-grade, comprehensive toolkit, architectural framework, and autonomous agent skill pack for developing, refactoring, and architecting modern PHP (<strong>PHP 8.4, PHP 8.5 &amp; PHP 8.6+</strong>) and <strong>Laravel 13</strong> applications with the Antigravity AI assistant.
+</p>
 
 ---
 
@@ -352,6 +360,7 @@ node ~/.gemini/config/plugins/laravel/skills/laravel-security-guard/scripts/lara
 ├── hooks.json
 ├── README.md
 ├── assets/
+│   ├── banner.png
 │   └── logo.svg
 ├── scripts/
 │   └── pre-write-guard.mjs
