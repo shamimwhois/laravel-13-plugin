@@ -13,7 +13,7 @@ graph TD
     UserInterface["Laravel 13 User Interface"] --> Paradigm{"Architectural Choice"}
     
     Paradigm -- Full-Stack PHP & Reactive DOM --> BladeLivewire["Blade & Livewire (v3 & v4)"]
-    Paradigm -- Single-Page Application (SPA) --> InertiaStack["Inertia.js v2 (Vue 3 / React / Svelte)"]
+    Paradigm -- Single-Page Application (SPA) --> InertiaStack["Inertia.js v3 (Vue 3 / React 19 / Svelte 5)"]
     
     BladeLivewire --> BladeComponents["1. Blade Component Architecture"]
     BladeLivewire --> LivewireComponents["2. Livewire v3/v4 Reactive Components"]

@@ -477,22 +477,23 @@ All frontend templates, components, and client-side single-page applications mus
   - Cache heavy queries using `#[Computed(persist: true)]`, and defer slow dashboard widgets using `#[Lazy]` with a dedicated `placeholder()` skeleton view.
   - Stream LLM tokens incrementally to the DOM using Livewire's `$this->stream()` targeting elements marked with `wire:stream` when integrating with `laravel/ai`.
   - Reserve Livewire for server-dependent state; use **Alpine.js** (`x-data`, `x-show`, `x-transition`) for purely client-side micro-interactions (dropdowns, dialogs, tabs).
-- **Inertia.js v2 Single-Page Applications (Vue 3, React, Svelte 5)**:
-  - NEVER return raw Eloquent models or unmapped collections from Inertia controllers. ALWAYS transform data using `JsonResource` or dedicated DTOs to prevent sensitive model attributes from leaking into client page props.
-  - Wrap queries taking longer than 100ms in **Deferred Props** (`Inertia::defer(fn () => ...)`) and hydrate on the client using `<Deferred data="...">` with fallback loading skeletons.
-  - Author Vue 3 components with `<script setup lang="ts">` and React 19/18 with TypeScript JSX, enforcing explicit typed interface declarations for all page props.
-  - Author Svelte 5 components using modern Runes (`let { prop }: Props = $props();`, `$state()`, `$derived()`) instead of legacy `export let` statements.
-  - Manage form interactions using Inertia's native `useForm()` hook for client-side dirty state tracking, automatic validation error mapping, and file uploads.
+- **Inertia.js v3 Single-Page Applications (`@inertiajs/*` v3.11+ & `inertia-laravel` v3.8+)**:
+  - NEVER return raw Eloquent models or unmapped collections from Inertia controllers. ALWAYS transform data using `JsonResource` or immutable DTOs to prevent sensitive model attributes from leaking into client page props.
+  - Wrap queries taking longer than 100ms in **Deferred Props** (`Inertia::defer(fn () => ..., rescue: true)`) and hydrate on the client using `<Deferred data="...">` with `#fallback` and `#rescue` slots. Use **`Inertia::optional()`** for explicit partial reloads (never removed v2 `Inertia::lazy()`), `Inertia::once()`/`shareOnce()` for stable shared data, and **`Inertia::live()`** + `useProp()` for real-time WebSocket prop updates.
+  - Author Vue 3 components with `<script setup lang="ts">`, **React 19+** with TypeScript JSX (React 18 dropped; wrap arrow-function persistent layouts as `Page.layout = [Layout]`), and **Svelte 5+** with Runes (`let { prop }: Props = $props();`, `$state()`, `$derived()`).
+  - Use `<Form>` (`createForm<T>()` in Vue/Svelte, `<Form<T>>` in React) or `useForm()` with built-in Precognition and `.optimistic()` for page mutations, **`useHttp()`** for standalone JSON/API calls without page visits, and `setLayoutProps()` / `resetLayoutProps()` for dynamic layout chrome (never invent `useLayoutProps()`).
+  - Use Inertia v3's built-in XHR client with `http.onRequest` / `onResponse` / `onError` interceptors (Axios is removed from core; only opt into `axiosAdapter()` when legacy Axios plugins require it) and listen to v3 **`httpException`** / **`networkError`** events (never removed v2 `invalid` / `exception`).
+  - Use `<x-inertia::head>` (with SSR fallback slot) and `<x-inertia::app />` in `resources/views/app.blade.php`, and `Inertia::handleExceptionsUsing()` for shared-data Inertia error pages.
 - **Vite & Frontend Testing Standards**:
-  - Configure `vite.config.ts` using `laravel-vite-plugin` with SSR entries (`resources/js/ssr.ts`) and path aliases (`@ -> /resources/js`).
+  - Configure `vite.config.ts` (Vite 7/8, ESM-only ES2022) using `laravel-vite-plugin` paired with `@inertiajs/vite` (`inertia()` — enables zero-config `createInertiaApp()` and built-in Dev SSR without a separate Node SSR daemon; use Node.js 22+ for production SSR).
   - Test Livewire components with Pest 3 using `Livewire::test()` verifying computed properties, action execution, validation errors, and locked property security exceptions.
-  - Test Inertia endpoints with Pest 3 using `assertInertia(fn (AssertableInertia $page) => ...)` asserting component names, typed prop structures, and deferred groups.
+  - Test Inertia endpoints with Pest 3 using `assertInertia(fn (AssertableInertia $page) => ...)` asserting component names, typed prop structures, deferred groups (`loadDeferredProps()`), and flash payloads (`hasFlash()` / `assertInertiaFlash()`).
 
 ---
 
 ## 19. Canonical Frontend Directory Organization: Layouts, Components & Pages
 
-All frontend assets across Blade, Livewire, Vue 3, React 19/18, and Svelte 5 must strictly adhere to the standardized 4-tier directory architecture:
+All frontend assets across Blade, Livewire, Vue 3, React 19, and Svelte 5 must strictly adhere to the standardized 4-tier directory architecture:
 
 - **Strict 4-Tier Directory Scoping**:
   - `layouts/`: Master application shells. Must ONLY contain outer HTML scaffolding, asset tags, and slot insertion points (`layouts/app`, `layouts/auth`, `layouts/customer`, `layouts/admin`, `layouts/public`).
@@ -688,7 +689,7 @@ All frontend templates, Blade views, Livewire components, and Inertia.js (Vue 3,
 All Laravel 13 exception handling, error views, and HTTP/HTTPS error UI components must strictly follow these rules:
 
 - **Unified `bootstrap/app.php` Exception Orchestration**:
-  - NEVER create legacy `app/Exceptions/Handler.php`. Configure `shouldRenderJsonWhen`, RFC 7807 `application/problem+json` rendering, `dontReportDuplicates()`, and Inertia error rendering exclusively inside `withExceptions()` in `bootstrap/app.php`.
+  - NEVER create legacy `app/Exceptions/Handler.php`. Configure `shouldRenderJsonWhen`, RFC 7807 `application/problem+json` rendering, `dontReportDuplicates()`, and response hardening inside `withExceptions()` in `bootstrap/app.php` (and leverage Inertia v3's `Inertia::handleExceptionsUsing()` when rendering Inertia error pages with shared data).
   - ALWAYS attach a correlation Trace ID (`X-Request-Id` ULID via `Context::add('trace_id', ...)`) to every logged exception, RFC 7807 payload, and rendered error page.
   - ALWAYS emit `Cache-Control: no-store, private` on every `4xx`/`5xx` error response so CDNs and browsers never cache transient errors or user-specific error details.
   - NEVER expose stack traces, SQL queries, file paths, or `.env` values when `APP_DEBUG=false`.

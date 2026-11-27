@@ -1,6 +1,6 @@
 # Laravel 13 Frontend Layouts, Components & Pages Directory Architecture
 
-This document defines the standardized directory structure, component categorization, layout boundaries, and page organization across all frontend stacks in Laravel 13: **Blade**, **Livewire (v3 & v4)**, and **Inertia.js v2** (**Vue 3**, **React 19/18**, and **Svelte 5**).
+This document defines the standardized directory structure, component categorization, layout boundaries, and page organization across all frontend stacks in Laravel 13: **Blade**, **Livewire (v3 & v4)**, and **Inertia.js v3** (**Vue 3**, **React 19+**, and **Svelte 5+**).
 
 ---
 
@@ -104,7 +104,7 @@ resources/views/
 
 ---
 
-### B. Inertia.js v2 SPA (`resources/js/`) (Vue 3, React 19, Svelte 5)
+### B. Inertia.js v3 SPA (`resources/js/`) (Vue 3, React 19, Svelte 5)
 
 ```text
 resources/js/

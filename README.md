@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Laravel 13 &amp; PHP 8.5 / 8.6 Enterprise Architecture &amp; Security Plugin Overview (v3.1.0)" width="100%" />
+  <img src="assets/banner.png" alt="Laravel 13 &amp; PHP 8.5 / 8.6 Enterprise Architecture &amp; Security Plugin Overview (v3.2.0)" width="100%" />
 </p>
 
 <h1 align="center">Laravel 13 &amp; Modern PHP 8.5+ / 8.6+ Antigravity Plugin</h1>
 
 <p align="center">
   <a href="https://github.com/shamimwhois/laravel-13-plugin"><img src="https://img.shields.io/badge/GitHub-shamimwhois%2Flaravel--13--plugin-181717?style=flat&logo=github" alt="GitHub Repository" /></a>
-  <a href="https://github.com/shamimwhois/laravel-13-plugin/releases"><img src="https://img.shields.io/badge/version-3.1.0-red.svg" alt="Version" /></a>
+  <a href="https://github.com/shamimwhois/laravel-13-plugin/releases"><img src="https://img.shields.io/badge/version-3.2.0-red.svg" alt="Version" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" /></a>
   <a href="https://laravel.com"><img src="https://img.shields.io/badge/Laravel-13.x-FF2D20?logo=laravel" alt="Laravel" /></a>
   <a href="https://php.net"><img src="https://img.shields.io/badge/PHP-8.5%2B%20%2F%208.6%2B-777BB4?logo=php" alt="PHP" /></a>
@@ -30,7 +30,7 @@
 - [The 31 Registered Skills](#-the-31-registered-skills)
 - [The 26 Always-On Quality & Security Rules](#-the-26-always-on-quality--security-rules)
 - [The 28 Master Architectural Guides](#-the-28-master-architectural-guides)
-- [Full-Stack Frontend Architecture (Blade, Livewire, Inertia.js v2)](#-full-stack-frontend-architecture-blade-livewire-inertiajs-v2)
+- [Full-Stack Frontend Architecture (Blade, Livewire, Inertia.js v3)](#-full-stack-frontend-architecture-blade-livewire-inertiajs-v3)
   - [The Canonical 4-Tier Frontend Directory Standard](#-the-canonical-4-tier-frontend-directory-standard)
 - [First-Party AI SDK (`laravel/ai`) - The 8 Core Pillars](#-first-party-ai-sdk-laravelai---the-8-core-pillars)
 - [Model Context Protocol (`laravel/mcp`) Architecture](#-model-context-protocol-laravelmcp-architecture)
@@ -46,9 +46,9 @@
 This plugin transforms the Antigravity AI assistant into an expert **Principal Laravel 13 & PHP 8.6+ Software Architect**. It provides:
 
 - **Merged 19-Point Laravel Security Guard (`hooks.json` + Static Scanner + `laravel-security-auditor`)**: Full integration of `shamimwhois/laravel-security-guard` covering all 19 vulnerability classes (SQLi, XSS, CSRF, BAC/IDOR, SSRF, Path Traversal, Command Injection, Mass Assignment, Open Redirect, Leaked Secrets, CVEs, Debug Mode/Assets, Broken Auth, Deserialization/`phar://`, XXE, SSTI, Clickjacking, CORS, HTTP Request Smuggling + TLS verification), active `PreToolUse` real-time write guard hook, zero-dependency Node.js static scanner, and Pest 3 security regression suite.
-- **Error Handling, Error Pages & HTTP/HTTPS Transport Components**: Unified `bootstrap/app.php` exception handling with RFC 7807 Problem Details, ULID `X-Request-Id` Trace IDs, complete `400`–`504` error pages (Blade, Livewire v3/v4, Inertia v2 Vue 3 / React 19 / Svelte 5), isolated zero-DB `layouts/error`, accessible UI validation/boundary error components, and HTTP/HTTPS transport error components (`419` CSRF refresh, `429` countdown, HTTPS enforcement, offline/TLS recovery).
+- **Error Handling, Error Pages & HTTP/HTTPS Transport Components**: Unified `bootstrap/app.php` exception handling (`withExceptions()`) and Inertia v3 `Inertia::handleExceptionsUsing()`, RFC 7807 Problem Details, ULID `X-Request-Id` Trace IDs, complete `400`–`504` error pages (Blade, Livewire v3/v4, Inertia v3 Vue 3 / React 19 / Svelte 5), isolated zero-DB `layouts/error`, accessible UI validation/boundary error components, and HTTP/HTTPS transport error components (`419` CSRF refresh, `429` countdown, HTTPS enforcement, `networkError`/`httpException` hooks).
 - **Resilient Request & Cache Handling**: Inbound `AttachRequestContextMiddleware`, Form Requests + DTOs + `JsonSchema::rules()`, atomic `Idempotency-Key` locks, tiered `RateLimiter`, outbound `Http::` timeouts/jittered retries/SSRF/TLS/Circuit Breakers, Laravel 13 `failover` cache stores (`redis -> database -> array`), `LockTimeoutException` recovery, versioned multi-tenant cache keys, and HTTP `Cache-Control` / `ETag` / `no-store` headers.
-- **Frontend Design Craft & Anti-AI-Slop Standards**: Synthesizes the core principles of Paul Bakaus's Impeccable (`pbakaus/impeccable`), Leon Lin's Taste Skill (`Leonxlnx/taste-skill`), and Hassan El Mghari's Hallmark (`nutlope/hallmark`) into Blade, Livewire v3/v4, and Inertia.js v2 (Vue 3, React 19, Svelte 5). Enforces the Hero Viewport Invariant (headline, 1 sentence, and CTA at 1280x800 without scrolling), strict ban on cliché purple-to-blue gradients and identical 3-card grids, asymmetric Bento layouts, themed native browser surfaces (`::selection`, `caret-color`, custom scrollbars, `:focus-visible`), and automated verification via `npx impeccable detect` and `sloplint`.
+- **Frontend Design Craft & Anti-AI-Slop Standards**: Synthesizes the core principles of Paul Bakaus's Impeccable (`pbakaus/impeccable`), Leon Lin's Taste Skill (`Leonxlnx/taste-skill`), and Hassan El Mghari's Hallmark (`nutlope/hallmark`) into Blade, Livewire v3/v4, and Inertia.js v3 (Vue 3, React 19, Svelte 5). Enforces the Hero Viewport Invariant (headline, 1 sentence, and CTA at 1280x800 without scrolling), strict ban on cliché purple-to-blue gradients and identical 3-card grids, asymmetric Bento layouts, themed native browser surfaces (`::selection`, `caret-color`, custom scrollbars, `:focus-visible`), and automated verification via `npx impeccable detect` and `sloplint`.
 - **Database Architecture & Schema Standards**: Comprehensive schema design with PHP 8 attributes (`#[Table]`, `#[Fillable]`, `#[Hidden]`, `#[UseEloquentBuilder]`, `#[ScopedBy]`), typed relationship generics, ULID primary keys, explicit FK cascade behaviors (`cascadeOnDelete()`, `restrictOnDelete()`, `nullOnDelete()`), Leftmost Prefix / ESR composite indexing, and pgvector HNSW vector search.
 - **Fintech & Payment Gateway Architecture**: Multi-driver architecture supporting Top 10 gateways (Stripe, bKash Tokenized Checkout, Binance Pay Crypto Web3, PayPal, Razorpay, Paddle, Mollie, Adyen, Square, SSLCommerz) with constant-time HMAC webhook verification, replay attack defense ($\pm 300\text{s}$ window + nonces), double-entry bookkeeping ledgers, payment FSMs, and PCI-DSS compliance.
 - **Architectural Base Directory Blueprints**: Production-grade folder hierarchy standards for Action-Driven Monoliths, Service-Class Oriented Monoliths, Modular Monoliths, Domain-Driven Design (DDD), Hexagonal (Ports & Adapters), and CQRS architectures with Pest 3 boundary tests.
@@ -57,7 +57,7 @@ This plugin transforms the Antigravity AI assistant into an expert **Principal L
 - **JSON Schema Validation (`JsonSchema::rules()`)**: Bridges `laravel/ai` and `laravel/mcp` tool parameter schemas directly into native Laravel validation rules without duplicating constraints.
 - **Declarative Queue Attributes (`#[RetryFor]`)**: Declares job and listener retry windows cleanly via PHP attributes (`#[RetryFor(hours: 4)]`), eliminating legacy `retryUntil()` boilerplate.
 - **Full-Stack Frontend Architecture**: Server-rendered Blade components, Alpine.js, Livewire v3 & v4 reactive state, and `wire:stream` real-time AI token streaming.
-- **Inertia.js v2 SPAs**: Multi-stack Single-Page Applications with Vue 3 (TypeScript), React 19/18 (TypeScript), and Svelte 5 (Runes), leveraging Deferred Props (`Inertia::defer`), prefetching, and Vite SSR.
+- **Inertia.js v3 SPAs (`v3.11.0` / `inertia-laravel v3.8.0`)**: Multi-stack SPAs with Vue 3 (TypeScript), **React 19+** (TypeScript), and **Svelte 5+** (Runes), leveraging `@inertiajs/vite` zero-config & Dev SSR, built-in XHR client & `http` interceptors (Axios removed), `useHttp()`, Optimistic Updates, Instant Visits, Layout Props (`setLayoutProps`), `<Form>` with built-in Precognition, Deferred (`#rescue`) / Optional / Once / Live Props, `<InfiniteScroll>`, `<WhenMounted>`, `QUERY` method, and Blade `<x-inertia::head>` / `<x-inertia::app />`.
 - **First-Party AI Integration**: Complete support for `composer require laravel/ai` (Prompts, Context, Tools, Provider Tools, Structured Outputs, SSE Streaming, Async Queues, and Attachments).
 - **First-Party Model Context Protocol**: Complete support for `composer require laravel/mcp` (Servers, Tools, Resources, Prompts, Web SSE, and stdio transports).
 - **Zero N+1 Queries & Memory Safety**: $O(1)$ database streaming with `cursor()`, mutation chunking with `chunkById()`, WeakMap caching, and query log deactivation (`DB::disableQueryLog()`).
@@ -113,7 +113,7 @@ Every skill adheres to progressive disclosure—loaded into context only when ne
 | **14** | **`laravel-frontend-blade-livewire`** | [`skills/laravel-frontend-blade-livewire/SKILL.md`](skills/laravel-frontend-blade-livewire/SKILL.md) | Blade component architecture, slots, Alpine.js, Livewire v3/v4 reactive state, `wire:stream` AI token streaming, `#[Locked]` tampering defense. |
 | **15** | **`laravel-frontend-design-craft`** | [`skills/laravel-frontend-design-craft/SKILL.md`](skills/laravel-frontend-design-craft/SKILL.md) | Anti-AI-slop design craft (synthesizing Impeccable, Taste Skill, and Hallmark), Hero viewport invariant, Bento grids, and themed browser surfaces. |
 | **16** | **`laravel-frontend-layouts-and-pages`** | [`skills/laravel-frontend-layouts-and-pages/SKILL.md`](skills/laravel-frontend-layouts-and-pages/SKILL.md) | Standardized 4-tier directory hierarchy (`layouts/`, `components/app/*`, `components/ui/*`, `components/error/*`, `errors/`, `pages/*`) across Blade, Livewire, Vue 3, React 19, Svelte 5. |
-| **17** | **`laravel-inertia-spa`** | [`skills/laravel-inertia-spa/SKILL.md`](skills/laravel-inertia-spa/SKILL.md) | Inertia.js v2 SPAs with Vue 3 (TS), React 19/18 (TS), Svelte 5 (Runes), Deferred Props (`Inertia::defer`), and Vite SSR. |
+| **17** | **`laravel-inertia-spa`** | [`skills/laravel-inertia-spa/SKILL.md`](skills/laravel-inertia-spa/SKILL.md) | Inertia.js v3 SPAs (`v3.11` / `inertia-laravel v3.8`) with Vue 3, React 19+, Svelte 5+, `@inertiajs/vite` Dev SSR, built-in XHR, `useHttp()`, Optimistic Updates, Instant Visits, Layout Props, `<Form>` Precognition & Live Props. |
 | **18** | **`laravel-injection-and-input-guard`** | [`skills/laravel-injection-and-input-guard/SKILL.md`](skills/laravel-injection-and-input-guard/SKILL.md) | Security deep-dive: SQLi, XSS, Path Traversal & Zip Slip, Command Injection, Deserialization/`phar://`, XXE, SSTI. |
 | **19** | **`laravel-mcp`** | [`skills/laravel-mcp/SKILL.md`](skills/laravel-mcp/SKILL.md) | Official `laravel/mcp`: Tools, Resources, Prompts, Web SSE, and stdio transports. |
 | **20** | **`laravel-memory-safety`** | [`skills/laravel-memory-safety/SKILL.md`](skills/laravel-memory-safety/SKILL.md) | Octane concurrency safety, $O(1)$ cursor streaming, WeakMap caching, worker recycling. |
@@ -152,7 +152,7 @@ All agent interactions automatically enforce the strict standards codified in [`
 15. **Model Context Protocol Standards**: Canonical `app/Mcp/` directories, `routes/ai.php` web SSE routing with Sanctum authentication, stdio CLI execution, and typed tool schemas validated with `JsonSchema::rules()`.
 16. **Console Commands & Scheduling**: `#[AsCommand]` attributes, `implements Isolatable` to eliminate overlapping crons, `DB::disableQueryLog()` memory protection, and `laravel/prompts`.
 17. **Database Transactions & Concurrency**: Mandatory `DB::transaction(..., attempts: 3)` with deadlock retry, pessimistic row locking (`lockForUpdate()`), **strict prohibition of external HTTP inside transactions**, and post-commit `afterCommit` hooks.
-18. **Modern Frontend Architecture**: Blade components with `@props`, Livewire `#[Locked]` state tampering defense, Form Objects, `wire:stream` AI token streaming, Alpine.js micro-interactions, Inertia v2 Deferred Props (`Inertia::defer`), Vue 3 / React TypeScript interfaces, Svelte 5 Runes, and Pest 3 component assertions.
+18. **Modern Frontend Architecture**: Blade components with `@props`, Livewire `#[Locked]` state tampering defense, Form Objects, `wire:stream` AI token streaming, Alpine.js micro-interactions, Inertia v3 (`@inertiajs/vite` Dev SSR, built-in XHR + `http` interceptors, `useHttp()`, Optimistic Updates, Instant Visits, `setLayoutProps()`, `<Form>` Precognition, `Inertia::defer(..., rescue: true)` / `optional()` / `live()`, Vue 3, React 19+, Svelte 5+ Runes), and Pest 3 assertions (`loadDeferredProps()`, `hasFlash()`).
 19. **Canonical Frontend Directory Organization**: Strict 4-tier directory scoping across Blade, Livewire, and Inertia.js (`layouts/`, `components/app/<domain>/`, `components/ui/`, `components/error/`, `components/icon/`, `errors/`, `pages/<domain>/<feature>/index`), total prohibition of view root sprawl, and controller dot-notation resolution (`view('pages.admin.dashboard.index')` / `Inertia::render('admin/dashboard/Index')`).
 20. **Dead Code Elimination, Zombie Logic Hunting & Codebase Hygiene**: Zero tolerance for commented-out code, unused `use` imports (`laravel/pint`), and unused Composer dependencies (`composer-unused`). Immediate deletion of legacy Laravel skeleton files (`app/Http/Kernel.php`, `app/Console/Kernel.php`, `app/Exceptions/Handler.php`, `app/Providers/RouteServiceProvider.php`). Automated dead code purging with Rector `SetList::DEAD_CODE` and Pest 3 boundary tests forbidding legacy class revival.
 21. **Architectural Base Project Directory Tree Patterns & Placement Guidelines**: Mandatory adherence to standardized architectural directory patterns (Action-Driven Monolith or Service-Class Oriented Monolith by default, Modular Monolith for multi-team platforms, DDD for core banking/fintech, Hexagonal for framework-agnostic engines). Strict canonical folder placement and Pest 3 architectural boundary tests in `tests/Arch/`.
@@ -178,7 +178,7 @@ Located in [`docs/architecture/`](docs/architecture/):
 8. **[`frontend-design-craft-and-anti-ai-slop.md`](docs/architecture/frontend-design-craft-and-anti-ai-slop.md)**: Production guide to frontend design craft, anti-AI-slop rules, surface modes (Persuade, Operate, Read, Experience), Hero viewport invariant, Bento grids, themed browser surfaces, and Impeccable/Hallmark CLI audits.
 9. **[`frontend-layouts-components-and-pages.md`](docs/architecture/frontend-layouts-components-and-pages.md)**: Standardized 4-tier frontend hierarchy, domain layout shells, UI design tokens, SVG icon primitives, and multi-tenant layout isolation.
 10. **[`blade-and-livewire.md`](docs/architecture/blade-and-livewire.md)**: Server-rendered Blade components, slots, Alpine.js, Livewire v3/v4 reactive state, and `wire:stream` AI streaming.
-11. **[`inertia-and-frontend-stacks.md`](docs/architecture/inertia-and-frontend-stacks.md)**: Inertia.js v2 SPAs with Vue 3 (TS), React 19/18 (TS), Svelte 5 (Runes), Deferred Props, and Vite SSR.
+11. **[`inertia-and-frontend-stacks.md`](docs/architecture/inertia-and-frontend-stacks.md)**: Inertia.js v3 (`v3.11.0` / `inertia-laravel v3.8.0`) SPAs with Vue 3 (TS), React 19+ (TS), Svelte 5+ (Runes), `@inertiajs/vite` Dev SSR, Built-in XHR, `useHttp()`, Optimistic Updates, Instant Visits, Live Props, and v2 → v3 migration runbook.
 12. **[`ai-sdk-and-llm-integration.md`](docs/architecture/ai-sdk-and-llm-integration.md)**: First-party `laravel/ai` SDK architecture & 8 Core Pillars.
 13. **[`mcp-and-ai-protocols.md`](docs/architecture/mcp-and-ai-protocols.md)**: First-party Model Context Protocol (`laravel/mcp`) server & client architecture.
 14. **[`console-commands-and-scheduling.md`](docs/architecture/console-commands-and-scheduling.md)**: Concurrency isolation (`Isolatable`), Laravel Prompts, memory safety, and `routes/console.php`.
@@ -199,7 +199,7 @@ Located in [`docs/architecture/`](docs/architecture/):
 
 ---
 
-## 🎨 Full-Stack Frontend Architecture (Blade, Livewire, Inertia.js v2)
+## 🎨 Full-Stack Frontend Architecture (Blade, Livewire, Inertia.js v3)
 
 The plugin supports two modern, production-grade frontend paradigms:
 
@@ -208,7 +208,7 @@ graph TD
     UI["Laravel 13 User Interface"] --> Choice{"Frontend Paradigm"}
     
     Choice -- Reactive PHP Full-Stack --> LivewireStack["Blade & Livewire (v3 & v4)"]
-    Choice -- Single-Page Application (SPA) --> InertiaStack["Inertia.js v2 Multi-Stack"]
+    Choice -- Single-Page Application (SPA) --> InertiaStack["Inertia.js v3 Multi-Stack (v3.11 / v3.8)"]
     
     LivewireStack --> BladeComponents["Atomic Blade Primitives (@props, slots)"]
     LivewireStack --> LivewireComponents["Livewire v3/v4 Components (#[Locked], #[Computed])"]
@@ -216,19 +216,19 @@ graph TD
     LivewireStack --> AlpineJS["Alpine.js Client Micro-Interactions (@entangle)"]
     
     InertiaStack --> VueStack["Vue 3 (<script setup lang='ts'>)"]
-    InertiaStack --> ReactStack["React 19 / 18 (TypeScript JSX)"]
-    InertiaStack --> SvelteStack["Svelte 5 (Runes: $props, $state, $derived)"]
-    InertiaStack --> DeferredProps["Inertia v2 Deferred Props (<Deferred data='...'>)"]
-    InertiaStack --> ViteSSR["Vite Asset Pipeline & SSR"]
+    InertiaStack --> ReactStack["React 19+ (Strict TSX)"]
+    InertiaStack --> SvelteStack["Svelte 5+ (Runes: $props, $state, $derived)"]
+    InertiaStack --> InertiaV3Core["Built-in XHR, useHttp, Optimistic UI, Instant Visits, Live Props"]
+    InertiaStack --> ViteSSR["@inertiajs/vite Zero-Config & Dev SSR (Node 22+ Prod)"]
 ```
 
 - **Blade & Alpine.js**: Reusable UI primitives (`resources/views/components/`) using `@props` and `$attributes->class()`.
 - **Livewire v3 & v4**: Server-driven reactivity with Form Objects (`Livewire\Form`), `#[Locked]` state tampering defense, and `wire:stream` real-time token streaming with `laravel/ai`.
-- **Inertia.js v2**: Single-Page Applications with zero client-side routing boilerplate:
-  - **Vue 3**: Composition API with `<script setup lang="ts">`, typed props, and `<Deferred>`.
-  - **React 19 / 18**: Hooks, `useForm()`, TypeScript JSX, and `<Deferred>`.
-  - **Svelte 5**: Modern reactive Runes (`let { user }: Props = $props();`, `$state()`, `$derived()`).
-  - **Performance**: Deferred Props (`Inertia::defer()`), prefetching, and Server-Side Rendering (SSR).
+- **Inertia.js v3 (`@inertiajs/*` v3.11.0 & `inertia-laravel` v3.8.0)**: Single-Page Applications with zero client-side routing boilerplate:
+  - **Vue 3**: Composition API with `<script setup lang="ts">`, typed `createForm<T>()`, Layout Props (`setLayoutProps`), `<Deferred>` (`#rescue`), `<InfiniteScroll>`, and `useProp()`.
+  - **React 19+**: Strict TypeScript JSX (React 18 dropped), `<Form<T>>`, `useHttp()`, optimistic updates, and array-wrapped persistent layouts (`Page.layout = [AppLayout]`).
+  - **Svelte 5+**: Modern reactive Runes (`let { user }: Props = $props();`, `$state()`, `$derived()`) and module-level `export const layout = [AppLayout, { ... }]`.
+  - **Zero-Config Vite & Realtime**: `@inertiajs/vite` automatic page resolution & out-of-the-box Dev SSR, built-in XHR client & `http` interceptors (Axios removed), `Inertia::optional()`, `Inertia::live()` + Echo/Pusher, `QUERY` HTTP method, and `<x-inertia::head>` / `<x-inertia::app />` Blade components.
 
 ### 📂 The Canonical 4-Tier Frontend Directory Standard
 
