@@ -1,6 +1,6 @@
 ---
 name: laravel-frontend-design-craft
-description: "Master guide to professional frontend design craft, anti-AI-slop aesthetics, art direction, and design system governance for Laravel 13 & PHP 8.6+ applications. Synthesizes Paul Bakaus's Impeccable (pbakaus/impeccable), Leon Lin's Taste Skill (Leonxlnx/taste-skill), and Hassan El Mghari's Hallmark (nutlope/hallmark) into Blade, Livewire v3/v4, and Inertia.js v2 (Vue 3, React 19, Svelte 5) frontends. Eliminates generic AI tropes, enforces the Hero viewport invariant, mandates token-based design systems, and runs automated anti-pattern audits via npx impeccable detect and sloplint."
+description: "Master guide to professional frontend design craft, anti-AI-slop aesthetics, art direction, and design system governance for Laravel 13 & PHP 8.6+ applications. Synthesizes Paul Bakaus's Impeccable (pbakaus/impeccable), Leon Lin's Taste Skill (Leonxlnx/taste-skill), and Hassan El Mghari's Hallmark (nutlope/hallmark) into Blade, Livewire v3/v4, and Inertia.js v3 (Vue 3, React 19, Svelte 5) frontends. Eliminates generic AI tropes, enforces the Hero viewport invariant, mandates token-based design systems, and runs automated anti-pattern audits via npx impeccable detect and sloplint."
 argument-hint: "[shape|audit|polish|bolder|quieter|typeset|colorize|animate] [target]"
 user-invocable: true
 ---
@@ -236,7 +236,7 @@ final class InvoiceLedger extends Component
 </div>
 ```
 
-### Pattern C: Inertia.js v2 Vue 3 TypeScript Hero Section (Anti-AI-Slop)
+### Pattern C: Inertia.js v3 Vue 3 TypeScript Hero Section (Anti-AI-Slop)
 
 ```vue
 <!-- resources/js/pages/home/Hero.vue -->

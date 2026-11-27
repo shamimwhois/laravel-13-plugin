@@ -5,7 +5,7 @@ description: Standardized directory organization, multi-domain layouts (admin, c
 
 # Laravel 13 Frontend Layouts, Components & Pages Organization Skill
 
-This skill governs the canonical directory structure, layout boundaries, domain-driven component scoping, and page hierarchy across all frontend technologies in Laravel 13 & PHP 8.5+: **Blade**, **Livewire (v3 & v4)**, and **Inertia.js v2** (**Vue 3**, **React 19/18**, **Svelte 5**).
+This skill governs the canonical directory structure, layout boundaries, domain-driven component scoping, and page hierarchy across all frontend technologies in Laravel 13 & PHP 8.5+ / 8.6+: **Blade**, **Livewire (v3 & v4)**, and **Inertia.js v3** (**Vue 3**, **React 19+**, **Svelte 5+**).
 
 ---
 
@@ -84,7 +84,7 @@ resources/views/
         └── index.blade.php
 ```
 
-### Inertia.js v2 (Vue 3, React 19, Svelte 5) (`resources/js/`)
+### Inertia.js v3 (Vue 3, React 19, Svelte 5) (`resources/js/`)
 
 ```text
 resources/js/

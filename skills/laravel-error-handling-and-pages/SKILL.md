@@ -6,12 +6,12 @@ description: >-
   boundaries, fallback cards), and HTTP/HTTPS Transport Error Components (419
   CSRF refresh, 429 retry-after countdown, HTTPS enforcement, TLS/SSL failures,
   mixed-content, offline/network recovery) across Blade, Livewire v3/v4, and
-  Inertia.js v2 (Vue 3 TS, React 19 TS, Svelte 5 Runes).
+  Inertia.js v3 (Vue 3 TS, React 19 TS, Svelte 5 Runes).
 ---
 
 # Laravel 13 Error Handling, Error Pages & HTTP/HTTPS Error Components Skill
 
-This skill standardizes backend exception orchestration, RFC 7807 JSON Problem Details, custom error pages (`400`–`504`), reusable validation/boundary error components, and **HTTP / HTTPS transport error components** across Blade, Livewire v3/v4, and Inertia.js v2.
+This skill standardizes backend exception orchestration, RFC 7807 JSON Problem Details, custom error pages (`400`–`504`), reusable validation/boundary error components, and **HTTP / HTTPS transport error components** across Blade, Livewire v3/v4, and Inertia.js v3.
 
 > 📖 **Master Specification**: For full architectural sequence diagrams, complete Blade/Vue/React/Svelte component suites, and Pest 3 verification tests, see **[docs/architecture/error-handling-pages-and-components.md](file:///C:/Users/SHAMIM.IT/.gemini/config/plugins/laravel/docs/architecture/error-handling-pages-and-components.md)**.
 
@@ -72,7 +72,8 @@ return Application::configure(basePath: dirname(__DIR__))
             return ProblemDetailsFactory::fromThrowable($e, $request);
         });
 
-        // 4. Unified Inertia.js v2 error page rendering + strict no-store cache headers
+        // 4. Unified Inertia.js v3 error page rendering + strict no-store cache headers
+        //    (You can also register `Inertia::handleExceptionsUsing(fn (ExceptionResponse $r) => ...)` in AppServiceProvider::boot() to retain shared data automatically)
         $exceptions->respond(static function (Response $response, Throwable $e, Request $request): Response {
             $status = $response->getStatusCode();
             $traceId = (string) Context::get('trace_id', $request->attributes->get('trace_id', ''));
@@ -566,15 +567,15 @@ Pair with `URL::forceScheme('https')` in `AppServiceProvider::boot()` when `app(
 
 ---
 
-## 5. Livewire v3/v4 & Inertia.js v2 Client Error Interception
+## 5. Livewire v3/v4 & Inertia.js v3 Client Error Interception
 
 ```ts
-// resources/js/bootstrap-errors.ts — Livewire & Inertia unified HTTP/HTTPS error hook
+// resources/js/bootstrap-errors.ts — Livewire & Inertia v3 unified HTTP/HTTPS error hook
 import { router } from '@inertiajs/vue3'; // or @inertiajs/react / @inertiajs/svelte
 
 export function registerTransportErrorHandlers(): void {
-    // 1. Inertia non-Inertia / network / TLS exception hook
-    router.on('exception', (event) => {
+    // 1a. Inertia v3 network / TLS / resolution error hook (renamed from v2 `exception` -> `networkError`)
+    router.on('networkError', (event) => {
         window.dispatchEvent(
             new CustomEvent('http-transport-error', {
                 detail: {
@@ -584,6 +585,25 @@ export function registerTransportErrorHandlers(): void {
             }),
         );
         event.preventDefault();
+    });
+
+    // 1b. Inertia v3 non-Inertia HTTP response hook (renamed from v2 `invalid` -> `httpException`)
+    router.on('httpException', (event) => {
+        const status = event.detail.response.status;
+        if (status === 419 || status === 429 || status >= 500) {
+            window.dispatchEvent(
+                new CustomEvent('http-transport-error', {
+                    detail: {
+                        title: status === 419 ? 'Session Expired' : `HTTP ${status} Error`,
+                        detail:
+                            status === 419
+                                ? 'Your security token expired. Refresh the page and retry.'
+                                : 'The server returned an unexpected response. Please retry.',
+                    },
+                }),
+            );
+            event.preventDefault();
+        }
     });
 
     // 2. Livewire v3/v4 global failure hook (419 CSRF, 429 throttle, 500/503 server error)

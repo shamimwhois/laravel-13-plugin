@@ -1,7 +1,7 @@
 # Master Architectural Guide: Error Handling, Error Pages, Error Components & HTTP/HTTPS Transport Resilience
 
 > **Document**: `docs/architecture/error-handling-pages-and-components.md`  
-> **Framework**: Laravel 13 & PHP 8.6+ (Blade, Livewire v3/v4, Inertia.js v2: Vue 3, React 19, Svelte 5)  
+> **Framework**: Laravel 13 & PHP 8.6+ (Blade, Livewire v3/v4, Inertia.js v3: Vue 3, React 19, Svelte 5)  
 > **Standards**: RFC 7807 Problem Details, WCAG 2.2 Accessibility (`role="alert"`, `aria-live`), OWASP Error Handling & Transport Security (TLS 1.2+/HSTS).
 
 ---
@@ -177,7 +177,7 @@ Delegate every status view (`400`, `401`, `402`, `403`, `404`, `419`, `422`, `42
 
 ---
 
-## 4. Inertia.js v2 Error Pages & Error Components (Vue 3, React 19, Svelte 5)
+## 4. Inertia.js v3 Error Pages & Error Components (Vue 3, React 19, Svelte 5)
 
 ### A. Vue 3 (TypeScript) Error Page + ErrorBoundary
 

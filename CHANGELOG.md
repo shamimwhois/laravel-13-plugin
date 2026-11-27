@@ -6,6 +6,25 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ---
 
+## [3.2.0] - 2026-11-28
+
+### Added
+- **Authoritative Inertia.js v3 Upgrade (`@inertiajs/*` v3.11.0 & `inertiajs/inertia-laravel` v3.8.0)** (verified live against `inertiajs.com/docs/v3/*`, `inertiajs/inertia` `v3.11.0`, and `inertiajs/inertia-laravel` `v3.8.0`):
+  - Complete overhaul of `skills/laravel-inertia-spa/SKILL.md` and Master Architectural Guide `docs/architecture/inertia-and-frontend-stacks.md` covering `@inertiajs/vite` zero-config setup & out-of-the-box Dev SSR (Vite 7/8, Node 22+ prod SSR, ES2022 ESM-only), built-in XHR client & `http.onRequest/onResponse/onError` interceptors (Axios, `qs`, and `lodash-es` removed; optional `axiosAdapter()`), standalone `useHttp()` hook, first-class Optimistic Updates with automatic partial-key rollback, Instant Visits (`component` / Wayfinder `instant`), Persistent Layouts & Layout Props (`setLayoutProps()`, `resetLayoutProps()`, `[Layout, props]`, React `[ArrowLayout]` wrapper rule), `<Form>` component with built-in Precognition (`createForm<T>()`, `<Form<T>>`, `useFormContext<T>()`), `<Deferred>` (`#rescue` slot with `Inertia::defer(..., rescue: true)`), `Inertia::optional()`, `Inertia::once()`/`shareOnce()`, `Inertia::scroll()` + `<InfiniteScroll>`, `<WhenMounted>`, `usePoll()` (`mode`, `background`, `polling`), `QUERY` HTTP method, Live Props (`Inertia::live()` + `Inertia::broadcastProps()` + `echo()`/`pusher()`/`actionCable()` + `useProp()`), `Inertia::flash()`/`forgetFlashed()` (preserved across `Inertia::location()` in v3.8.0), `preserveBigIntegers()`, `<x-inertia::head>` (with SSR fallback slot) & `<x-inertia::app />` Blade components, `Inertia::handleExceptionsUsing()`, `config/inertia.php` v3.8.0 reference, Pest 3 assertions (`loadDeferredProps()`, `hasFlash()`, `assertInertiaFlash()`), and complete **Inertia v2 → v3** upgrade & anti-hallucination checklist.
+  - Updated `rules/AGENTS.md` (Sections 18, 19, 25), `skills/laravel-error-handling-and-pages/SKILL.md`, `docs/architecture/error-handling-pages-and-components.md`, `docs/architecture/blade-and-livewire.md`, `docs/architecture/frontend-layouts-components-and-pages.md`, `skills/laravel-best-practices/SKILL.md`, `skills/laravel-frontend-design-craft/SKILL.md`, `skills/laravel-frontend-layouts-and-pages/SKILL.md`, `plugin.json` (`3.2.0`), `README.md`, and refreshed `assets/banner.png` (`v3.2.0`, `Inertia v3`).
+
+### Fixed
+- Replaced removed Inertia v2 `Inertia::lazy()` with `Inertia::optional()` in `skills/laravel-inertia-spa/SKILL.md`.
+- Replaced renamed Inertia v2 client event `router.on('exception', ...)` with verified Inertia v3 `router.on('networkError', ...)` and `router.on('httpException', ...)` in `skills/laravel-error-handling-and-pages/SKILL.md`.
+- Removed dropped React 18 references across Inertia v3 docs and rules (React 19+ and Svelte 5+ strictly required in Inertia v3).
+
+### Hardened (CodeRabbit CLI Review Findings Resolved — 10/10)
+- Replaced string channel names with `new PrivateChannel("team.{$teamId}")` in `Inertia::live()` examples (since Inertia v3.8 treats string channels as public) and added `configureEcho({ broadcaster: 'reverb' })` before `live: echo()`.
+- Guarded `document.querySelector(...)` CSP nonce lookup with `typeof document !== 'undefined'` for `@inertiajs/vite` SSR execution, and moved `prefetch: { cacheFor: '1m' }` into `createInertiaApp({ defaults: ... })` so initialization does not reset it.
+- Corrected the history encryption middleware alias to `'inertia.encrypt'`, removed React-only `strictMode` from the Vue `@inertiajs/vue3` bootstrap example, consumed the CSV `download_url` response in the Svelte 5 `useHttp` example, scoped optimistic note updates to `notesCount` instead of `pendingCount`, and added `Team`/`RevenueMetric` fixtures + `user.name` assertions to Pest 3 deferred-prop tests.
+
+---
+
 ## [3.1.0] - 2026-11-28
 
 ### Added
