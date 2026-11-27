@@ -89,9 +89,9 @@ final class UpstreamGatewayUnavailableException extends DomainException
 
 ## 3. Isolated Error Layout & Native Blade Error Pages
 
-### A. Zero-Dependency Error Layout (`resources/views/layouts/error.blade.php`)
+### A. Zero-Dependency Error Layout (`resources/views/components/layouts/error.blade.php`)
 
-Never call `auth()->user()`, database queries, or Redis sessions inside `layouts/error.blade.php`. When a `500` or `503` happens during an infrastructure outage, the error page must still render cleanly.
+Place the anonymous Blade error layout under `resources/views/components/layouts/error.blade.php` so Laravel automatically discovers `<x-layouts.error>` (or explicitly register `Blade::anonymousComponentPath(resource_path('views/layouts'), 'layouts')` in `AppServiceProvider::boot()` if you keep layouts under `resources/views/layouts/`). Never call `auth()->user()`, database queries, or Redis sessions inside the error layout: when a `500` or `503` happens during an infrastructure outage, the error page must still render cleanly.
 
 ```blade
 @props(['title' => 'Error', 'status' => 500])

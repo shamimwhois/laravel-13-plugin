@@ -59,10 +59,13 @@ return Application::configure(basePath: dirname(__DIR__))
             '^' . preg_quote((string) parse_url((string) config('app.url'), PHP_URL_HOST), '/') . '$',
         ]);
 
-        // 3. Global pipeline: Trace ID first, then HTTPS, then security headers
-        $middleware->prepend(AttachRequestContextMiddleware::class);
-        $middleware->prepend(EnsureHttpsRequest::class);
-        $middleware->append(SecurityHeaders::class);
+        // 3. Global pipeline: append runs AFTER Laravel's built-in TrustProxies & TrustHosts,
+        // preserving order: TrustProxies -> TrustHosts -> AttachRequestContext -> EnsureHttpsRequest -> SecurityHeaders
+        $middleware->append([
+            AttachRequestContextMiddleware::class,
+            EnsureHttpsRequest::class,
+            SecurityHeaders::class,
+        ]);
 
         // 4. Named route middleware aliases
         $middleware->alias([
@@ -130,6 +133,9 @@ use Illuminate\Support\Facades\Log;
 
 final readonly class CircuitBreaker
 {
+    /** @var list<int> */
+    private const array DEPENDENCY_FAILURE_STATUSES = [429, 500, 502, 503, 504];
+
     public function __construct(
         private string $service,
         private int $failureThreshold = 5,
@@ -160,6 +166,16 @@ final readonly class CircuitBreaker
 
             return $result;
         } catch (ConnectionException|RequestException $e) {
+            // Preserve non-transient client errors (e.g., 400, 404, 422) for the caller — never trip the circuit on them
+            if (
+                $e instanceof RequestException
+                && ! in_array($e->response->status(), self::DEPENDENCY_FAILURE_STATUSES, true)
+            ) {
+                throw $e;
+            }
+
+            // Atomically initialize counter with TTL before incrementing (required on database/empty cache stores)
+            Cache::add($failKey, 0, $this->openSeconds * 2);
             $failures = (int) Cache::increment($failKey);
             Cache::touch($failKey, $this->openSeconds * 2);
 
@@ -185,9 +201,12 @@ final readonly class CircuitBreaker
 
 ## 4. Resilient Multi-Tenant Cache Architecture
 
-### A. Versioned Multi-Tenant Key Strategy (Zero Tag-Memory Leaks)
+### A. Versioned Multi-Tenant Key Strategy (Zero Tag-Memory Leaks & Eviction-Safe)
 
-Redis cache tags can accumulate orphaned set entries under high churn. Prefer deterministic **versioned namespace keys** scoped strictly by `tenant_id` so invalidation is $O(1)$ and cross-tenant cache leaks are impossible:
+Redis cache tags can accumulate orphaned set entries under high churn. Prefer deterministic **versioned namespace keys** scoped strictly by `tenant_id` so invalidation is $O(1)$ and cross-tenant cache leaks are impossible.
+
+> [!IMPORTANT]
+> **Eviction & Race Safety**: Keep generation metadata (`__version`) in a **non-evicting authoritative store** (e.g., `Cache::store('database')` or a dedicated `noeviction` Redis DB) and serialize initialization/advancement with an atomic lock or ULID token so LRU eviction or concurrent writes can NEVER revert a version back to `1` and resurrect stale entries.
 
 ```php
 <?php
@@ -198,31 +217,44 @@ namespace App\Support;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 final class TenantCacheKey
 {
+    private const string VERSION_STORE = 'database';
+
     private function __construct() {}
 
     #[\NoDiscard]
     public static function for(string $tenantId, string $domain, string $suffix): string
     {
-        $version = (int) Cache::get(self::versionKey($tenantId, $domain), 1);
+        $store = Cache::store(self::VERSION_STORE);
+        $vKey = self::versionKey($tenantId, $domain);
 
-        return sprintf('t:%s:%s:v%d:%s', $tenantId, $domain, $version, $suffix);
+        // Atomically initialize with a unique ULID generation token (never reuses "1" after eviction/reset)
+        $version = $store->get($vKey);
+        if (! is_string($version) || $version === '') {
+            $initial = (string) Str::ulid();
+            $store->add($vKey, $initial);
+            $version = (string) $store->get($vKey, $initial);
+        }
+
+        return sprintf('t:%s:%s:g:%s:%s', $tenantId, $domain, $version, $suffix);
     }
 
     /**
-     * Bump namespace version strictly AFTER the DB transaction commits.
+     * Advance namespace generation atomically strictly AFTER the DB transaction commits.
      */
     public static function invalidateDomainAfterCommit(string $tenantId, string $domain): void
     {
         DB::afterCommit(static function () use ($tenantId, $domain): void {
+            $store = Cache::store(self::VERSION_STORE);
             $vKey = self::versionKey($tenantId, $domain);
-            if (! Cache::has($vKey)) {
-                Cache::forever($vKey, 2);
-                return;
-            }
-            Cache::increment($vKey);
+
+            $store->lock("lock:{$vKey}", 5)->block(3, static function () use ($store, $vKey): void {
+                // Always write a strictly newer ULID generation token under the lock
+                $store->forever($vKey, (string) Str::ulid());
+            });
         });
     }
 

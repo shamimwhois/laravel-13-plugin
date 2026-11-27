@@ -34,9 +34,23 @@ use InvalidArgumentException;
 
 final class SafeHttpClient
 {
+    /**
+     * Validate URL strictly, resolve ALL public A/AAAA IPs, and return a canonically reconstructed URL
+     * so parse_url() and libcurl/Guzzle can never disagree on target host/port.
+     *
+     * @return array{url: string, host: string, port: int, ips: list<string>}
+     */
     public static function assertPublicUrl(string $url): array
     {
+        if (preg_match('/[\x00-\x1F\x7F\\\\]/', $url) === 1) {
+            throw new InvalidArgumentException('URL contains forbidden control characters or backslashes.');
+        }
+
         $parsed = parse_url($url);
+        if (! is_array($parsed) || isset($parsed['user']) || isset($parsed['pass'])) {
+            throw new InvalidArgumentException('URLs with embedded credentials are forbidden.');
+        }
+
         $scheme = strtolower((string) ($parsed['scheme'] ?? ''));
         $host = strtolower((string) ($parsed['host'] ?? ''));
         $port = $parsed['port'] ?? ($scheme === 'https' ? 443 : 80);
@@ -64,22 +78,32 @@ final class SafeHttpClient
             }
         }
 
-        return ['host' => $trimmedHost, 'port' => $port, 'ip' => $ips[0]];
+        // Reconstruct canonical URL from validated components only (prevents parser-differential SSRF)
+        $authorityHost = str_contains($trimmedHost, ':') ? "[{$trimmedHost}]" : $trimmedHost;
+        $path = isset($parsed['path']) && is_string($parsed['path']) ? $parsed['path'] : '/';
+        $query = isset($parsed['query']) && is_string($parsed['query']) ? '?' . $parsed['query'] : '';
+        $canonicalUrl = sprintf('%s://%s:%d%s%s', $scheme, $authorityHost, $port, $path, $query);
+
+        return ['url' => $canonicalUrl, 'host' => $trimmedHost, 'port' => $port, 'ips' => $ips];
     }
 
     public static function get(string $url): Response
     {
         $resolved = self::assertPublicUrl($url);
 
-        // Disable automatic redirects (or manually re-validate every hop) and pin resolved IP
-        return Http::timeout(5)
+        // Pin ALL validated IPs (comma-separated) for dual-stack IPv6/IPv4 reliability & DNS-rebinding defense
+        $pinnedIps = implode(',', $resolved['ips']);
+
+        // Disable automatic redirects (or manually re-validate every hop) and send canonical URL
+        return Http::connectTimeout(3)
+            ->timeout(5)
             ->withoutRedirecting()
             ->withOptions([
                 'curl' => [
-                    CURLOPT_RESOLVE => ["{$resolved['host']}:{$resolved['port']}:{$resolved['ip']}"],
+                    CURLOPT_RESOLVE => ["{$resolved['host']}:{$resolved['port']}:{$pinnedIps}"],
                 ],
             ])
-            ->get($url);
+            ->get($resolved['url']);
     }
 
     /** @return list<string> */

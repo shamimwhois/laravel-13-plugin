@@ -242,9 +242,9 @@ Aligned cleanly with the **4-Tier Frontend Directory Standard**:
 
 ```text
 resources/views/
-├── layouts/
-│   └── error.blade.php                      # Minimal, zero-DB-query error shell
 ├── components/
+│   ├── layouts/
+│   │   └── error.blade.php                  # Zero-DB-query discoverable <x-layouts.error>
 │   ├── ui/
 │   │   └── error/
 │   │       ├── field.blade.php              # Inline validation error (role="alert")
@@ -338,11 +338,15 @@ resources/js/
         @if ($resolvedTrace)
             <button
                 type="button"
-                x-data="{ copied: false }"
-                x-on:click="navigator.clipboard?.writeText('{{ e($resolvedTrace) }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                x-data="{
+                    copied: false,
+                    traceId: {{ \Illuminate\Support\Js::from((string) $resolvedTrace) }},
+                    shortLabel: {{ \Illuminate\Support\Js::from('Trace: ' . substr((string) $resolvedTrace, 0, 12)) }},
+                }"
+                x-on:click="navigator.clipboard?.writeText(traceId); copied = true; setTimeout(() => copied = false, 2000)"
                 class="inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-950 px-2.5 py-1 font-mono text-xs text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-400"
             >
-                <span x-text="copied ? 'Copied Trace ID' : 'Trace: {{ e(substr((string) $resolvedTrace, 0, 12)) }}'"></span>
+                <span x-text="copied ? 'Copied Trace ID' : shortLabel"></span>
             </button>
         @endif
     </div>
