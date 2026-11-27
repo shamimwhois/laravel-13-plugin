@@ -507,6 +507,7 @@ use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Facades\DB;
+use Override;
 
 final readonly class OrderCreationService implements OrderCreationServiceInterface
 {
@@ -515,7 +516,7 @@ final readonly class OrderCreationService implements OrderCreationServiceInterfa
         private Dispatcher $events,
     ) {}
 
-    #[\Override]
+    #[Override]
     public function create(CreateOrderData $data): Order
     {
         return DB::transaction(attempts: 3, callback: function () use ($data): Order {

@@ -357,6 +357,7 @@ declare(strict_types=1);
 namespace App\Data\Ai;
 
 use DateTimeImmutable;
+use NoDiscard;
 
 final readonly class SecurityAuditReport
 {
@@ -382,7 +383,7 @@ final readonly class SecurityAuditReport
      *     blocks_deployment: bool
      * } $data
      */
-    #[\NoDiscard]
+    #[NoDiscard]
     public static function fromArray(array $data): self
     {
         return new self(
@@ -409,6 +410,7 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Concerns\HasStructuredOutput;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Promptable;
+use NoDiscard;
 
 final class SecurityAuditAgent implements Agent
 {
@@ -442,7 +444,7 @@ final class SecurityAuditAgent implements Agent
         ];
     }
 
-    #[\NoDiscard]
+    #[NoDiscard]
     public function auditCode(string $sourceCode): SecurityAuditReport
     {
         /** @var array{summary: string, severity_score: int, vulnerabilities: list<string>, remediations: list<string>, blocks_deployment: bool} $payload */
@@ -632,10 +634,11 @@ use Illuminate\Http\UploadedFile;
 use InvalidArgumentException;
 use Laravel\Ai\Files\Document;
 use Laravel\Ai\Files\Image;
+use NoDiscard;
 
 final readonly class InspectReceiptAction
 {
-    #[\NoDiscard]
+    #[NoDiscard]
     public function execute(UploadedFile $file, string $userQuery): string
     {
         $attachment = match ($file->getClientMimeType()) {
@@ -678,12 +681,13 @@ declare(strict_types=1);
 namespace App\Support\Ai;
 
 use InvalidArgumentException;
+use NoDiscard;
 
 final readonly class PromptSanitizer
 {
     private const int MAX_INPUT_LENGTH = 16000;
 
-    #[\NoDiscard]
+    #[NoDiscard]
     public static function sanitize(string $input): string
     {
         $trimmed = trim($input);

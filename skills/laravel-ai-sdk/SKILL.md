@@ -259,6 +259,7 @@ declare(strict_types=1);
 namespace App\Data\Ai;
 
 use DateTimeImmutable;
+use NoDiscard;
 
 final readonly class LeadQualificationDto
 {
@@ -276,7 +277,7 @@ final readonly class LeadQualificationDto
     /**
      * @param array{lead_tier: string, fit_score: int, identified_needs: list<string>, recommended_action: string} $data
      */
-    #[\NoDiscard]
+    #[NoDiscard]
     public static function fromArray(array $data): self
     {
         return new self(
@@ -300,6 +301,7 @@ use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Concerns\HasStructuredOutput;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Promptable;
+use NoDiscard;
 
 final class QualifyLeadAgent implements Agent
 {
@@ -320,7 +322,7 @@ final class QualifyLeadAgent implements Agent
         ];
     }
 
-    #[\NoDiscard]
+    #[NoDiscard]
     public function qualify(string $leadNotes): LeadQualificationDto
     {
         /** @var array{lead_tier: string, fit_score: int, identified_needs: list<string>, recommended_action: string} $payload */
@@ -470,10 +472,11 @@ use Illuminate\Http\UploadedFile;
 use InvalidArgumentException;
 use Laravel\Ai\Files\Document;
 use Laravel\Ai\Files\Image;
+use NoDiscard;
 
 final readonly class AnalyzePitchDeckAction
 {
-    #[\NoDiscard]
+    #[NoDiscard]
     public function execute(UploadedFile $file, string $notes): string
     {
         $attachment = match ($file->getClientMimeType()) {

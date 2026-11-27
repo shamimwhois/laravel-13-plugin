@@ -1,10 +1,12 @@
-# Laravel 13 & Modern PHP 8.6+ Engineering Guidelines
+# Laravel 13 & Modern PHP 8.5+ / 8.6+ Engineering Guidelines
 
 These rules govern all PHP and Laravel code written, reviewed, or refactored when this plugin is active. Adhere to these standards strictly without exception.
 
+> **Version Gating**: Apply PHP 8.6-specific syntax and standard library rules (PFA `?`/`...`, `clamp()`, readonly property defaults, `#[Override]` on constants/enum cases, `Time\Duration`, `SortDirection`, `Io\Poll\*`, `StreamErrorMode`, Parameter DocComments, enum `__debugInfo()`) **only when the project targets PHP 8.6+**. When a project targets **PHP 8.5**, keep code strictly PHP 8.5-parseable using the PHP 8.4/8.5 standards below.
+
 ---
 
-## 1. Strict Typing & Modern PHP 8.6+ Syntax Standards
+## 1. Strict Typing & Modern PHP 8.5+ / 8.6+ Syntax Standards
 
 - **Strict Types**: Always place `declare(strict_types=1);` at the very top of every PHP file without exception.
 - **Namespaces & Imports**:
@@ -57,16 +59,25 @@ These rules govern all PHP and Laravel code written, reviewed, or refactored whe
   - Never mutate objects stored in constants (`const_object_property_write`) with request-scoped data under Laravel Octane / long-running workers.
 - **PHP 8.6 Deprecation & BC Hygiene**: Never name identifiers `let` or `is`, constants `_`, functions `readonly`, or class constants `namespace`; never `return` inside `finally`; never declare nullable `?array` on `__debugInfo()` (must return `array`); use PCRE `/u` instead of deprecated `mb_ereg*`/`mb_split` (Oniguruma EOL); account for `trim()` stripping `\f`, `fclose()`/`file_put_contents()`/`copy()` returning `false` on flush/close failure, and `json_last_error_msg()`/`JsonException` appending `near location {line}:{column}`.
 - **PHP 8.4 Property Hooks**: Use property hooks (`get => ...; set => ...;`) for computed, formatted, or validated properties instead of boilerplate getter and setter methods.
-- **PHP 8.4 Asymmetric Visibility**: Utilize `public private(set)` or `protected private(set)` for properties that need public read access but restricted write access, eliminating boilerplate getters.
-- **PHP 8.5 Pipe Operator (`|>`)**: Use the native pipe operator for sequential data transformations and pipelines.
-- **PHP 8.5 Clone With v2 Syntax**: Use `clone($object, [...])` for immutable DTOs and value objects when modifying state (NEVER invent `clone $obj with (...)`):
+- **PHP 8.4 & 8.5 Asymmetric Visibility**: Utilize `public private(set)` or `protected private(set)` on instance properties (PHP 8.4) and `public private(set) static` on static properties (PHP 8.5) to eliminate boilerplate getters.
+- **PHP 8.5 `final` Constructor Property Promotion**: Use `final` on promoted constructor parameters (`public function __construct(final string $id)`) when subclasses must not override a promoted property.
+- **PHP 8.5 Pipe Operator (`|>`)**: Use the native left-associative pipe operator for sequential single-argument data transformations; wrap RHS arrow functions, `??`, and `?:` in parentheses (`|> (static fn ($v) => ...)`), and remember `|>` binds tighter than comparisons and `??` (and does not accept pass-by-reference parameters).
+- **PHP 8.5 Clone With v2 Syntax & FCC**: Use `clone($object, [...])` (and `clone(...)` as a first-class callable, e.g., `array_map(clone(...), $items)`) for immutable DTOs and value objects when modifying state (NEVER invent `clone $obj with (...)`). Note that `__clone()` runs **before** property overrides and constructor validation is bypassed — for value objects enforcing invariants, validate overridden values in a property `set` hook or reconstruct through the validating constructor (`new self(...)`) instead of `clone(...)`:
   ```php
   $updatedUser = clone($user, [
       'status' => UserStatus::Active,
   ]);
   ```
-- **PHP 8.5 `#[NoDiscard]` Attribute**: Mark methods and functions whose return values must never be ignored (e.g., calculations, builders, status checks) with explicitly imported `use NoDiscard;` + `#[NoDiscard]`.
-- **PHP 8.5 Native Array Helpers**: Prefer native `array_first($items)` and `array_last($items)` over manual pointer manipulations.
+- **PHP 8.5 `#[NoDiscard]` & `(void)` Cast**: Mark methods and functions whose return values must never be ignored with explicitly imported `use NoDiscard;` + `#[NoDiscard]` (optional message argument). Use the statement-only `(void) expr;` cast to intentionally discard a `#[NoDiscard]` return value (never use `(void)` as an expression). Remember `#[NoDiscard]` is not inherited from interfaces or parent classes (only preserved from traits).
+- **PHP 8.5 Attributes & Constant Expressions**:
+  - Use `#[Override]` on overridden properties (PHP 8.5) as well as methods (8.3) and constants/enum cases (8.6).
+  - Use `#[DelayedTargetValidation]` when maintaining dual PHP 8.5/8.6 attribute compatibility; use `#[Deprecated]` on traits and compile-time non-class constants (`const`) as well as functions/methods/class constants.
+  - Use `static` closures (without `use (...)` — never arrow functions), first-class callables (`strlen(...)`, `Class::method(...)`), and scalar type casts in constant expressions, attribute arguments, and default values.
+- **PHP 8.5 Native URI Extension & Standard Library**:
+  - Prefer `Uri\Rfc3986\Uri` and `Uri\WhatWg\Url` (plus PHP 8.6 `UriBuilder`/`UrlBuilder`) over brittle `parse_url()` for security-critical URL parsing, normalization, and SSRF validation.
+  - Prefer native `array_first($items)` and `array_last($items)` over manual pointer manipulations, `Closure::getCurrent()` for self-recursive closures, `get_error_handler()`/`get_exception_handler()`, `FILTER_THROW_ON_FAILURE`, `IntlListFormatter`, `Locale::isRightToLeft()`, `Pdo\Sqlite::setAuthorizer()`, and `'partitioned' => true` (CHIPS) for embedded cookies.
+  - Account for OPcache being always compiled in on PHP 8.5+ (omit `zend_extension=opcache.so` to avoid startup warnings), keep `fatal_error_backtraces=1`, and enforce `max_memory_limit` in production containers.
+- **PHP 8.5 Deprecation & BC Hygiene**: Never use non-canonical scalar casts (`(integer)`, `(boolean)`, `(double)`, `(binary)`), the backtick shell operator (`` `cmd` ``), semicolon-terminated `case` clauses, `null` as array offset/`array_key_exists()`, non-numeric string increments (`$s++` → `str_increment()`), `__sleep()`/`__wakeup()` (use `__serialize()`/`__unserialize()`), returning `null` from `__debugInfo()`, legacy driver constants/methods on base `PDO` (`PDO::MYSQL_ATTR_*`, `PDO::pgsql*()` → use `Pdo\Mysql`/`Pdo\Pgsql`/`Pdo\Sqlite`), no-op close calls (`curl_close()`, `finfo_close()`, `imagedestroy()`, `xml_parser_free()`), `MHASH_*`, `DATE_RFC7231`, `mysqli_execute()`, `socket_set_timeout()`, `$http_response_header`, `Reflection*::setAccessible()`, or `disable_classes`.
 - **PHP 8.4+ Instantiation**: Chain directly onto new instances without wrapping parentheses: `new Service()->process()`.
 - **Constructor Property Promotion**: Always promote constructor parameters with explicit visibility, types, and `readonly` where appropriate:
   ```php

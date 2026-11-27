@@ -136,6 +136,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use NoDiscard;
 
 final class SecureUploadAction
 {
@@ -145,7 +146,7 @@ final class SecureUploadAction
         'image/webp' => 'webp',
     ];
 
-    #[\NoDiscard]
+    #[NoDiscard]
     public function execute(UploadedFile $file): string
     {
         // 1. Inspect real binary bytes via finfo

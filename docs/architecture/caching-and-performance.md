@@ -82,8 +82,9 @@ Laravel 11, 12, and 13 solve this with `Cache::flexible()`, serving a stale valu
 ```php
 use App\Models\Product;
 use Illuminate\Support\Facades\Cache;
+use NoDiscard;
 
-#[\NoDiscard]
+#[NoDiscard]
 public function getPopularProducts(): mixed
 {
     // [Fresh TTL: 5 minutes, Stale Grace Period: 30 minutes]
@@ -108,8 +109,9 @@ For expensive external API fetches or batch aggregations, use distributed Redis 
 
 ```php
 use Illuminate\Support\Facades\Cache;
+use NoDiscard;
 
-#[\NoDiscard]
+#[NoDiscard]
 public function generateQuarterlyFinancialReport(): ReportDto
 {
     $lockKey = 'locks:quarterly_report';

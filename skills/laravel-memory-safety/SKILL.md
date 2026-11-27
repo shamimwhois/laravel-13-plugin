@@ -30,8 +30,9 @@ Never load 100,000 models with `->get()` or `Model::all()`. Stream records 1-by-
 ```php
 use App\Models\Order;
 use Illuminate\Support\LazyCollection;
+use NoDiscard;
 
-#[\NoDiscard]
+#[NoDiscard]
 public function getPendingOrders(): LazyCollection
 {
     // Flat ~15MB RAM consumption regardless of row count

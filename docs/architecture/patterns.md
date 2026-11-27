@@ -81,7 +81,7 @@ Decouples business logic into single-responsibility Action classes, paired with 
 flowchart LR
     Route --> Invokable["Invokable Controller"]
     Invokable --> FormRequest["Form Request (Auth/Rules)"]
-    Invokable --> Action["Action Class (#[\NoDiscard])"]
+    Invokable --> Action["Action Class (#[NoDiscard])"]
     Action --> Model["Eloquent Model"]
     Invokable --> Resource["API Resource"]
 ```
@@ -106,9 +106,19 @@ app/
 ### Code Example (Laravel 13 & PHP 8.5+)
 ```php
 // app/Actions/Orders/CreateOrderAction.php
+namespace App\Actions\Orders;
+
+use App\Data\Orders\CreateOrderDto;
+use App\Enums\OrderStatus;
+use App\Events\OrderCreated;
+use App\Models\Order;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use NoDiscard;
+
 final readonly class CreateOrderAction
 {
-    #[\NoDiscard]
+    #[NoDiscard]
     public function execute(User $user, CreateOrderDto $dto): Order
     {
         return DB::transaction(function () use ($user, $dto): Order {
@@ -267,6 +277,11 @@ src/
 ### Code Example (PHP 8.5+ Value Object & Aggregate)
 ```php
 // src/Domain/Orders/ValueObjects/Money.php
+namespace Domain\Orders\ValueObjects;
+
+use DomainException;
+use NoDiscard;
+
 final readonly class Money
 {
     public function __construct(
@@ -278,7 +293,7 @@ final readonly class Money
         }
     }
 
-    #[\NoDiscard]
+    #[NoDiscard]
     public function add(self $other): self
     {
         if ($this->currency !== $other->currency) {

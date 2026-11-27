@@ -472,6 +472,7 @@ declare(strict_types=1);
 
 namespace App\Services\Orders;
 
+use App\Contracts\Services\Billing\PaymentGatewayServiceInterface;
 use App\Contracts\Services\Orders\OrderCreationServiceInterface;
 use App\Data\Orders\CreateOrderData;
 use App\Enums\OrderStatus;
@@ -479,17 +480,19 @@ use App\Events\Orders\OrderCreated;
 use App\Exceptions\Orders\InsufficientInventoryException;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Facades\DB;
+use Override;
 use Throwable;
 
 final readonly class OrderCreationService implements OrderCreationServiceInterface
 {
     public function __construct(
-        private \App\Contracts\Services\Billing\PaymentGatewayServiceInterface $paymentGateway,
-        private \Illuminate\Contracts\Events\Dispatcher $events,
+        private PaymentGatewayServiceInterface $paymentGateway,
+        private Dispatcher $events,
     ) {}
 
-    #[\Override]
+    #[Override]
     public function create(CreateOrderData $data): Order
     {
         return DB::transaction(attempts: 3, callback: function () use ($data): Order {
@@ -556,11 +559,14 @@ final readonly class StoreOrderController
 
 ```php
 // In app/Providers/AppServiceProvider.php:
+use App\Contracts\Services\Orders\OrderCreationServiceInterface;
+use App\Services\Orders\OrderCreationService;
+
 public function register(): void
 {
     $this->app->bind(
-        \App\Contracts\Services\Orders\OrderCreationServiceInterface::class,
-        \App\Services\Orders\OrderCreationService::class,
+        OrderCreationServiceInterface::class,
+        OrderCreationService::class,
     );
 }
 ```

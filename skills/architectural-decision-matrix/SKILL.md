@@ -65,10 +65,11 @@ use App\Events\OrderCreated;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use NoDiscard;
 
 final readonly class CreateOrderAction
 {
-    #[\NoDiscard]
+    #[NoDiscard]
     public function execute(User $user, CreateOrderDto $dto): Order
     {
         return DB::transaction(function () use ($user, $dto): Order {

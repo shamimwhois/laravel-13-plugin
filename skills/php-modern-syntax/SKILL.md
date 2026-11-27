@@ -1,13 +1,13 @@
 ---
 name: php-modern-syntax
-description: Authoritative Modern PHP 8.4, PHP 8.5, and PHP 8.6.0 GA syntax reference, standard library guide, and migration checklist. Use when writing, upgrading, or refactoring PHP code to leverage PHP 8.6 Partial Function Application (? and ...), clamp(), Readonly property defaults, #[Override] on constants and enum cases, Time\Duration, SortDirection, Io\Poll\Context, StreamErrorMode/StreamException, Parameter DocComments, WeakMap reference assignment, object property writes on constants, PHP 8.5 clone($obj, [...]), pipe operator (|>), #[NoDiscard], and PHP 8.4 property hooks & asymmetric visibility.
+description: Authoritative Modern PHP 8.4, PHP 8.5.0 GA, and PHP 8.6.0 GA syntax reference, standard library guide, and cumulative migration checklist. Use when writing, upgrading, or refactoring PHP code to leverage PHP 8.6 Partial Function Application (? and ...), clamp(), Readonly property defaults, #[Override] on constants and enum cases, Time\Duration, SortDirection, Io\Poll\Context, StreamErrorMode/StreamException, Parameter DocComments, WeakMap reference assignment, object property writes on constants, PHP 8.5 pipe operator (|>), clone($obj, [...]), #[NoDiscard] + (void) cast, #[DelayedTargetValidation], #[Override] on properties, #[Deprecated] on traits/constants, final property promotion, asymmetric static visibility, closures/FCCs/casts in constant expressions, native Uri\Rfc3986\Uri & Uri\WhatWg\Url, array_first/array_last, Closure::getCurrent(), FILTER_THROW_ON_FAILURE, IntlListFormatter, and PHP 8.4 property hooks & asymmetric visibility.
 ---
 
-# Modern PHP Syntax & Idioms Guide (PHP 8.4 – PHP 8.6.0 GA)
+# Modern PHP Syntax & Idioms Guide (PHP 8.4 – PHP 8.5.0 GA – PHP 8.6.0 GA)
 
-This skill is the verified syntax and standard library reference for **PHP 8.6.0 GA (released November 19, 2026)**, **PHP 8.5**, and **PHP 8.4**, tailored for strict-typed **Laravel 13** applications compliant with **PHPStan Level 8 / max**.
+This skill is the verified syntax and standard library reference for **PHP 8.6.0 GA (released November 19, 2026)**, **PHP 8.5.0 GA (released November 20, 2025)**, and **PHP 8.4**, tailored for strict-typed **Laravel 13** applications compliant with **PHPStan Level 8 / max**.
 
-> **Master Guide**: See [`docs/architecture/php-8-6-modern-syntax-and-migration.md`](../../docs/architecture/php-8-6-modern-syntax-and-migration.md) for full class synopses, engine optimizations, Laravel 13 integration blueprints, and the complete PHP 8.5 → 8.6 upgrade runbook.
+> **Master Guide**: See [`docs/architecture/php-8-6-modern-syntax-and-migration.md`](../../docs/architecture/php-8-6-modern-syntax-and-migration.md) for full PHP 8.5 & PHP 8.6 class synopses, engine optimizations, Laravel 13 integration blueprints, and the cumulative **PHP 8.4 → 8.5 → 8.6** upgrade runbook.
 
 ---
 
@@ -169,7 +169,7 @@ final class StripePaymentGateway implements PaymentGatewayContract
 ### 1.5 Object Property Writes on Constants
 RFC: `const_object_property_write`.
 
-Allows `->` property writes, `isset()`, `unset()`, compound assignments, `++`/`--`, and pass-by-reference on objects referenced by global or class constants (rebinding the constant itself remains illegal; array dimension writes `[]` on constants remain unchanged):
+Allows `->` property writes, `isset()`, `unset()`, compound assignments, `++`/`--`, and pass-by-reference on objects referenced by global or class constants (rebinding the constant itself remains illegal; array dimension writes `[]` on constants remain unchanged; class constants still cannot directly use `new` expressions and must reference a global constant):
 
 ```php
 <?php
@@ -190,7 +190,7 @@ RFC: `debugable-enums`.
 Unit and backed enums can now declare `public function __debugInfo(): array` to redact sensitive values in debug output (`var_dump()`, Symfony VarDumper / `dd()`).
 
 > **Important Security & Deprecation Notes**:
-> - Return type MUST be non-nullable `array` — declaring `?array` or `array|null` on `__debugInfo()` is deprecated in PHP 8.6.
+> - Return type MUST be non-nullable `array` — declaring `?array` or `array|null` on `__debugInfo()` is deprecated in PHP 8.6 (and returning `null` was deprecated in PHP 8.5).
 > - `__debugInfo()` only affects debug dumps; Monolog's `NormalizerFormatter` uses JSON normalization and serializes the raw backing value, so always enforce separate Monolog secret scrubbing for logs.
 
 ```php
@@ -255,7 +255,7 @@ Nanosecond-precision, timezone- and calendar-independent elapsed time (`final re
 
 - **Readonly properties**: `public readonly int $seconds`, `public readonly int $nanoseconds`, `public readonly bool $negative`.
 - **Factories**: `fromNanoseconds(int)`, `fromMicroseconds(int)`, `fromMilliseconds(int)`, `fromSeconds(int $seconds, int $nanoseconds = 0)`, `fromMinutes(int)`, `fromHours(int)`, `fromIso8601DurationString(string)` (time components up to hours only — calendar designators `Y`/`M`/`W`/`D` throw `Time\TimeException`).
-- **Arithmetic & Comparison**: `add(self)`, `sub(self)`, `multiplyBy(int)`, `divideBy(int)`, `negate()`, `absolute()`, `static compare(self $a, self $b): int`, plus `<`, `<=`, `==`, `!=`, `>=`, `>`, `<=>`, and `clamp()`.
+- **Arithmetic & Comparison**: `add(Duration $duration)`, `sub(Duration $duration)`, `multiplyBy(int)`, `divideBy(int)`, `negate()`, `absolute()`, `static compare(self $a, self $b): int`, plus `<`, `<=`, `==`, `!=`, `>=`, `>`, `<=>`, and `clamp()`.
 - **No string coercion**: `Time\Duration` does **not** implement `__toString()`, `toIsoString()`, or `toSeconds()`. Read `$duration->seconds` and `$duration->nanoseconds` directly.
 
 ```php
@@ -400,7 +400,7 @@ try {
 }
 ```
 
-### 2.6 New Reflection, URI & Security / Crypto Additions
+### 2.6 New Reflection, URI & Security / Crypto Additions (PHP 8.6)
 - **Reflection**: `ReflectionProperty::isReadable(?string $scope, ?object $object = null): bool`, `ReflectionProperty::isWritable(?string $scope, ?object $object = null): bool`, `ReflectionParameter::getDocComment(): string|false`, `ReflectionConstant::inNamespace()`, `ReflectionAttribute::{inNamespace,getNamespaceName,getShortName}()`.
 - **URI Builders**: `Uri\Rfc3986\UriBuilder`, `Uri\WhatWg\UrlBuilder`, `Uri\WhatWg\url_percent_encode()`, `getUriType()`, `getHostType()`, `isSpecialScheme()`.
 - **Session Security Defaults**: `session.use_strict_mode = 1`, `session.cookie_httponly = 1`, `session.cookie_samesite = "Lax"` now enabled by default in PHP 8.6.
@@ -409,9 +409,18 @@ try {
 
 ---
 
-## 3. PHP 8.5 Features (Verified Syntax)
+## 3. PHP 8.5.0 GA Language, Syntax & Standard Library (Complete Verified Reference)
 
-### 3.1 Native Pipe Operator (`|>`)
+### 3.1 Native Pipe Operator (`|>`, `T_PIPE`)
+Left-associative operator passing the LHS expression as the single argument to the RHS callable.
+
+- **Precedence**: Directly below `.` (string concat) and **above** all comparisons (`==`, `===`, `<`, `>`), bitwise/logical operators, `??`, `?:`, `=`, and `yield`.
+  - `5 + 2 |> f(...)` evaluates `(5 + 2) |> f(...)`.
+  - `'ok' |> strlen(...) === 2` compares the pipe result against `2`.
+  - `$id |> findUsername(...) ?? 'guest'` coalesces the entire chain.
+- **Parentheses required on RHS**: Always wrap arrow functions `fn(...) => ...`, `??`, and `?:` in parentheses when used as a pipe stage (`|> (static fn (string $v): string => ...)`). Omitting parentheses around arrow functions is a syntax error.
+- **Callable constraints**: RHS must accept 1 argument (by-value; pass-by-reference parameters are disallowed except internal "prefer-ref" stdlib functions). Non-callable RHS throws `Error`. Compiled directly for FCCs (`strlen(...)`, `$obj->method(...)`, `Class::method(...)`).
+
 ```php
 <?php
 
@@ -422,10 +431,19 @@ $slug = '   PHP 8.5 Release Overview   '
     |> trim(...)
     |> (static fn (string $value): string => str_replace(' ', '-', $value))
     |> strtolower(...);
+
+$label = $rawInput
+    |> trim(...)
+    |> (static fn (string $value): ?string => $value !== '' ? $value : null)
+    ?? 'untitled';
 ```
 
-### 3.2 Clone With v2: `clone($object, $properties)`
-> **Exact Syntax**: PHP 8.5 shipped function-call syntax `clone($object, ['prop' => $value])`. Do **NOT** write `clone $object with (...)` — that syntax does not exist.
+### 3.2 Clone With v2: `clone(object $object, array $withProperties = []): object`
+> **Exact Syntax**: PHP 8.5 promoted `clone` to a language construct/function (`clone($object, ['prop' => $value])`) and first-class callable (`clone(...)`). Do **NOT** write `clone $object with (...)` — that syntax does not exist.
+
+- **Execution order**: (1) Shallow copy → (2) `__clone()` executes **before** `$withProperties` → (3) `$withProperties` writes apply in iteration order (first exception aborts remaining assignments).
+- **Readonly, Visibility & Invariants**: Unlocks `readonly` on the cloned copy during assignment, while strictly enforcing visibility (including implicit `protected(set)` on `public readonly`), property `set` hooks, and `__set()`. Because `clone($object, [...])` bypasses `__construct()` and runs `__clone()` before applying overrides, preserve value-object invariants by validating inside a property `set` hook or reconstructing through the validating constructor (`new self(...)`).
+- **First-Class Callable**: `array_map(clone(...), $items)` clones a list of objects cleanly.
 
 ```php
 <?php
@@ -445,7 +463,7 @@ final readonly class UserProfile
         public UserStatus $status,
     ) {}
 
-    #[NoDiscard]
+    #[NoDiscard('Use the cloned UserProfile instance returned by withStatus().')]
     public function withStatus(UserStatus $status): self
     {
         return clone($this, [
@@ -455,12 +473,172 @@ final readonly class UserProfile
 }
 ```
 
-### 3.3 `#[NoDiscard]` Attribute & Native Array / URI Helpers
-- **`#[NoDiscard]`** (import `use NoDiscard;`): flags ignored return values at runtime and in static analysis.
-- **`array_first(array $array): mixed`** & **`array_last(array $array): mixed`**: pointer-safe first/last element extraction (returns `null` on empty arrays).
-- **Native URI Extension**: `Uri\Rfc3986\Uri` and `Uri\WhatWg\Url` (plus PHP 8.6 `UriBuilder` / `UrlBuilder`).
-- **`#[Override]` on Properties** (PHP 8.5) — extended to constants and enum cases in PHP 8.6.
-- **Closures & First-Class Callables in Constant Expressions**: static closures and FCCs inside attributes and parameter defaults.
+### 3.3 `#[NoDiscard]` Attribute & `(void)` Cast (`T_VOID_CAST`)
+- **Synopsis**: `#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_FUNCTION)] final class NoDiscard { public readonly ?string $message; public function __construct(?string $message = null) {} }`.
+- **Fail-closed timing**: Checks for unused return value **after** argument evaluation and **before** executing the function body — emits `E_USER_WARNING` (userland) or `E_WARNING` (native), including `$message`.
+- **Inheritance & Restrictions**: Applies strictly to the called declaration (NOT inherited from interfaces or parent methods; **preserved** when copied from traits). Compile-time error on `: void`, `: never`, void/untyped magic methods, and property hooks.
+- **Explicit Suppression with `(void)`**: Use `(void) $service->compute();` when intentionally discarding a `#[NoDiscard]` return value (protected from OPcache DCE). `(void)` is a **statement-only** construct, NOT an expression (`if ((void) $fn())` is a `ParseError`).
+- **Native PHP 8.5 usage**: Applied natively to `flock()` and `DateTimeImmutable::set*()`.
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use NoDiscard;
+
+#[NoDiscard('Inspect the verification result before proceeding.')]
+function verifyDigest(string $expected, string $actual): bool
+{
+    return hash_equals($expected, $actual);
+}
+
+// Suppressing warning intentionally in a test or fire-and-forget wrapper:
+(void) verifyDigest($expected, $actual);
+```
+
+### 3.4 `#[Override]` on Properties, `#[DelayedTargetValidation]`, `#[Deprecated]` Expansion & Constant Attributes
+- **`#[Override]` on Properties** (`Attribute::TARGET_PROPERTY`): Works on regular and constructor-promoted properties (PHP 8.5); extended to class/interface/trait constants & enum cases in PHP 8.6.
+- **`#[DelayedTargetValidation]`**: Defers compile-time validation of internal/extension attribute targets to `ReflectionAttribute::newInstance()`. Use when maintaining dual PHP 8.5 / 8.6 libraries (e.g., attaching `#[Override]` to constants before 8.6) or working with PHP 8.5's stricter compile-time rejection of `#[Attribute]` on abstract classes/interfaces/traits/enums.
+- **`#[Deprecated]` Expansion**: Extended in PHP 8.5 to **traits** and **compile-time non-class constants** (`const FOO = ...`, via `Attribute::TARGET_CONSTANT`; functions, methods, and class constants shipped in PHP 8.4).
+- **Attributes on Non-Class Constants**: Compile-time `const` declarations (not `define()`) accept attributes, readable via `ReflectionConstant::getAttributes()`.
+
+### 3.5 `final` Constructor Property Promotion & Asymmetric Static Visibility
+- **`final` Promoted Properties**: Declare `final` directly on promoted constructor parameters (defaults to `public` if visibility omitted; combinable with asymmetric visibility & property hooks).
+- **Asymmetric Visibility on Static Properties**: `public private(set) static` and `public protected(set) static` follow identical semantics to PHP 8.4 instance asymmetric visibility.
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Ledger;
+
+class BaseLedgerEntry
+{
+    public private(set) static int $allocatedCount = 0;
+
+    public function __construct(
+        final public string $ledgerId,
+        final public private(set) int $amountCents,
+    ) {
+        self::$allocatedCount++;
+    }
+}
+```
+
+### 3.6 Static Closures, First-Class Callables & Type Casts in Constant Expressions
+Permitted in attribute arguments, property/parameter defaults, constants, and class constants:
+- Closures **must** be `static` and **cannot** use `use (...)` (arrow functions `fn(...)` are disallowed due to implicit capture).
+- First-class callables are limited to `function_name(...)` and `ClassName::methodName(...)` (no dynamic expressions or `__callStatic()`).
+- Scalar type casts are allowed in constant expressions (e.g., `public const int MAX_RETRIES = (int) 3.0;`).
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Requests;
+
+use Attribute;
+
+#[Attribute(Attribute::TARGET_PROPERTY)]
+final readonly class TransformWith
+{
+    /** @param callable(string): string $transformer */
+    public function __construct(
+        public mixed $transformer = trim(...),
+    ) {}
+}
+
+final readonly class SearchFilter
+{
+    public const int DEFAULT_LIMIT = (int) 25.0;
+
+    public function __construct(
+        #[TransformWith(static function (string $value): string {
+            return strtolower(trim($value));
+        })]
+        public string $query = '',
+    ) {}
+}
+```
+
+### 3.7 Native URI Extension (`Uri\Rfc3986\Uri` & `Uri\WhatWg\Url`)
+Always-enabled built-in extension (powered by `uriparser` for RFC 3986 and `Lexbor` for WHATWG URLs). Prefer over legacy `parse_url()` for security-critical URL parsing (SSRF defense, webhook validation, OAuth redirects):
+
+- **`Uri\Rfc3986\Uri`** (`final readonly class`): `new Uri($str, ?Uri $base = null)` (throws `Uri\InvalidUriException`), `Uri::parse($str, ?Uri $base = null): ?static`, `resolve()`, `equals(..., UriComparisonMode::ExcludeFragment|IncludeFragment)`, `toString()` / `toRawString()`, normalized getters (`getScheme()`, `getHost()`, `getPort()`, `getPath()`, `getQuery()`, `getFragment()`, `getUserInfo()`, `getUsername()`, `getPassword()`), `getRaw*()` getters, and immutable `with*()` methods (`withUserInfo(#[SensitiveParameter] ?string)`).
+- **`Uri\WhatWg\Url`** (`final readonly class`): `new Url($str, ?Url $base = null, array &$softErrors = null)` (throws `Uri\WhatWg\InvalidUrlException` with `$errors`), `Url::parse($str, ?Url $base = null, array &$errors = null): ?static`, `toAsciiString()` / `toUnicodeString()`, `getAsciiHost()` / `getUnicodeHost()`, and immutable `with*()` methods.
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Security;
+
+use Uri\InvalidUriException;
+use Uri\Rfc3986\Uri;
+use Uri\UriComparisonMode;
+use Uri\WhatWg\Url;
+
+final class SafeUrlNormalizer
+{
+    public static function canonicalHttpsOrigin(string $rawUrl): ?string
+    {
+        $url = Url::parse($rawUrl);
+        $host = $url?->getAsciiHost();
+        if ($url === null || $url->getScheme() !== 'https' || $host === null) {
+            return null;
+        }
+
+        // Return scheme + host + optional port only (never credentials, path, query, or fragment)
+        $port = $url->getPort();
+
+        return $port === null
+            ? sprintf('https://%s', $host)
+            : sprintf('https://%s:%d', $host, $port);
+    }
+
+    /**
+     * Resolves a callback reference strictly within the trusted HTTPS base origin (blocks SSRF origin escape).
+     *
+     * @throws InvalidUriException
+     */
+    public static function resolveWebhookCallback(string $base, string $relative): string
+    {
+        $baseUri = new Uri($base);
+        if ($baseUri->getScheme() !== 'https' || $baseUri->getHost() === null || $baseUri->getUserInfo() !== null) {
+            throw new InvalidUriException('Base webhook URI must use HTTPS with an explicit host and no credentials.');
+        }
+
+        $resolved = $baseUri->resolve($relative);
+        if (
+            $resolved->getScheme() !== 'https'
+            || $resolved->getHost() !== $baseUri->getHost()
+            || $resolved->getPort() !== $baseUri->getPort()
+            || $resolved->getUserInfo() !== null
+        ) {
+            throw new InvalidUriException('Callback URI must stay on the trusted HTTPS base origin without credentials.');
+        }
+
+        return $resolved->equals($baseUri, UriComparisonMode::ExcludeFragment)
+            ? $baseUri->withFragment(null)->toString()
+            : $resolved->withFragment(null)->toString();
+    }
+}
+```
+
+### 3.8 PHP 8.5 Standard Library, Intl, Curl, Filter, PDO & Runtime Additions
+- **Array & Core**: `array_first(array $array): mixed`, `array_last(array $array): mixed`, `get_error_handler(): ?callable`, `get_exception_handler(): ?callable`, `Closure::getCurrent(): Closure` (clean self-recursion without `&$fn`), `Closure` is a proper subtype of `callable`.
+- **Filter**: `FILTER_THROW_ON_FAILURE` + `Filter\FilterException` / `Filter\FilterFailedException` (cannot combine with `FILTER_NULL_ON_FAILURE` → `ValueError`).
+- **Intl** (ICU ≥ 57.1; `IntlListFormatter` ICU ≥ 67): `IntlListFormatter` (`TYPE_AND`, `TYPE_OR`, `TYPE_UNITS`; `WIDTH_WIDE`, `WIDTH_SHORT`, `WIDTH_NARROW`), `locale_is_right_to_left()` / `Locale::isRightToLeft()`, `Locale::{addLikelySubtags,minimizeSubtags}()`, `grapheme_levenshtein()`, `$locale` param on `grapheme_*()`.
+- **Curl**: `curl_multi_get_handles(CurlMultiHandle)`, `curl_share_init_persistent(array $share_options): CurlSharePersistentHandle`.
+- **DOM**: `Dom\Element::getElementsByClassName()`, `Dom\Element::insertAdjacentHTML()`, `$outerHTML`, `$children`.
+- **PDO / SQLite / PgSQL** (note: `Pdo\Mysql`/`Pdo\Pgsql`/`Pdo\Sqlite` subclasses shipped in PHP 8.4): `Pdo\Sqlite::setAuthorizer(?callable)`, `ATTR_TRANSACTION_MODE`, `ATTR_EXPLAIN_STATEMENT`, `ATTR_BUSY_STATEMENT`; `Pdo\Pgsql::copyFromArray(iterable)` & `PDO::ATTR_PREFETCH = 0`; `pg_close_stmt()` (libpq ≥ 17).
+- **Reflection**: `ReflectionConstant` is no longer `final` and adds `getFileName()`, `getExtension()`, `getExtensionName()`, `getAttributes()`; `ReflectionProperty::getMangledName()`.
+- **Cookies (CHIPS)**: `setcookie()`, `setrawcookie()`, `session_set_cookie_params()` support `'partitioned' => true`.
+- **OPcache, INI & CLI**: OPcache is **always compiled in** (remove `zend_extension=opcache.so` to avoid warnings; added `opcache_is_script_cached_in_file_cache()`), `fatal_error_backtraces=1` enabled by default, `max_memory_limit` (`INI_SYSTEM` hard cap), `disable_classes` removed, `PHP_BUILD_DATE`, `PHP_BUILD_PROVIDER`, and `php --ini=diff`.
 
 ---
 
@@ -505,16 +683,26 @@ final class BankAccount
 }
 ```
 
-### 4.2 Parenthesis-Free `new` Chaining
-```php
-$result = new RequestPipeline()->pipe($step1)->pipe($step2)->execute();
-```
+### 4.2 Parenthesis-Free `new` Chaining & PHP 8.4 Array/PDO/DOM Foundations
+- Chaining without wrapping parentheses: `new RequestPipeline()->pipe($step1)->execute()`.
+- `array_find()`, `array_find_key()`, `array_any()`, `array_all()`, `#[Deprecated]` (functions/methods/class constants), `BcMath\Number`, `Dom\HTMLDocument`/`Dom\XMLDocument`, and driver-specific `Pdo\Mysql`/`Pdo\Pgsql`/`Pdo\Sqlite` subclasses.
 
 ---
 
-## 5. PHP 8.6 Deprecations & Breaking Changes Checklist
+## 5. Cumulative Deprecations & Breaking Changes Checklist (PHP 8.5 & PHP 8.6)
 
-When writing or upgrading code for PHP 8.6+, strictly avoid these deprecated/changed patterns:
+### 5.1 PHP 8.5.0 GA Deprecations & BC Changes
+
+| Category | Deprecated / Changed in PHP 8.5 | Modern Replacement |
+| :--- | :--- | :--- |
+| **Syntax & Casts** | Non-canonical casts `(integer)`, `(boolean)`, `(double)`, `(binary)`; backtick operator `` `cmd` ``; `case` terminated by `;`; constant redeclaration | Use `(int)`, `(bool)`, `(float)`, `(string)`; `Illuminate\Support\Facades\Process` (array args); `case ...:` |
+| **Strings, Arrays & Magic** | `null` as array offset or in `array_key_exists()`; `$str++` on non-numeric strings; `__sleep()`/`__wakeup()`; returning `null` from `__debugInfo()` | Use `""` key; `str_increment()`; `__serialize()`/`__unserialize()`; return `[]` |
+| **PDO Driver APIs** | Driver-specific `PDO::MYSQL_ATTR_*`, `PDO::PGSQL_*`, `PDO::SQLITE_*` constants & `PDO::pgsql*()`/`PDO::sqlite*()` methods; `"uri:"` DSN | Use PHP 8.4+ `Pdo\Mysql`, `Pdo\Pgsql`, `Pdo\Sqlite` subclass constants & methods |
+| **No-Op Close & Legacy** | `curl_close()`, `curl_share_close()`, `finfo_close()`, `imagedestroy()`, `xml_parser_free()`; `MHASH_*`; `DATE_RFC7231`; `mysqli_execute()`; `socket_set_timeout()`; `$http_response_header` | Drop no-op close calls (GC handles objects); `hash()`; convert to UTC before formatting (`$dt->setTimezone(new DateTimeZone('UTC'))->format('D, d M Y H:i:s \G\M\T')`); `mysqli_stmt_execute()`; `stream_set_timeout()`; `http_get_last_response_headers()` |
+| **Reflection & SPL** | `Reflection*::setAccessible()`; `SplObjectStorage::{contains,attach,detach}()`; `ArrayObject`/`ArrayIterator` with objects; `chr()` outside `0..255`; `ord()` non-1-byte string | Remove `setAccessible()`; use `offsetExists`/`offsetSet`/`offsetUnset`; pass arrays; validate byte ranges |
+| **Runtime & INI BC** | `disable_classes` removed; `zend_extension=opcache.so` warns (always built-in); `#[Attribute]` on abstract/interface/trait/enum is a compile error; traits bound before parent class; `PDO::FETCH_CLASS` constructor args follow `call_user_func_array`; `ArrayObject` rejects enums | Remove `disable_classes` & `zend_extension=opcache.so`; declare concrete attribute classes (or `#[DelayedTargetValidation]`); review `PDO::FETCH_CLASS` arg lists |
+
+### 5.2 PHP 8.6.0 GA Deprecations & BC Changes
 
 | Category | Deprecated / Changed in PHP 8.6 | Modern Replacement |
 | :--- | :--- | :--- |
@@ -528,11 +716,15 @@ When writing or upgrading code for PHP 8.6+, strictly avoid these deprecated/cha
 
 ---
 
-## 6. Anti-Hallucination Guard: Features NOT in PHP 8.6
+## 6. Anti-Hallucination & Version-Boundary Guard
 
-Never emit the following syntax — each was either declined, deferred, or remains under discussion as of PHP 8.6.0 GA:
+Never emit the following syntax or misattribute versions:
 
 - `clone $obj with (prop: $val)` → **Wrong** (use PHP 8.5 `clone($obj, ['prop' => $val])`).
+- `if ((void) $fn())` → **ParseError** (PHP 8.5 `(void)` cast is a statement-only construct, not an expression).
+- `str_replace(' ', '-', ?)` in PHP 8.5 → **Wrong** (PFA `?` placeholder shipped in **PHP 8.6.0**; use a parenthesized closure in PHP 8.5).
+- `Uri\Rfc3986\UriBuilder` / `Uri\WhatWg\UrlBuilder` in PHP 8.5 → **Wrong** (`Uri`/`Url` shipped in PHP 8.5; `*Builder` shipped in **PHP 8.6.0**).
+- `Pdo\Mysql`/`Pdo\Pgsql`/`Pdo\Sqlite` → introduced in **PHP 8.4** (driver methods/constants on base `PDO` deprecated in **PHP 8.5**).
 - `BackedEnum::values()` → **Not in PHP 8.6** (under discussion; use `array_column(self::cases(), 'value')`).
 - Pattern matching `is` operator (`$x is int`) → **Not in PHP 8.6** (under discussion; `is` identifier deprecated in prep).
 - `let` block scoping (`let $x = 1`) → **Declined** (`let` identifier deprecated).
