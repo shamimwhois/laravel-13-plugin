@@ -9,6 +9,8 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 function allow() {
   process.stdout.write(JSON.stringify({ decision: 'allow' }) + '\n');
@@ -18,6 +20,16 @@ function allow() {
 function ask(reason) {
   process.stdout.write(JSON.stringify({ decision: 'ask', reason }) + '\n');
   process.exit(0);
+}
+
+function isWithinDir(targetPath, dirPath) {
+  if (!targetPath || !dirPath) return false;
+  const resolvedTarget = path.resolve(targetPath);
+  const resolvedDir = path.resolve(dirPath);
+  const normTarget = process.platform === 'win32' ? resolvedTarget.toLowerCase() : resolvedTarget;
+  const normDir = process.platform === 'win32' ? resolvedDir.toLowerCase() : resolvedDir;
+  const rel = path.relative(normDir, normTarget);
+  return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
 }
 
 function extractTargetPath(args) {
@@ -36,7 +48,18 @@ function extractTargetPath(args) {
 function extractWrittenText(args) {
   if (!args || typeof args !== 'object') return '';
   const parts = [];
-  for (const key of ['Content', 'content', 'Replacement', 'replacement', 'CodeContent', 'ReplacementContent']) {
+  for (const key of [
+    'Content',
+    'content',
+    'contents',
+    'Replacement',
+    'replacement',
+    'CodeContent',
+    'ReplacementContent',
+    'new_string',
+    'newText',
+    'code',
+  ]) {
     if (typeof args[key] === 'string' && args[key].length > 0) {
       parts.push(args[key]);
     }
@@ -45,6 +68,15 @@ function extractWrittenText(args) {
     for (const chunk of args.ReplacementChunks) {
       if (chunk && typeof chunk.ReplacementContent === 'string') {
         parts.push(chunk.ReplacementContent);
+      }
+    }
+  }
+  if (Array.isArray(args.edits)) {
+    for (const edit of args.edits) {
+      if (edit && typeof edit.replacement === 'string') {
+        parts.push(edit.replacement);
+      } else if (edit && typeof edit.new_string === 'string') {
+        parts.push(edit.new_string);
       }
     }
   }
@@ -182,17 +214,27 @@ function main() {
   }
 
   const args = payload?.toolCall?.args;
-  const targetPath = extractTargetPath(args).replace(/\\/g, '/');
-  if (!targetPath) allow();
+  const rawTargetPath = extractTargetPath(args);
+  if (!rawTargetPath) allow();
 
-  // Never block edits inside Antigravity plugin/skill/scratch dirs, example env files, or test suites
-  if (
-    /\/\.gemini\/config\/plugins\//i.test(targetPath) ||
-    /\/\.gemini\/antigravity\//i.test(targetPath) ||
-    /(?:^|\/)tests\//i.test(targetPath) ||
-    /Test\.php$/i.test(targetPath) ||
-    /\.env\.example$/i.test(targetPath)
-  ) {
+  // Resolve lexically & canonically before any allow-list check (blocks "/x/tests/../../app/..." traversal bypasses)
+  const baseCwd = typeof payload?.cwd === 'string' && payload.cwd.length > 0 ? payload.cwd : process.cwd();
+  const resolvedTarget = path.resolve(baseCwd, rawTargetPath);
+  const targetPath = resolvedTarget.replace(/\\/g, '/');
+
+  // Allow-list ONLY real Antigravity plugin/app-data dirs, workspace root tests/ dir, and .env.example
+  const homeDir = os.homedir();
+  const workspaceRoots = [
+    ...(Array.isArray(payload?.workspacePaths) ? payload.workspacePaths : []),
+    baseCwd,
+  ].filter((p) => typeof p === 'string' && p.length > 0);
+
+  const inPluginsDir = isWithinDir(resolvedTarget, path.join(homeDir, '.gemini', 'config', 'plugins'));
+  const inAntigravityDir = isWithinDir(resolvedTarget, path.join(homeDir, '.gemini', 'antigravity'));
+  const inWorkspaceTests = workspaceRoots.some((root) => isWithinDir(resolvedTarget, path.join(root, 'tests')));
+  const isEnvExample = path.basename(resolvedTarget).toLowerCase() === '.env.example';
+
+  if (inPluginsDir || inAntigravityDir || inWorkspaceTests || isEnvExample) {
     allow();
   }
 
@@ -202,7 +244,10 @@ function main() {
   }
 
   const text = extractWrittenText(args);
-  if (!text) allow();
+  if (!text) {
+    process.stderr.write(`[Laravel Security Guard] Notice: no writable text field extracted for guarded target ${targetPath}\n`);
+    allow();
+  }
 
   const code = stripCommentLines(text);
   const hits = [];

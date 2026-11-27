@@ -690,9 +690,10 @@ All inbound HTTP/HTTPS requests, outbound `Http::` calls, and application/HTTP c
   - Retry ONLY transient failures (`ConnectionException`, `429`, `502`, `503`, `504`) with jittered exponential backoff; never retry non-idempotent writes without an `Idempotency-Key`.
   - Wrap unstable external HTTPS dependencies in a Cache-backed `CircuitBreaker` and route user-supplied URLs exclusively through SSRF-safe `SafeHttpClient` with strict TLS verification (never `withoutVerifying()` in production).
 - **Resilient Cache Handling**:
-  - Configure Laravel 13's native `failover` cache store (`redis -> database -> array`) in `config/cache.php` and guard critical cache reads with `ResilientCache` so Redis outages degrade gracefully instead of crashing with `500 RedisException`.
-  - ALWAYS handle `LockTimeoutException` explicitly on `Cache::lock()->block()` calls (returning `503` + `Retry-After` or a stale fallback).
-  - Use `Cache::flexible()` for read-heavy SWR keys, `Cache::touch()` for TTL renewal, `igbinary` + `zstd` compression, and versioned multi-tenant cache keys (`t:{tenantId}:{domain}:v{n}:{key}`) invalidated strictly via `DB::afterCommit()`.
+  - Configure Laravel 13's native `failover` cache store (`redis -> database -> array`) in `config/cache.php` strictly for **recomputable cached data** (catalogs, dashboards, read models), and guard critical reads with `ResilientCache` so Redis outages degrade gracefully instead of crashing with `500 RedisException`.
+  - **Exclude Idempotency & Security State from Best-Effort Failover**: ALWAYS store idempotency records, distributed financial locks, and replay nonces in a single authoritative, durable store (e.g., dedicated database table or `Cache::store('database')`) rather than a failover store, preventing duplicate execution after Redis recovers from an outage.
+  - ALWAYS handle `LockTimeoutException` explicitly on `Cache::lock()->block()` calls (returning `503` + `Retry-After` or a stale fallback) without swallowing business exceptions thrown by the inner callback.
+  - Use `Cache::flexible()` for read-heavy SWR keys, `Cache::touch()` for TTL renewal, `igbinary` + `zstd` compression, and versioned multi-tenant cache keys (`t:{tenantId}:{domain}:v{n}:{key}`) backed by a non-evicting version store invalidated strictly via `DB::afterCommit()`.
   - Apply `Cache-Control: public, max-age=..., stale-while-revalidate=..., stale-if-error=...` + `ETag` on public GETs and strict `Cache-Control: no-store, private` on authenticated PII, auth, and `4xx`/`5xx` error responses.
 
 

@@ -127,7 +127,7 @@ final class StoreOrderRequest extends FormRequest
 
 ### C. Atomic Idempotency Middleware (`Idempotency-Key`)
 
-Protect state-mutating API endpoints (`POST /orders`, `POST /payments`) against network retries and double-submissions using `Cache::lock()` + SHA-256 request fingerprint verification:
+Protect state-mutating API endpoints (`POST /orders`, `POST /payments`) against network retries and double-submissions using an **authoritative, durable store** (`Cache::store('database')` — NEVER a best-effort `failover` store!) paired with authenticated user scoping and SHA-256 request payload fingerprinting. Register this middleware **after `auth:sanctum` / `auth`**:
 
 ```php
 <?php
@@ -144,10 +144,27 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class EnforceIdempotencyKeyMiddleware
 {
+    private const string AUTHORITATIVE_STORE = 'database';
+
     public function handle(Request $request, Closure $next): Response
     {
         if (! in_array($request->method(), ['POST', 'PUT', 'PATCH'], true)) {
             return $next($request);
+        }
+
+        // Scope strictly to authenticated user identity (run after auth middleware; never share NAT IP space)
+        $userId = $request->user()?->getAuthIdentifier();
+        if ($userId === null) {
+            return response()->json([
+                'type' => 'https://api.example.com/errors/unauthenticated',
+                'title' => 'Authentication Required',
+                'status' => Response::HTTP_UNAUTHORIZED,
+                'code' => 'UNAUTHENTICATED',
+                'detail' => 'Idempotent endpoints require an authenticated user context.',
+            ], Response::HTTP_UNAUTHORIZED, [
+                'Content-Type' => 'application/problem+json',
+                'Cache-Control' => 'no-store, private',
+            ]);
         }
 
         $key = $request->header('Idempotency-Key');
@@ -164,14 +181,16 @@ final class EnforceIdempotencyKeyMiddleware
             ]);
         }
 
-        $scope = ($request->user()?->id ?? $request->ip()) . ':' . $request->path() . ':' . $key;
-        $cacheKey = 'idempotency:resp:' . hash('sha256', $scope);
+        $store = Cache::store(self::AUTHORITATIVE_STORE);
+        $scope = $userId . ':' . $request->path() . ':' . $key;
+        $hash = hash('sha256', $scope);
+        $cacheKey = 'idempotency:resp:' . $hash;
         $fingerprint = hash('sha256', $request->getContent());
 
         try {
-            return Cache::lock('idempotency:lock:' . hash('sha256', $scope), 15)->block(3, function () use ($cacheKey, $fingerprint, $request, $next): Response {
+            return $store->lock('idempotency:lock:' . $hash, 15)->block(3, function () use ($store, $cacheKey, $fingerprint, $request, $next): Response {
                 /** @var array{fingerprint: string, status: int, body: string, content_type: string}|null $stored */
-                $stored = Cache::get($cacheKey);
+                $stored = $store->get($cacheKey);
 
                 if ($stored !== null) {
                     if (! hash_equals($stored['fingerprint'], $fingerprint)) {
@@ -195,11 +214,13 @@ final class EnforceIdempotencyKeyMiddleware
 
                 /** @var Response $response */
                 $response = $next($request);
+                $status = $response->getStatusCode();
 
-                if ($response->getStatusCode() < 500) {
-                    Cache::put($cacheKey, [
+                // Replay ONLY successful 2xx responses (never cache transient 409, 429, or 5xx errors)
+                if ($status >= 200 && $status < 300) {
+                    $store->put($cacheKey, [
                         'fingerprint' => $fingerprint,
-                        'status' => $response->getStatusCode(),
+                        'status' => $status,
                         'body' => (string) $response->getContent(),
                         'content_type' => (string) $response->headers->get('Content-Type', 'application/json'),
                     ], now()->addHours(24));
@@ -303,7 +324,7 @@ final class ResilientCache
 
     /**
      * Serve stale-while-revalidate via Cache::flexible() and fall back cleanly
-     * to the origin callback if the cache backend fails completely.
+     * to the origin callback ONLY when the cache backend fails (never re-run on callback failure).
      *
      * @template TValue
      * @param Closure(): TValue $callback
@@ -312,9 +333,20 @@ final class ResilientCache
     #[\NoDiscard]
     public static function flexible(string $key, int $freshSeconds, int $staleSeconds, Closure $callback): mixed
     {
+        $callbackRan = false;
+
         try {
-            return Cache::flexible($key, [$freshSeconds, $staleSeconds], $callback);
+            return Cache::flexible($key, [$freshSeconds, $staleSeconds], static function () use ($callback, &$callbackRan): mixed {
+                $callbackRan = true;
+
+                return $callback();
+            });
         } catch (Throwable $e) {
+            // Propagate origin/domain callback failures immediately — never execute $callback twice
+            if ($callbackRan) {
+                throw $e;
+            }
+
             Log::warning('Cache backend unavailable during flexible fetch; falling back to origin.', [
                 'cache_key' => $key,
                 'exception' => $e::class,
@@ -326,7 +358,8 @@ final class ResilientCache
     }
 
     /**
-     * Acquire an atomic distributed lock with graceful LockTimeoutException handling.
+     * Acquire an atomic distributed lock with graceful LockTimeoutException & lock-backend recovery,
+     * while letting exceptions thrown inside $callback propagate normally.
      *
      * @template TValue
      * @param Closure(): TValue $callback
@@ -341,8 +374,14 @@ final class ResilientCache
         Closure $callback,
         Closure $onTimeout,
     ): mixed {
+        $callbackStarted = false;
+
         try {
-            return Cache::lock($lockName, $lockSeconds)->block($waitSeconds, $callback);
+            return Cache::lock($lockName, $lockSeconds)->block($waitSeconds, static function () use ($callback, &$callbackStarted): mixed {
+                $callbackStarted = true;
+
+                return $callback();
+            });
         } catch (LockTimeoutException) {
             Log::notice('Cache lock contention timeout; invoking fallback.', [
                 'lock_name' => $lockName,
@@ -350,6 +389,10 @@ final class ResilientCache
 
             return $onTimeout();
         } catch (Throwable $e) {
+            if ($callbackStarted) {
+                throw $e;
+            }
+
             Log::error('Cache lock backend error; invoking fallback.', [
                 'lock_name' => $lockName,
                 'exception' => $e::class,

@@ -144,13 +144,66 @@ final class SafePath
         }
 
         try {
+            $prefix = $canonicalDest . DIRECTORY_SEPARATOR;
+
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $entry = $zip->getNameIndex($i);
-                if (! is_string($entry) || str_contains($entry, '..') || str_starts_with($entry, '/') || str_starts_with($entry, '\\')) {
-                    throw new InvalidArgumentException('Zip Slip entry blocked.');
+                if (! is_string($entry) || $entry === '' || str_contains($entry, "\0")) {
+                    throw new InvalidArgumentException('Invalid ZIP entry name.');
                 }
+
+                // Reject POSIX symlink entries (mode 0120000) so later entries cannot write through symlinks
+                $opsys = 0;
+                $externalAttr = 0;
+                if ($zip->getExternalAttributesIndex($i, $opsys, $externalAttr) && $opsys === ZipArchive::OPSYS_UNIX) {
+                    $fileType = ($externalAttr >> 16) & 0170000;
+                    if ($fileType === 0120000) {
+                        throw new InvalidArgumentException('Symlink entries are forbidden in ZIP archives.');
+                    }
+                }
+
+                $normalized = str_replace('\\', '/', $entry);
+                if (str_starts_with($normalized, '/') || preg_match('/^[A-Za-z]:/', $normalized) === 1) {
+                    throw new InvalidArgumentException('Absolute path entry blocked.');
+                }
+
+                // Validate segment-by-segment (permits legitimate filenames like "report..final.txt")
+                $segments = array_values(array_filter(explode('/', $normalized), static fn (string $s): bool => $s !== '' && $s !== '.'));
+                foreach ($segments as $segment) {
+                    if ($segment === '..') {
+                        throw new InvalidArgumentException('Zip Slip traversal segment blocked.');
+                    }
+                }
+
+                if ($segments === [] || str_ends_with($normalized, '/')) {
+                    continue;
+                }
+
+                $targetPath = $canonicalDest . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $segments);
+                $targetDir = dirname($targetPath);
+                if (! is_dir($targetDir) && ! mkdir($targetDir, 0750, true) && ! is_dir($targetDir)) {
+                    throw new InvalidArgumentException('Unable to create destination subdirectory.');
+                }
+
+                $realTargetDir = realpath($targetDir);
+                if ($realTargetDir === false || (! str_starts_with($realTargetDir . DIRECTORY_SEPARATOR, $prefix) && $realTargetDir !== $canonicalDest)) {
+                    throw new InvalidArgumentException('Resolved extraction directory escapes destination.');
+                }
+
+                // Stream regular file directly without calling extractTo() (prevents symlink TOCTOU)
+                $in = $zip->getStreamIndex($i);
+                if ($in === false) {
+                    throw new InvalidArgumentException("Unable to read archive entry [{$entry}].");
+                }
+                $out = fopen($realTargetDir . DIRECTORY_SEPARATOR . basename($targetPath), 'wb');
+                if ($out === false) {
+                    fclose($in);
+                    throw new InvalidArgumentException('Unable to write extracted file.');
+                }
+                stream_copy_to_stream($in, $out);
+                fclose($in);
+                fclose($out);
             }
-            $zip->extractTo($canonicalDest);
         } finally {
             $zip->close();
         }
